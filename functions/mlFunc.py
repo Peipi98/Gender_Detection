@@ -28,16 +28,10 @@ def load(fname):
             pass
     return numpy.hstack(DList), numpy.array(labelsList, dtype=numpy.int32)
     
-
-def load_iris():
-    D, L = sklearn.datasets.load_iris()['data'].T, sklearn.datasets.load_iris() ['target']
-    return D, L
-    
-    
-def mu(D):
+def emprical_mean(D):
     return mcol(D.mean(1))
 
-def covariance(D, mu):
+def empirical_covariance(D, mu):
     n = numpy.shape(D)[1]
     DC = D - mcol(mu)
     C = 1/n * numpy.dot(DC, numpy.transpose(DC))
@@ -73,12 +67,11 @@ def PCA(D, L):
     DP = numpy.dot(P.T, D)
     print(DP)
     hlabels = {
-        0: "setosa",
-        1: "versicolor",
-        2: "virginica"
+        0: "male",
+        1: "female"
     }
 
-    for i in range(3):
+    for i in range(2):
 #I have to invert the sign of the second eigenvector to flip the image
         plt.scatter(DP[:, L==i][0], -DP[:, L==i][1], label = hlabels.get(i))
         plt.legend()
@@ -86,8 +79,8 @@ def PCA(D, L):
     plt.show()
 
 def ML_GAU(D):
-    m = mu(D)
-    C= covariance(D, m)
+    m = emprical_mean(D)
+    C= empirical_covariance(D, m)
     return m, C
 
 def logpdf_GAU_ND(X, mu, C):
@@ -122,4 +115,21 @@ def plot_hist_exp(X1D, m_ML, C_ML):
     plt.hist(X1D.ravel(), bins=50, density=True)
     XPlot = numpy.linspace(-8, 12, 1000)
     plt.plot(XPlot.ravel(), numpy.exp(logpdf_GAU_ND(mrow(XPlot), m_ML, C_ML)))
+    plt.show()
+
+# PLOTTING FUNCTIONS 
+def plot_hist(D, L):
+
+    D0 = D[:, L==0]
+    D1 = D[:, L==1]
+
+    for dIdx in range(12):
+        plt.figure()
+        
+        plt.hist(D0[dIdx, :], bins = 10, density = True, alpha = 0.4, label = 'male')
+        plt.hist(D1[dIdx, :], bins = 10, density = True, alpha = 0.4, label = 'female')
+        
+        plt.legend()
+        plt.tight_layout() # Use with non-default font size to keep axis label inside the figure
+        plt.savefig('hist_%d.pdf' % dIdx)
     plt.show()
