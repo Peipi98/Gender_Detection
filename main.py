@@ -13,36 +13,19 @@ if __name__ == "__main__":
     DTE, LTE = load("Test.txt")
     #plot_hist(D, L)
     
-
-    h = {}
     
-    for i in range(2):
-        mu, C = ML_GAU(DTR[:, LTR==i])
-        h[i] = (mu, C)
-        
-    SJoint = numpy.zeros((2, DTE.shape[1]))
-    logSJoint = numpy.zeros((2, DTE.shape[1]))
-    classPriors = [0.999, 0.001]
+    #We're starting with Multivariate Gaussian Classifier
+    _, LPred2 = MGC(DTE, LTE, DTR, LTR)
+    _, LP2n = naive_MGC(DTE, LTE, DTR, LTR)
+    _, LP2t = tied_cov_GC(DTE, LTE, DTR, LTR)
+    _, LP2nt = tied_cov_naive_GC(DTE, LTE, DTR, LTR)
+    # logMGC accuracy
+    log_acc, log_err = test(LTE, LPred2)
+    log_acc_n, log_err_n = test(LTE, LP2n)
+    log_acc_t, log_err_t = test(LTE, LP2t)
+    log_acc_nt, log_err_nt = test(LTE, LP2nt)
     
-    for label in range(2):
-        mu, C = h[label]
-        
-        SJoint[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, C).ravel()) * classPriors[label] 
-        logSJoint[label, :] = logpdf_GAU_ND(DTE, mu, C).ravel() + numpy.log(classPriors[label])
-        
-    SMarginal = SJoint.sum(0)
-    logSMarginal = scipy.special.logsumexp(logSJoint, axis=0)
+    # Notiamo che le features sono molto correlate tra loro,
+    # quindi non possiamo fare l'assunzione di indipendenza di Naive Bayes
     
-    Post1 = SJoint / mrow(SMarginal)
-    logPost = logSJoint - mrow(logSMarginal)
-    Post2 = numpy.exp(logPost)
-    
-    LPred1 = Post1.argmax(0)
-    LPred2 = Post2.argmax(0)
-    
-    accuracy_1 = (LTE == LPred1).sum() /LTE.size
-    error_1 = 1 - accuracy_1
-    
-    accuracy_2 = (LTE == LPred2).sum() /LTE.size
-    error_2 = 1 - accuracy_2
     #PCA(D, L)
