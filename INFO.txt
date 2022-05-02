@@ -1,0 +1,4 @@
+The dataset consists of synthetic speaker embeddings that represent the acoustic characteristics of a spoken utterance. Each row corresponds to a different speaker, and contains 12 features followed by the gender label (1 for female, 0 for male). The features do not have any particular interpretation. Speakers belong to four different age groups. The age information, however, is not available.
+
+The training set consists of 3000 samples per class, whereas the test set contains 2000 samples per class.
+
