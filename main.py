@@ -17,14 +17,19 @@ def kfold_cross(func, DTR, LTR, k):
     for i in range(k):
         D = []
         L = []
-        if i == 0 or i == k-1: 
-            continue
-        D.append(numpy.hstack(Dtr[:i]))
-        D.append(numpy.hstack(Dtr[i+1:]))
+        if i == 0:
+            D.append(numpy.hstack(Dtr[i+1:]))
+            L.append(numpy.hstack(Ltr[i+1:]))
+        elif i == k-1:
+            D.append(numpy.hstack(Dtr[:i]))
+            L.append(numpy.hstack(Ltr[:i]))
+        else:
+            D.append(numpy.hstack(Dtr[:i]))
+            D.append(numpy.hstack(Dtr[i+1:]))
+            L.append(numpy.hstack(Ltr[:i]))
+            L.append(numpy.hstack(Ltr[i+1:]))
+            
         D = numpy.hstack(D)
-        
-        L.append(numpy.hstack(Ltr[:i]))
-        L.append(numpy.hstack(Ltr[i+1:]))
         L = numpy.hstack(L)
         
         DTE = Dtr[i]
