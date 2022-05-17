@@ -1,7 +1,7 @@
 import numpy
 from mlFunc import *
 
-def MGC(DTE, LTE, DTR, LTR):
+def MGC(DTE, DTR, LTR):
     h = {}
 
     for i in range(2):
@@ -28,7 +28,7 @@ def MGC(DTE, LTE, DTR, LTR):
     LPred2 = Post2.argmax(0)
     return LPred1, LPred2
 
-def naive_MGC(DTE, LTE, DTR, LTR):
+def naive_MGC(DTE, DTR, LTR):
     h = {}
 
     for i in range(2):
@@ -56,7 +56,7 @@ def naive_MGC(DTE, LTE, DTR, LTR):
     LPred2 = Post2.argmax(0)
     return LPred1, LPred2
 
-def tied_cov_GC(DTE, LTE, DTR, LTR):
+def tied_cov_GC(DTE, DTR, LTR):
     h = {}
     Ctot = 0
     for i in range(2):
@@ -88,7 +88,7 @@ def tied_cov_GC(DTE, LTE, DTR, LTR):
     return LPred1, LPred2
 
 
-def tied_cov_naive_GC(DTE, LTE, DTR, LTR):
+def tied_cov_naive_GC(DTE, DTR, LTR):
     h = {}
     Ctot = 0
     for i in range(2):
@@ -119,3 +119,13 @@ def tied_cov_naive_GC(DTE, LTE, DTR, LTR):
     LPred1 = Post1.argmax(0)
     LPred2 = Post2.argmax(0)
     return LPred1, LPred2
+
+
+def linear_reg(DTR, LTR, DTE, l):
+    logreg_obj = logreg_obj_wrap(DTR, LTR, l)
+    _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True)
+    _w = _v[0:DTR.shape[0]]
+    _b = _v[-1]
+    STE = numpy.dot(_w.T, DTE) + _b
+    LP = STE > 0
+    return LP, _J

@@ -1,0 +1,1 @@
+1) Come gestire DTE nel caso in cui usiamo LDA/PCA ?? DTE và trasformato? Come?

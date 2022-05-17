@@ -9,10 +9,10 @@ if __name__ == "__main__":
     # plot_hist(D, L)
 
     # We're starting with Multivariate Gaussian Classifier
-    _, LPred2 = MGC(DTE, LTE, DTR, LTR)
-    _, LP2n = naive_MGC(DTE, LTE, DTR, LTR)
-    _, LP2t = tied_cov_GC(DTE, LTE, DTR, LTR)
-    _, LP2nt = tied_cov_naive_GC(DTE, LTE, DTR, LTR)
+    _, LPred2 = MGC(DTE, DTR, LTR)
+    _, LP2n = naive_MGC(DTE, DTR, LTR)
+    _, LP2t = tied_cov_GC(DTE, DTR, LTR)
+    _, LP2nt = tied_cov_naive_GC(DTE, DTR, LTR)
     # logMGC accuracy
     log_acc, log_err = test(LTE, LPred2)
     log_acc_n, log_err_n = test(LTE, LP2n)
@@ -45,20 +45,18 @@ if __name__ == "__main__":
     # Notiamo che le features sono molto correlate tra loro,
     # quindi non possiamo fare l'assunzione di indipendenza di Naive Bayes
 
-    # PCA(D, L)
-    lamb = [1e-6, 1e-3, 0.1, 1.0, 0.0, 3.0]
+
+    #DTR = LDA(DTR, LTR, 2)
+
+
+
+    # _, LPred2 = MGC(DTE, DTR, LTR)
+    #print(test(LTE, LPred2))
+
+
+    #lamb = [1e-6, 1e-3, 0.1, 1.0, 0.0, 3.0]
     
-    for l in lamb:
-        LPred, _J= linear_reg(DTR, LTR, DTE, LTE, l)
-        print(LPred)
-        acc_LR, err_LR = test(LTE, LPred)
-        print(str(acc_LR) + "\t" +str(err_LR))
-    # for l in [1e-6, 1e-3, 0.1, 1.0]:
-    #     logreg_obj = logreg_obj_wrap(DTR, LTR, l)
-    #     _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True)
-    #     _w = _v[0:DTR.shape[0]]
-    #     _b = _v[-1]
-    #     STE = numpy.dot(_w.T, DTE) + _b
-    #     LP = STE > 0
-    #     ER = 1 - numpy.array(LP == LTE).mean()
-    #     print(l, round(_J, 3), str(100*round(ER, 3))+'%')
+    #for l in lamb:
+        #LPred, _J = linear_reg(DTR, LTR, DTE, l)
+        #acc_LR, err_LR = test(LTE, LPred)
+        #print(str(acc_LR) + "\t" + str(err_LR))

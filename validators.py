@@ -27,7 +27,7 @@ def kfold_cross(func, DTR, LTR, k):
         DTE = Dtr[i]
         LTE = Ltr[i]
         # print(str(DTE) + " " + str(i))
-        _, lpred = func(DTE, LTE, D, L)
+        _, lpred = func(DTE, D, L)
         acc, _ = test(LTE, lpred)
         accuracy.append(acc)
 
@@ -45,7 +45,7 @@ def holdout_validation(func, D, L, seed=0, trainPerc=0.8):
     LTR = L[idxTrain]
     LTE = L[idxTest]
 
-    _, lpred = func(DTE, LTE, DTR, LTR)
+    _, lpred = func(DTE, DTR, LTR)
     acc, _ = test(LTE, lpred)
 
     return acc
@@ -68,7 +68,7 @@ def leave_one_out(func, DTR, LTR):
         DTE = DTR[:, i]
         LTE = LTR[i]
         # print(str(DTE) + " " + str(i))
-        _, lpred = func(mcol(DTE), mcol(LTE), D, L)
+        _, lpred = func(mcol(DTE), D, L)
         acc, _ = test(LTE, lpred)
         accuracy.append(acc)
     return numpy.mean(accuracy)
