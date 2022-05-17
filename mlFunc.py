@@ -112,133 +112,10 @@ def loglikelihood(XND, m_ML, C_ML):
 def likelihood(XND, m_ML, C_ML):
     return numpy.exp(loglikelihood(XND, m_ML, C_ML))
 
-
-def MGC(DTE, LTE, DTR, LTR):
-    h = {}
-
-    for i in range(2):
-        mu, C = ML_GAU(DTR[:, LTR == i])
-        h[i] = (mu, C)
-
-    SJoint = numpy.zeros((2, DTE.shape[1]))
-    logSJoint = numpy.zeros((2, DTE.shape[1]))
-    classPriors = [0.5, 0.5]
-
-    for label in range(2):
-        mu, C = h[label]
-        SJoint[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, C).ravel()) * classPriors[label]
-        logSJoint[label, :] = logpdf_GAU_ND(DTE, mu, C).ravel() + numpy.log(classPriors[label])
-
-    SMarginal = SJoint.sum(0)
-    logSMarginal = scipy.special.logsumexp(logSJoint, axis=0)
-
-    Post1 = SJoint / mrow(SMarginal)
-    logPost = logSJoint - mrow(logSMarginal)
-    Post2 = numpy.exp(logPost)
-
-    LPred1 = Post1.argmax(0)
-    LPred2 = Post2.argmax(0)
-    return LPred1, LPred2
-
-
 def test(LTE, LPred):
     accuracy = (LTE == LPred).sum() / LTE.size
     error = 1 - accuracy
     return accuracy, error
-
-
-def naive_MGC(DTE, LTE, DTR, LTR):
-    h = {}
-
-    for i in range(2):
-        mu, C = ML_GAU(DTR[:, LTR == i])
-        C = C * numpy.identity(C.shape[0])
-        h[i] = (mu, C)
-
-    SJoint = numpy.zeros((2, DTE.shape[1]))
-    logSJoint = numpy.zeros((2, DTE.shape[1]))
-    classPriors = [0.5, 0.5]
-
-    for label in range(2):
-        mu, C = h[label]
-        SJoint[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, C).ravel()) * classPriors[label]
-        logSJoint[label, :] = logpdf_GAU_ND(DTE, mu, C).ravel() + numpy.log(classPriors[label])
-
-    SMarginal = SJoint.sum(0)
-    logSMarginal = scipy.special.logsumexp(logSJoint, axis=0)
-
-    Post1 = SJoint / mrow(SMarginal)
-    logPost = logSJoint - mrow(logSMarginal)
-    Post2 = numpy.exp(logPost)
-
-    LPred1 = Post1.argmax(0)
-    LPred2 = Post2.argmax(0)
-    return LPred1, LPred2
-
-
-def tied_cov_GC(DTE, LTE, DTR, LTR):
-    h = {}
-    Ctot = 0
-    for i in range(2):
-        mu, C = ML_GAU(DTR[:, LTR == i])
-        Ctot += DTR[:, LTR == i].shape[1] * C
-        h[i] = (mu)
-
-    Ctot = Ctot / DTR.shape[1]
-
-    SJoint = numpy.zeros((2, DTE.shape[1]))
-    logSJoint = numpy.zeros((2, DTE.shape[1]))
-    classPriors = [0.5, 0.5]
-
-    for label in range(2):
-        mu = h[label]
-
-        SJoint[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, Ctot).ravel()) * classPriors[label]
-        logSJoint[label, :] = logpdf_GAU_ND(DTE, mu, Ctot).ravel() + numpy.log(classPriors[label])
-
-    SMarginal = SJoint.sum(0)
-    logSMarginal = scipy.special.logsumexp(logSJoint, axis=0)
-
-    Post1 = SJoint / mrow(SMarginal)
-    logPost = logSJoint - mrow(logSMarginal)
-    Post2 = numpy.exp(logPost)
-
-    LPred1 = Post1.argmax(0)
-    LPred2 = Post2.argmax(0)
-    return LPred1, LPred2
-
-
-def tied_cov_naive_GC(DTE, LTE, DTR, LTR):
-    h = {}
-    Ctot = 0
-    for i in range(2):
-        mu, C = ML_GAU(DTR[:, LTR == i])
-        Ctot += DTR[:, LTR == i].shape[1] * C
-        h[i] = (mu)
-
-    Ctot = Ctot / DTR.shape[1]
-    Ctot = Ctot * numpy.identity(Ctot.shape[0])
-
-    SJoint = numpy.zeros((2, DTE.shape[1]))
-    logSJoint = numpy.zeros((2, DTE.shape[1]))
-    classPriors = [0.5, 0.5]
-
-    for label in range(2):
-        mu = h[label]
-
-        SJoint[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, Ctot).ravel()) * classPriors[label]
-        logSJoint[label, :] = logpdf_GAU_ND(DTE, mu, Ctot).ravel() + numpy.log(classPriors[label])
-
-    SMarginal = SJoint.sum(0)
-    logSMarginal = scipy.special.logsumexp(logSJoint, axis=0)
-
-    Post1 = SJoint / mrow(SMarginal)
-    logPost = logSJoint - mrow(logSMarginal)
-    Post2 = numpy.exp(logPost)
-
-    LPred1 = Post1.argmax(0)
-    LPred2 = Post2.argmax(0)
-    return LPred1, LPred2
 
 def logreg_obj_wrap(DTR, LTR, l):
     M = DTR.shape[0]
@@ -251,16 +128,25 @@ def logreg_obj_wrap(DTR, LTR, l):
         return numpy.linalg.norm(w)**2 * l/2.0 + cxe.mean()
     return logreg_obj
 
-def to_be_transfered_into_main(DTR, LTR, DTE, LTE):
-    for l in [1e-6, 1e-3, 0.1, 1.0]:
-        logreg_obj = logreg_obj_wrap(DTR, LTR, l)
-        _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True)
-        _w = _v[0:DTR.shape[0]]
-        _b = _v[-1]
-        STE = numpy.dot(_w.T, DTE) + _b
-        LP = STE > 0
-        ER = 1 - numpy.array(LP == LTE).mean()
-        print(l, round(_J, 3), str(100*round(ER, 3))+'%')
+# def to_be_transfered_into_main(DTR, LTR, DTE, LTE, lamb):
+#     for l in lamb:
+        # logreg_obj = logreg_obj_wrap(DTR, LTR, l)
+        # _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True)
+        # _w = _v[0:DTR.shape[0]]
+        # _b = _v[-1]
+        # STE = numpy.dot(_w.T, DTE) + _b
+        # LP = STE > 0
+#         ER = 1 - numpy.array(LP == LTE).mean()
+#         print(l, round(_J, 3), str(100*round(ER, 3))+'%')
+
+def linear_reg(DTR, LTR, DTE, LTE, l):
+    logreg_obj = logreg_obj_wrap(DTR, LTR, l)
+    _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True)
+    _w = _v[0:DTR.shape[0]]
+    _b = _v[-1]
+    STE = numpy.dot(_w.T, DTE) + _b
+    LP = STE > 0
+    return LP, _J
 
 def plot():
     plt.figure()
