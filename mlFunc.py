@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pylab
 import scipy.linalg
 import sklearn.datasets
+import scipy.optimize as opt
 
 
 def mcol(v):
@@ -239,6 +240,27 @@ def tied_cov_naive_GC(DTE, LTE, DTR, LTR):
     LPred2 = Post2.argmax(0)
     return LPred1, LPred2
 
+def logreg_obj_wrap(DTR, LTR, l):
+    M = DTR.shape[0]
+    Z = LTR * 2.0 -1.0
+    def logreg_obj(v):
+        w = mcol(v[0:M])
+        b = v[-1]
+        S = numpy.dot(w.T, DTR) + b
+        cxe = numpy.logaddexp(0, -S*Z)
+        return numpy.linalg.norm(w)**2 * l/2.0 + cxe.mean()
+    return logreg_obj
+
+def to_be_transfered_into_main(DTR, LTR, DTE, LTE):
+    for l in [1e-6, 1e-3, 0.1, 1.0]:
+        logreg_obj = logreg_obj_wrap(DTR, LTR, l)
+        _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True) #..[0]+1 perchè 4 sono le features (w) e uno è b
+        _w = _v[0:DTR.shape[0]]
+        _b = _v[-1]
+        STE = numpy.dot(_w.T, DTE) + _b
+        LP = STE > 0 # mette true se il > è vero, altrimenti false, ovviamente '0' perchè stiamo considerando priors uguali, LP sta per labels predicted
+        ER = 1 - numpy.array(LP == LTE).mean()
+        print(l, round(_J, 3), str(100*round(ER, 3))+'%') #lambda, J, Error rate
 
 def plot():
     plt.figure()
