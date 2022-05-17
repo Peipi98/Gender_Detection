@@ -1,1 +1,4 @@
 1) Come gestire DTE nel caso in cui usiamo LDA/PCA ?? DTE và trasformato? Come?
+2) Il nostro report è strutturato bene? Va messo qualcosa in più?
+3) Bisogna consegnare uno script per ogni tipo di classificatore o un unico script?
+4) 

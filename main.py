@@ -18,6 +18,11 @@ if __name__ == "__main__":
     log_acc_n, log_err_n = test(LTE, LP2n)
     log_acc_t, log_err_t = test(LTE, LP2t)
     log_acc_nt, log_err_nt = test(LTE, LP2nt)
+    
+    # print(str(round(log_err*100, 3)) + "%")
+    # print(str(round(log_err_n*100, 3)) + "%")
+    # print(str(round(log_err_t*100, 3)) + "%")
+    # print(str(round(log_err_nt*100, 3)) + "%")
 
     # print(holdout_validation(MGC, DTR, LTR))
     # print(holdout_validation(naive_MGC, DTR, LTR))
@@ -32,7 +37,7 @@ if __name__ == "__main__":
     # print(leave_one_out(naive_MGC, DTR, LTR))
     # print(leave_one_out(tied_cov_GC, DTR, LTR))
     # print(leave_one_out(tied_cov_naive_GC, DTR, LTR))
-    kfold_cross(MGC, DTR, LTR, 10)
+    #kfold_cross(MGC, DTR, LTR, 10)
 
     # DA CHIEDERE
     # Notiamo che i risultati di leave-one-out sono rispettivamente
@@ -54,9 +59,9 @@ if __name__ == "__main__":
     #print(test(LTE, LPred2))
 
 
-    #lamb = [1e-6, 1e-3, 0.1, 1.0, 0.0, 3.0]
+    lamb = [1e-6, 1e-3, 0.1, 1.0, 0.0, 3.0]
     
-    #for l in lamb:
-        #LPred, _J = linear_reg(DTR, LTR, DTE, l)
-        #acc_LR, err_LR = test(LTE, LPred)
-        #print(str(acc_LR) + "\t" + str(err_LR))
+    for l in lamb:
+        LPred, _J = linear_reg(DTR, LTR, DTE, l)
+        acc_LR, err_LR = test(LTE, LPred)
+        print( str(l)+ "\t\t" + str(acc_LR) + "\t" + str(round(err_LR*100, 3))+"%")
