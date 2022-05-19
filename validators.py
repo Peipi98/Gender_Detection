@@ -1,6 +1,7 @@
 import numpy
 from mlFunc import *
 
+
 def kfold_cross(func, DTR, LTR, k):
     accuracy = []
     Dtr = numpy.split(DTR, k, axis=1)
@@ -72,3 +73,12 @@ def leave_one_out(func, DTR, LTR):
         acc, _ = test(LTE, lpred)
         accuracy.append(acc)
     return numpy.mean(accuracy)
+
+
+def confusion_matrix(Lpred, LTE, k):
+    # k = number of classes
+    conf = numpy.zeros((3, 3))
+    for i in range(k):
+        for j in range(k):
+            conf[i][j] = ((Lpred == i) * (LTE == j)).sum()
+    return conf
