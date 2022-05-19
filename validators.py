@@ -75,10 +75,26 @@ def leave_one_out(func, DTR, LTR):
     return numpy.mean(accuracy)
 
 
-def confusion_matrix(Lpred, LTE, k):
+def confusion_matrix(Lpred, LTE, k=2):
     # k = number of classes
-    conf = numpy.zeros((3, 3))
+    conf = numpy.zeros((k, k))
     for i in range(k):
         for j in range(k):
             conf[i][j] = ((Lpred == i) * (LTE == j)).sum()
     return conf
+
+
+# to be splitted ???? llrs sta per log-likelihood ratios
+def plot_ROC(llrs, LTE):
+    thresholds = numpy.array(llrs)
+    thresholds.sort()
+    thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
+    FPR = numpy.zeros(thresholds.size)
+    TPR = numpy.zeros(thresholds.size)
+    for idx, t in enumerate(thresholds):
+        Pred = numpy.int32(llrs > t)
+        conf = confusion_matrix(Pred, LTE, 2)
+        TPR[idx] = conf[1, 1] / (conf[1, 1] + conf[0, 1])
+        FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
+    pylab.plot(FPR, TPR)
+    pylab.show()
