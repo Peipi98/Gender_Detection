@@ -57,7 +57,7 @@ def PCA(D, L, m=2):
         1: "female"
     }
 
-    if(m == 2):
+    if m == 2:
         for i in range(2):
             # I have to invert the sign of the second eigenvector to flip the image
             plt.scatter(DP[:, L == i][0], -DP[:, L == i][1], label=hlabels.get(i))
@@ -66,13 +66,12 @@ def PCA(D, L, m=2):
         plt.show()
     return P
 
-def LDA(D, L, DTE, m=1):
+def LDA(D, L, d=1, m=2):
     N = numpy.shape(D)[1]
-    mu = D.mean(1)  # mu -> sumOfRow / 150 -> the result of mean is a 1-D array instead of a column vector.
-
+    mu = D.mean(1)
 
     tot = 0
-    for i in range(2):
+    for i in range(m):
         nc = D[:, L == i].shape[1]
         muc = D[:, L == i].mean(1)
         tot += nc * (mcol(muc - mu)).dot(mcol(muc - mu).T)
@@ -86,17 +85,16 @@ def LDA(D, L, DTE, m=1):
     SW = SW / N
 
     s, U = scipy.linalg.eigh(SB, SW)
-    W = U[:, ::-1][:, 0:m]
+    W = U[:, ::-1][:, 0:d]
 
-    Y = []
-    for i in range(2):
-        y = numpy.dot(W.T, D[:, L == i])
-        matplotlib.pyplot.scatter(y[0], y[1])
-        Y.append(y)
 
-    matplotlib.pyplot.show()
+    if d == 1:
+        for i in range(m):
+            y = numpy.dot(W.T, D[:, L == i])
+            matplotlib.pyplot.scatter(y[0], numpy.zeros(y.shape[1]))
+        matplotlib.pyplot.show()
 
-    return numpy.hstack(Y), DTE
+    return W
 
 def ML_GAU(D):
     m = emprical_mean(D)

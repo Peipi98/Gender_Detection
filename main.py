@@ -58,22 +58,57 @@ if __name__ == "__main__":
     # _, LPred2 = MGC(DTE, DTR, LTR)
     #print(test(LTE, LPred2))
 
-
-    lamb = [1e-6, 1e-3, 0.1, 1.0, 0.0, 3.0]
+    print('Linear regression:')
+    lamb = [0.0, 1e-6, 1e-3, 0.1, 1.0, 3.0]
     
     for l in lamb:
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
         acc_LR, err_LR = test(LTE, LPred)
         print( str(l)+ "\t\t" + str(acc_LR) + "\t" + str(round(err_LR*100, 3))+"%")
 
+
+    print('Linear regression + PCA(12 -> 11):')
     #todo we still have to find the best 'm' by using validation
     m = 11
     P = PCA(DTR, LTR, m)
     DTR = numpy.dot(P.T, DTR)
     DTE = numpy.dot(P.T, DTE)
+    for l in lamb:
+        LPred, _J = linear_reg(DTR, LTR, DTE, l)
+        acc_LR, err_LR = test(LTE, LPred)
+        print( str(l)+ "\t\t" + str(acc_LR) + "\t" + str(round(err_LR*100, 3))+"%")
+
+    print('Linear regression + LDA(binary case -> d=1 direction):')
+    # todo we still have to find the best 'm' by using validation
+    DTR, LTR = load("Train.txt")
+    DTE, LTE = load("Test.txt")
+
+    W = LDA(DTR, LTR, 1)
+    DTR = numpy.dot(W.T, DTR)
+    DTE = numpy.dot(W.T, DTE)
+
+    for l in lamb:
+        LPred, _J = linear_reg(DTR, LTR, DTE, l)
+        acc_LR, err_LR = test(LTE, LPred)
+        print(str(l) + "\t\t" + str(acc_LR) + "\t" + str(round(err_LR * 100, 3)) + "%")
+
+
+    print('Linear regression + PCA(12 -> 11) + LDA(binary case -> d=1 direction):')
+    # todo we still have to find the best 'm' by using validation
+    DTR, LTR = load("Train.txt")
+    DTE, LTE = load("Test.txt")
+
+    m = 11
+    P = PCA(DTR, LTR, m)
+    DTR = numpy.dot(P.T, DTR)
+    DTE = numpy.dot(P.T, DTE)
+
+    W = LDA(DTR, LTR, 1)
+    DTR = numpy.dot(W.T, DTR)
+    DTE = numpy.dot(W.T, DTE)
 
 
     for l in lamb:
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
         acc_LR, err_LR = test(LTE, LPred)
-        print( str(l)+ "\t\t" + str(acc_LR) + "\t" + str(round(err_LR*100, 3))+"%")
+        print(str(l) + "\t\t" + str(acc_LR) + "\t" + str(round(err_LR * 100, 3)) + "%")
