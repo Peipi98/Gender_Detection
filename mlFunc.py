@@ -45,43 +45,26 @@ def empirical_covariance(D, mu):
 
 
 def PCA(D, L, m=2):
-    # 1. compute covariance matrix
     n = numpy.shape(D)[1]
-    # mu = dataset mean, calculated by axis = 1 (columns mean)
-    # the result is an array of means for each column
     mu = D.mean(1)
-
-    # remove the mean from all points of the data matrix D,
-    # so I can center the data
     DC = D - mcol(mu)
-
-    # calculate covariance matrix with DataCentered matrix
     C = 1 / n * numpy.dot(DC, numpy.transpose(DC))
-
-    # Calculate eigenvectors and eigenvalues of C with singular value decomposition
-    # That's why C is semi-definite positive, so we can get the sorted eigenvectors
-    # from the svd: C=U*(Sigma)*V(^transposed)
-    # svd() returns sorted eigenvalues from smallest to largest,
-    # and the corresponding eigenvectors
     USVD, s, _ = numpy.linalg.svd(C)
-
-    # m are the leading eigenvectors chosen from the next P matrix
     P = USVD[:, 0:m]
-
-    # apply the projection to the matrix of samples D
     DP = numpy.dot(P.T, D)
-    print(DP)
     hlabels = {
         0: "male",
         1: "female"
     }
 
-    for i in range(2):
-        # I have to invert the sign of the second eigenvector to flip the image
-        plt.scatter(DP[:, L == i][0], -DP[:, L == i][1], label=hlabels.get(i))
-        plt.legend()
-        plt.tight_layout()
-    plt.show()
+    if(m == 2):
+        for i in range(2):
+            # I have to invert the sign of the second eigenvector to flip the image
+            plt.scatter(DP[:, L == i][0], -DP[:, L == i][1], label=hlabels.get(i))
+            plt.legend()
+            plt.tight_layout()
+        plt.show()
+    return P
 
 def LDA(D, L, DTE, m=1):
     N = numpy.shape(D)[1]

@@ -65,3 +65,15 @@ if __name__ == "__main__":
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
         acc_LR, err_LR = test(LTE, LPred)
         print( str(l)+ "\t\t" + str(acc_LR) + "\t" + str(round(err_LR*100, 3))+"%")
+
+    #todo we still have to find the best 'm' by using validation
+    m = 11
+    P = PCA(DTR, LTR, m)
+    DTR = numpy.dot(P.T, DTR)
+    DTE = numpy.dot(P.T, DTE)
+
+
+    for l in lamb:
+        LPred, _J = linear_reg(DTR, LTR, DTE, l)
+        acc_LR, err_LR = test(LTE, LPred)
+        print( str(l)+ "\t\t" + str(acc_LR) + "\t" + str(round(err_LR*100, 3))+"%")
