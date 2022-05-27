@@ -6,7 +6,6 @@ import scipy.linalg
 import sklearn.datasets
 import scipy.optimize as opt
 from prettytable import PrettyTable
-from classifiers import *
 
 
 def mcol(v):
@@ -154,31 +153,14 @@ def plot(D, L):
     D0 = D[:, L == 0]
     D1 = D[:, L == 1]
     hLabels = {
-        0: "Male",
-        1: "Female"
+        0: "male",
+        1: "female"
     }
     plt.figure()
     for i in range(2):
+        plt.legend(hLabels)
         plt.scatter(D[:, L==i][0],D[:, L==i][1], label = hLabels.get(i) )
     plt.show()
 
-def generative_acc_err(DTE, DTR, LTE, LTR, title):
-    _, LPred2 = MGC(DTE, DTR, LTR)
-    _, LP2n = naive_MGC(DTE, DTR, LTR)
-    _, LP2t = tied_cov_GC(DTE, DTR, LTR)
-    _, LP2nt = tied_cov_naive_GC(DTE, DTR, LTR)
-    # logMGC accuracy
-    log_acc, log_err = test(LTE, LPred2)
-    log_acc_n, log_err_n = test(LTE, LP2n)
-    log_acc_t, log_err_t = test(LTE, LP2t)
-    log_acc_nt, log_err_nt = test(LTE, LP2nt)
-
-    table = PrettyTable(["", "Accuracy %", "Error "])
-    table.title = title
-    table.add_row(["MGC", round(log_acc*100, 3), round(log_err*100, 3)])
-    table.add_row(["Naive MGC", round(log_acc_n*100, 3), round(log_err_n*100, 3)])
-    table.add_row(["Tied GC", round(log_acc_t*100, 3), round(log_err_t*100, 3)])
-    table.add_row(["Naive Tied GC", round(log_acc_nt*100, 3), round(log_err_nt*100, 3)])
-    print(table)
 
 

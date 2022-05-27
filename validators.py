@@ -1,5 +1,6 @@
 import numpy
 from mlFunc import *
+from classifiers import *
 
 
 def kfold_cross(func, DTR, LTR, k):
@@ -98,3 +99,22 @@ def plot_ROC(llrs, LTE):
         FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
     pylab.plot(FPR, TPR)
     pylab.show()
+
+def generative_acc_err(DTE, DTR, LTE, LTR, title):
+    _, LPred2 = MGC(DTE, DTR, LTR)
+    _, LP2n = naive_MGC(DTE, DTR, LTR)
+    _, LP2t = tied_cov_GC(DTE, DTR, LTR)
+    _, LP2nt = tied_cov_naive_GC(DTE, DTR, LTR)
+    # logMGC accuracy
+    log_acc, log_err = test(LTE, LPred2)
+    log_acc_n, log_err_n = test(LTE, LP2n)
+    log_acc_t, log_err_t = test(LTE, LP2t)
+    log_acc_nt, log_err_nt = test(LTE, LP2nt)
+
+    table = PrettyTable(["", "Accuracy %", "Error "])
+    table.title = title
+    table.add_row(["MGC", round(log_acc*100, 3), round(log_err*100, 3)])
+    table.add_row(["Naive MGC", round(log_acc_n*100, 3), round(log_err_n*100, 3)])
+    table.add_row(["Tied GC", round(log_acc_t*100, 3), round(log_err_t*100, 3)])
+    table.add_row(["Naive Tied GC", round(log_acc_nt*100, 3), round(log_err_nt*100, 3)])
+    print(table)

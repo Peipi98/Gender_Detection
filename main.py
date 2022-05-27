@@ -1,14 +1,13 @@
 from mlFunc import *
-from validators import *
 from classifiers import *
+from validators import *
 from prettytable import PrettyTable
 
 if __name__ == "__main__":
     DTR, LTR = load("Train.txt")
 
     DTE, LTE = load("Test.txt")
-    # plot_hist(D, L)
-    _, LPred2 = MGC(DTE, DTR, LTR)
+    plot(DTR, LTR)
     # We're starting with Multivariate Gaussian Classifier
     """     
     _, LPred2 = MGC(DTE, DTR, LTR)
@@ -31,18 +30,19 @@ if __name__ == "__main__":
     P = PCA(DTR, LTR, m)
     DTR_PCA = numpy.dot(P.T, DTR)
     DTE_PCA = numpy.dot(P.T, DTE)
+    plot(DTR_PCA, LTR)
     generative_acc_err(DTE_PCA, DTR_PCA, LTE, LTR, "PCA")
 
     ## LDA
     W = LDA(DTR, LTR, 1)
     DTR_LDA = numpy.dot(W.T, DTR)
     DTE_LDA = numpy.dot(W.T, DTE)
-    generative_acc_err(DTE_PCA, DTR_PCA, LTE, LTR, "LDA")
+    generative_acc_err(DTE_LDA, DTR_LDA, LTE, LTR, "LDA")
 
     ## PCA + LDA
-    W = LDA(DTR, LTR, 1)
-    DTR = numpy.dot(W.T, DTR_PCA)
-    DTE = numpy.dot(W.T, DTE_PCA)
+    W = LDA(DTR_PCA, LTR, 1)
+    DTR_LDA = numpy.dot(W.T, DTR_PCA)
+    DTE_LDA = numpy.dot(W.T, DTE_PCA)
     generative_acc_err(DTE_LDA, DTR_LDA, LTE, LTR, "PCA + LDA")
 
     # print(str(round(log_err*100, 3)) + "%")
