@@ -98,8 +98,8 @@ def plot_histogram(D, L, labels, title):
     y = D[:, L == 1]
     matplotlib.pyplot.hist(y[0], bins=60, density=True, alpha=0.4, label=labels[1])
     matplotlib.pyplot.legend()
+    plt.savefig('hist' + title + '.png')
     matplotlib.pyplot.show()
-    plt.savefig('hist' + title + '.pdf')
 
 
 def ML_GAU(D):

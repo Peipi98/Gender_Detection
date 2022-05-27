@@ -1,6 +1,7 @@
 from mlFunc import *
 from validators import *
 from classifiers import *
+from prettytable import PrettyTable
 
 if __name__ == "__main__":
     DTR, LTR = load("Train.txt")
@@ -58,19 +59,22 @@ if __name__ == "__main__":
     # _, LPred2 = MGC(DTE, DTR, LTR)
     #print(test(LTE, LPred2))
 
-    print('Linear regression:')
+    linreg = PrettyTable(["Lambda", "Accuracy %", "Error rate %"])
+    linreg.title = 'Linear regression'
+    
     plot_histogram(DTR, LTR, ['male', 'female'], 'No manipulation')
     lamb = [0.0, 1e-6, 1e-3, 0.1, 1.0, 3.0]
     
     for l in lamb:
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
         acc_LR, err_LR = test(LTE, LPred)
-        print( str(l)+ "\t\t" + str(acc_LR) + "\t" + str(round(err_LR*100, 3))+"%")
+        linreg.add_row([l, round(acc_LR*100, 3), round(err_LR*100, 3)])
+    print(linreg)
 
-
-    print('Linear regression + PCA(12 -> 11):')
+    linreg_PCA = PrettyTable(["Lambda", "Accuracy %", "Error rate %"])
+    linreg_PCA.title = 'Linear regression + PCA(12 -> 8)'
     #todo we still have to find the best 'm' by using validation
-    m = 11
+    m = 8
     P = PCA(DTR, LTR, m)
     DTR = numpy.dot(P.T, DTR)
     plot_histogram(DTR, LTR, ['male', 'female'], 'PCA')
@@ -78,9 +82,11 @@ if __name__ == "__main__":
     for l in lamb:
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
         acc_LR, err_LR = test(LTE, LPred)
-        print( str(l)+ "\t\t" + str(acc_LR) + "\t" + str(round(err_LR*100, 3))+"%")
-
-    print('Linear regression + LDA(binary case -> d=1 direction):')
+        linreg_PCA.add_row([l, round(acc_LR*100, 3), round(err_LR*100, 3)])
+    print(linreg_PCA)
+    
+    linreg_LDA = PrettyTable(["Lambda", "Accuracy %", "Error rate %"])
+    linreg_LDA.title = 'Linear regression + LDA(binary case -> d=1 direction)'
     # todo we still have to find the best 'm' by using validation
     DTR, LTR = load("Train.txt")
     DTE, LTE = load("Test.txt")
@@ -94,15 +100,17 @@ if __name__ == "__main__":
     for l in lamb:
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
         acc_LR, err_LR = test(LTE, LPred)
-        print(str(l) + "\t\t" + str(acc_LR) + "\t" + str(round(err_LR * 100, 3)) + "%")
+        linreg_LDA.add_row([l, round(acc_LR*100, 3), round(err_LR*100, 3)])
+    print(linreg_LDA)
 
 
-    print('Linear regression + PCA(12 -> 11) + LDA(binary case -> d=1 direction):')
+    linreg_PCA_LDA = PrettyTable(["Lambda", "Accuracy %", "Error rate %"])
+    linreg_PCA_LDA.title = 'Linear regression + PCA(12 -> 8) + LDA(binary case -> d=1 direction)'
     # todo we still have to find the best 'm' by using validation
     DTR, LTR = load("Train.txt")
     DTE, LTE = load("Test.txt")
 
-    m = 11
+    m = 8
     P = PCA(DTR, LTR, m)
     DTR = numpy.dot(P.T, -DTR)
     DTE = numpy.dot(P.T, -DTE)
@@ -116,4 +124,5 @@ if __name__ == "__main__":
     for l in lamb:
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
         acc_LR, err_LR = test(LTE, LPred)
-        print(str(l) + "\t\t" + str(acc_LR) + "\t" + str(round(err_LR * 100, 3)) + "%")
+        linreg_PCA_LDA.add_row([l, round(acc_LR*100, 3), round(err_LR*100, 3)])
+    print(linreg_PCA_LDA)
