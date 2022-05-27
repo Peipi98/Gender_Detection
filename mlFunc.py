@@ -66,6 +66,7 @@ def PCA(D, L, m=2):
         plt.show()
     return P
 
+
 def LDA(D, L, d=1, m=2):
     N = numpy.shape(D)[1]
     mu = D.mean(1)
@@ -86,15 +87,19 @@ def LDA(D, L, d=1, m=2):
 
     s, U = scipy.linalg.eigh(SB, SW)
     W = U[:, ::-1][:, 0:d]
-
-
-    if d == 1:
-        for i in range(m):
-            y = numpy.dot(W.T, D[:, L == i])
-            matplotlib.pyplot.scatter(y[0], numpy.zeros(y.shape[1]))
-        matplotlib.pyplot.show()
-
     return W
+
+
+def plot_histogram(D, L, labels, title):
+    matplotlib.pyplot.figure()
+    matplotlib.pyplot.title(title)
+    y = D[:, L == 0]
+    matplotlib.pyplot.hist(y[0], bins=60, density=True, alpha=0.4, label=labels[0])
+    y = D[:, L == 1]
+    matplotlib.pyplot.hist(y[0], bins=60, density=True, alpha=0.4, label=labels[1])
+    matplotlib.pyplot.legend()
+    matplotlib.pyplot.show()
+
 
 def ML_GAU(D):
     m = emprical_mean(D)
@@ -123,30 +128,35 @@ def loglikelihood(XND, m_ML, C_ML):
 def likelihood(XND, m_ML, C_ML):
     return numpy.exp(loglikelihood(XND, m_ML, C_ML))
 
+
 def test(LTE, LPred):
     accuracy = (LTE == LPred).sum() / LTE.size
     error = 1 - accuracy
     return accuracy, error
 
+
 def logreg_obj_wrap(DTR, LTR, l):
     M = DTR.shape[0]
-    Z = LTR * 2.0 -1.0
+    Z = LTR * 2.0 - 1.0
+
     def logreg_obj(v):
         w = mcol(v[0:M])
         b = v[-1]
         S = numpy.dot(w.T, DTR) + b
-        cxe = numpy.logaddexp(0, -S*Z)
-        return numpy.linalg.norm(w)**2 * l/2.0 + cxe.mean()
+        cxe = numpy.logaddexp(0, -S * Z)
+        return numpy.linalg.norm(w) ** 2 * l / 2.0 + cxe.mean()
+
     return logreg_obj
+
 
 # def to_be_transfered_into_main(DTR, LTR, DTE, LTE, lamb):
 #     for l in lamb:
-        # logreg_obj = logreg_obj_wrap(DTR, LTR, l)
-        # _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True)
-        # _w = _v[0:DTR.shape[0]]
-        # _b = _v[-1]
-        # STE = numpy.dot(_w.T, DTE) + _b
-        # LP = STE > 0
+# logreg_obj = logreg_obj_wrap(DTR, LTR, l)
+# _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True)
+# _w = _v[0:DTR.shape[0]]
+# _b = _v[-1]
+# STE = numpy.dot(_w.T, DTE) + _b
+# LP = STE > 0
 #         ER = 1 - numpy.array(LP == LTE).mean()
 #         print(l, round(_J, 3), str(100*round(ER, 3))+'%')
 

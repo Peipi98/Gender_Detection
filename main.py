@@ -59,6 +59,7 @@ if __name__ == "__main__":
     #print(test(LTE, LPred2))
 
     print('Linear regression:')
+    plot_histogram(DTR, LTR, ['male', 'female'], 'No manipulation')
     lamb = [0.0, 1e-6, 1e-3, 0.1, 1.0, 3.0]
     
     for l in lamb:
@@ -85,7 +86,9 @@ if __name__ == "__main__":
 
     W = LDA(DTR, LTR, 1)
     DTR = numpy.dot(W.T, DTR)
+    plot_histogram(DTR, LTR, ['male', 'female'], 'LDA')
     DTE = numpy.dot(W.T, DTE)
+
 
     for l in lamb:
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
@@ -105,6 +108,7 @@ if __name__ == "__main__":
 
     W = LDA(DTR, LTR, 1)
     DTR = numpy.dot(W.T, DTR)
+    plot_histogram(DTR, LTR, ['male', 'female'], 'PCA + LDA')
     DTE = numpy.dot(W.T, DTE)
 
 
