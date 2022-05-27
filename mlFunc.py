@@ -99,6 +99,7 @@ def plot_histogram(D, L, labels, title):
     matplotlib.pyplot.hist(y[0], bins=60, density=True, alpha=0.4, label=labels[1])
     matplotlib.pyplot.legend()
     matplotlib.pyplot.show()
+    plt.savefig('hist' + title + '.pdf')
 
 
 def ML_GAU(D):
@@ -149,17 +150,6 @@ def logreg_obj_wrap(DTR, LTR, l):
     return logreg_obj
 
 
-# def to_be_transfered_into_main(DTR, LTR, DTE, LTE, lamb):
-#     for l in lamb:
-# logreg_obj = logreg_obj_wrap(DTR, LTR, l)
-# _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True)
-# _w = _v[0:DTR.shape[0]]
-# _b = _v[-1]
-# STE = numpy.dot(_w.T, DTE) + _b
-# LP = STE > 0
-#         ER = 1 - numpy.array(LP == LTE).mean()
-#         print(l, round(_J, 3), str(100*round(ER, 3))+'%')
-
 def plot(D, L):
     D0 = D[:, L == 0]
     D1 = D[:, L == 1]
@@ -172,26 +162,5 @@ def plot(D, L):
         plt.scatter(D[:, L==i][0],D[:, L==i][1], label = hLabels.get(i) )
     plt.show()
 
-def plot_hist_exp(X1D, m_ML, C_ML):
-    plt.figure()
-    plt.hist(X1D.ravel(), bins=50, density=True)
-    XPlot = numpy.linspace(-8, 12, 1000)
-    plt.plot(XPlot.ravel(), numpy.exp(logpdf_GAU_ND(mrow(XPlot), m_ML, C_ML)))
-    plt.show()
 
 
-# PLOTTING FUNCTIONS
-def plot_hist(D, L):
-    D0 = D[:, L == 0]
-    D1 = D[:, L == 1]
-
-    for dIdx in range(12):
-        plt.figure()
-
-        plt.hist(D0[dIdx, :], bins=10, density=True, alpha=0.4, label='male')
-        plt.hist(D1[dIdx, :], bins=10, density=True, alpha=0.4, label='female')
-
-        plt.legend()
-        plt.tight_layout()  # Use with non-default font size to keep axis label inside the figure
-        plt.savefig('hist_%d.pdf' % dIdx)
-    plt.show()

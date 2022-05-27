@@ -73,6 +73,7 @@ if __name__ == "__main__":
     m = 11
     P = PCA(DTR, LTR, m)
     DTR = numpy.dot(P.T, DTR)
+    plot_histogram(DTR, LTR, ['male', 'female'], 'PCA')
     DTE = numpy.dot(P.T, DTE)
     for l in lamb:
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
@@ -103,8 +104,8 @@ if __name__ == "__main__":
 
     m = 11
     P = PCA(DTR, LTR, m)
-    DTR = numpy.dot(P.T, DTR)
-    DTE = numpy.dot(P.T, DTE)
+    DTR = numpy.dot(P.T, -DTR)
+    DTE = numpy.dot(P.T, -DTE)
 
     W = LDA(DTR, LTR, 1)
     DTR = numpy.dot(W.T, DTR)
