@@ -5,6 +5,8 @@ import pylab
 import scipy.linalg
 import sklearn.datasets
 import scipy.optimize as opt
+from prettytable import PrettyTable
+from classifiers import *
 
 
 def mcol(v):
@@ -31,7 +33,6 @@ def load(fname):
         except:
             pass
     return numpy.hstack(DList), numpy.array(labelsList, dtype=numpy.int32)
-
 
 def emprical_mean(D):
     return mcol(D.mean(1))
@@ -66,7 +67,6 @@ def PCA(D, L, m=2):
         plt.show()
     return P
 
-
 def LDA(D, L, d=1, m=2):
     N = numpy.shape(D)[1]
     mu = D.mean(1)
@@ -98,7 +98,7 @@ def plot_histogram(D, L, labels, title):
     y = D[:, L == 1]
     matplotlib.pyplot.hist(y[0], bins=60, density=True, alpha=0.4, label=labels[1])
     matplotlib.pyplot.legend()
-    plt.savefig('hist' + title + '.png')
+    plt.savefig('./images/hist' + title + '.png')
     matplotlib.pyplot.show()
 
 
@@ -162,5 +162,23 @@ def plot(D, L):
         plt.scatter(D[:, L==i][0],D[:, L==i][1], label = hLabels.get(i) )
     plt.show()
 
+def generative_acc_err(DTE, DTR, LTE, LTR, title):
+    _, LPred2 = MGC(DTE, DTR, LTR)
+    _, LP2n = naive_MGC(DTE, DTR, LTR)
+    _, LP2t = tied_cov_GC(DTE, DTR, LTR)
+    _, LP2nt = tied_cov_naive_GC(DTE, DTR, LTR)
+    # logMGC accuracy
+    log_acc, log_err = test(LTE, LPred2)
+    log_acc_n, log_err_n = test(LTE, LP2n)
+    log_acc_t, log_err_t = test(LTE, LP2t)
+    log_acc_nt, log_err_nt = test(LTE, LP2nt)
+
+    table = PrettyTable(["", "Accuracy %", "Error "])
+    table.title = title
+    table.add_row(["MGC", round(log_acc*100, 3), round(log_err*100, 3)])
+    table.add_row(["Naive MGC", round(log_acc_n*100, 3), round(log_err_n*100, 3)])
+    table.add_row(["Tied GC", round(log_acc_t*100, 3), round(log_err_t*100, 3)])
+    table.add_row(["Naive Tied GC", round(log_acc_nt*100, 3), round(log_err_nt*100, 3)])
+    print(table)
 
 

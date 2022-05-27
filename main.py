@@ -8,8 +8,9 @@ if __name__ == "__main__":
 
     DTE, LTE = load("Test.txt")
     # plot_hist(D, L)
-
+    _, LPred2 = MGC(DTE, DTR, LTR)
     # We're starting with Multivariate Gaussian Classifier
+    """     
     _, LPred2 = MGC(DTE, DTR, LTR)
     _, LP2n = naive_MGC(DTE, DTR, LTR)
     _, LP2t = tied_cov_GC(DTE, DTR, LTR)
@@ -18,8 +19,32 @@ if __name__ == "__main__":
     log_acc, log_err = test(LTE, LPred2)
     log_acc_n, log_err_n = test(LTE, LP2n)
     log_acc_t, log_err_t = test(LTE, LP2t)
-    log_acc_nt, log_err_nt = test(LTE, LP2nt)
+    log_acc_nt, log_err_nt = test(LTE, LP2nt) 
+    """
     
+    # GENERATIVE MODELS
+    m = 8
+    ## RAW
+    generative_acc_err(DTE, DTR, LTE, LTR, "RAW")
+
+    ## PCA
+    P = PCA(DTR, LTR, m)
+    DTR_PCA = numpy.dot(P.T, DTR)
+    DTE_PCA = numpy.dot(P.T, DTE)
+    generative_acc_err(DTE_PCA, DTR_PCA, LTE, LTR, "PCA")
+
+    ## LDA
+    W = LDA(DTR, LTR, 1)
+    DTR_LDA = numpy.dot(W.T, DTR)
+    DTE_LDA = numpy.dot(W.T, DTE)
+    generative_acc_err(DTE_PCA, DTR_PCA, LTE, LTR, "LDA")
+
+    ## PCA + LDA
+    W = LDA(DTR, LTR, 1)
+    DTR = numpy.dot(W.T, DTR_PCA)
+    DTE = numpy.dot(W.T, DTE_PCA)
+    generative_acc_err(DTE_LDA, DTR_LDA, LTE, LTR, "PCA + LDA")
+
     # print(str(round(log_err*100, 3)) + "%")
     # print(str(round(log_err_n*100, 3)) + "%")
     # print(str(round(log_err_t*100, 3)) + "%")
