@@ -4,7 +4,7 @@ from classifiers import *
 
 if __name__ == "__main__":
     DTR, LTR = load("Train.txt")
-
+    plot(DTR, LTR)
     DTE, LTE = load("Test.txt")
     # plot_hist(D, L)
 
@@ -69,9 +69,10 @@ if __name__ == "__main__":
 
     print('Linear regression + PCA(12 -> 11):')
     #todo we still have to find the best 'm' by using validation
-    m = 11
+    m = 8
     P = PCA(DTR, LTR, m)
     DTR = numpy.dot(P.T, DTR)
+    plot(DTR, LTR)
     DTE = numpy.dot(P.T, DTE)
     for l in lamb:
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
@@ -98,7 +99,7 @@ if __name__ == "__main__":
     DTR, LTR = load("Train.txt")
     DTE, LTE = load("Test.txt")
 
-    m = 11
+    m = 8
     P = PCA(DTR, LTR, m)
     DTR = numpy.dot(P.T, DTR)
     DTE = numpy.dot(P.T, DTE)

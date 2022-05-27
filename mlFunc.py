@@ -1,3 +1,4 @@
+from cProfile import label
 import numpy
 import matplotlib
 import matplotlib.pyplot as plt
@@ -151,12 +152,16 @@ def logreg_obj_wrap(DTR, LTR, l):
 #         print(l, round(_J, 3), str(100*round(ER, 3))+'%')
 
 
-def plot():
+def plot(D, L):
+    D0 = D[:, L == 0]
+    D1 = D[:, L == 1]
+    hLabels = {
+        0: "Male",
+        1: "Female"
+    }
     plt.figure()
-    XPlot = numpy.linspace(-8, 12, 1000)
-    m = numpy.ones((1, 1)) * 1.0
-    C = numpy.ones((1, 1)) * 2.0
-    plt.plot(XPlot.ravel(), numpy.exp(logpdf_GAU_ND(mrow(XPlot), m, C)))
+    for i in range(2):
+        plt.scatter(D[:, L==i][0],D[:, L==i][1], label = hLabels.get(i) )
     plt.show()
 
 
