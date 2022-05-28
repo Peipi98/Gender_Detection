@@ -151,3 +151,12 @@ if __name__ == "__main__":
         acc_LR, err_LR = test(LTE, LPred)
         linreg_PCA_LDA.add_row([l, round(acc_LR*100, 3), round(err_LR*100, 3)])
     print(linreg_PCA_LDA)
+
+    # DTR, LTR = load("Train.txt")
+    # DTE, LTE = load("Test.txt")
+    # _, _, scores = MGC(DTE, DTR, LTR)
+    # p = numpy.linspace(-3, 3, 21)
+    # pylab.plot(p, bayes_error_plot(p, scores, LTE, minCost=False), color='r')
+    # pylab.plot(p, bayes_error_plot(p, scores, LTE, minCost=True), color='b')
+    # pylab.ylim(0, 1.1)
+    # pylab.show()
