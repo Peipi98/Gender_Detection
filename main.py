@@ -20,7 +20,7 @@ if __name__ == "__main__":
     log_acc_t, log_err_t = test(LTE, LP2t)
     log_acc_nt, log_err_nt = test(LTE, LP2nt) 
     """
-    
+
     # GENERATIVE MODELS
     m = 8
     ## RAW
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     # DA CHIEDERE
     # Notiamo che i risultati di leave-one-out sono rispettivamente
     # più bassi rispetto ai precedenti non naive, ma più alti dei naive.
-    # 0.9753333333333334 
+    # 0.9753333333333334
     # 0.7031666666666667
     # 0.9755
     # 0.7048333333333333
@@ -86,10 +86,10 @@ if __name__ == "__main__":
 
     linreg = PrettyTable(["Lambda", "Accuracy %", "Error rate %"])
     linreg.title = 'Linear regression'
-    
+
     plot_histogram(DTR, LTR, ['male', 'female'], 'No manipulation')
     lamb = [0.0, 1e-6, 1e-3, 0.1, 1.0, 3.0]
-    
+
     for l in lamb:
         LPred, _J = linear_reg(DTR, LTR, DTE, l)
         acc_LR, err_LR = test(LTE, LPred)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
         acc_LR, err_LR = test(LTE, LPred)
         linreg_PCA.add_row([l, round(acc_LR*100, 3), round(err_LR*100, 3)])
     print(linreg_PCA)
-    
+
     linreg_LDA = PrettyTable(["Lambda", "Accuracy %", "Error rate %"])
     linreg_LDA.title = 'Linear regression + LDA(binary case -> d=1 direction)'
     # todo we still have to find the best 'm' by using validation
@@ -152,11 +152,16 @@ if __name__ == "__main__":
         linreg_PCA_LDA.add_row([l, round(acc_LR*100, 3), round(err_LR*100, 3)])
     print(linreg_PCA_LDA)
 
-    # DTR, LTR = load("Train.txt")
-    # DTE, LTE = load("Test.txt")
-    # _, _, scores = MGC(DTE, DTR, LTR)
-    # p = numpy.linspace(-3, 3, 21)
-    # pylab.plot(p, bayes_error_plot(p, scores, LTE, minCost=False), color='r')
-    # pylab.plot(p, bayes_error_plot(p, scores, LTE, minCost=True), color='b')
-    # pylab.ylim(0, 1.1)
-    # pylab.show()
+    DTR, LTR = load("Train.txt")
+    DTE, LTE = load("Test.txt")
+    _, _, llrs = MGC(DTE, DTR, LTR)
+    _, _, llrsn = naive_MGC(DTE, DTR, LTR)
+    _, _, llrst = tied_cov_GC(DTE, DTR, LTR)
+    _, _, llrsnt = tied_cov_naive_GC(DTE, DTR, LTR)
+
+    #Cfn and Ctp are set to 1
+    bayes_error_min_act_plot(llrs, LTE, 'MGC', 0.4)
+    bayes_error_min_act_plot(llrsn, LTE, 'MGC + Naive', 1)
+    bayes_error_min_act_plot(llrst, LTE, 'MGC + Tied', 0.4)
+    bayes_error_min_act_plot(llrsnt, LTE, 'MGC + Naive + Tied', 1)
+

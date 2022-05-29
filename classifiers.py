@@ -10,12 +10,15 @@ def MGC(DTE, DTR, LTR):
 
     SJoint = numpy.zeros((2, DTE.shape[1]))
     logSJoint = numpy.zeros((2, DTE.shape[1]))
+    dens = numpy.zeros((2, DTE.shape[1]))
     classPriors = [0.5, 0.5]
 
     for label in range(2):
         mu, C = h[label]
-        SJoint[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, C).ravel()) * classPriors[label]
+        dens[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, C).ravel())
+        SJoint[label, :] = dens[label, :] * classPriors[label]
         logSJoint[label, :] = logpdf_GAU_ND(DTE, mu, C).ravel() + numpy.log(classPriors[label])
+
 
     SMarginal = SJoint.sum(0)
     logSMarginal = scipy.special.logsumexp(logSJoint, axis=0)
@@ -23,10 +26,9 @@ def MGC(DTE, DTR, LTR):
     Post1 = SJoint / mrow(SMarginal)
     logPost = logSJoint - mrow(logSMarginal)
     Post2 = numpy.exp(logPost)
-
     LPred1 = Post1.argmax(0)
     LPred2 = Post2.argmax(0)
-    return LPred1, LPred2
+    return LPred1, LPred2, numpy.log(dens[1]/dens[0])
 
 def naive_MGC(DTE, DTR, LTR):
     h = {}
@@ -38,11 +40,13 @@ def naive_MGC(DTE, DTR, LTR):
 
     SJoint = numpy.zeros((2, DTE.shape[1]))
     logSJoint = numpy.zeros((2, DTE.shape[1]))
+    dens = numpy.zeros((2, DTE.shape[1]))
     classPriors = [0.5, 0.5]
 
     for label in range(2):
         mu, C = h[label]
-        SJoint[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, C).ravel()) * classPriors[label]
+        dens[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, C).ravel())
+        SJoint[label, :] = dens[label, :] * classPriors[label]
         logSJoint[label, :] = logpdf_GAU_ND(DTE, mu, C).ravel() + numpy.log(classPriors[label])
 
     SMarginal = SJoint.sum(0)
@@ -54,7 +58,7 @@ def naive_MGC(DTE, DTR, LTR):
 
     LPred1 = Post1.argmax(0)
     LPred2 = Post2.argmax(0)
-    return LPred1, LPred2
+    return LPred1, LPred2, numpy.log(dens[1]/dens[0])
 
 def tied_cov_GC(DTE, DTR, LTR):
     h = {}
@@ -68,12 +72,13 @@ def tied_cov_GC(DTE, DTR, LTR):
 
     SJoint = numpy.zeros((2, DTE.shape[1]))
     logSJoint = numpy.zeros((2, DTE.shape[1]))
+    dens = numpy.zeros((2, DTE.shape[1]))
     classPriors = [0.5, 0.5]
 
     for label in range(2):
         mu = h[label]
-
-        SJoint[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, Ctot).ravel()) * classPriors[label]
+        dens[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, Ctot).ravel())
+        SJoint[label, :] = dens[label, :] * classPriors[label]
         logSJoint[label, :] = logpdf_GAU_ND(DTE, mu, Ctot).ravel() + numpy.log(classPriors[label])
 
     SMarginal = SJoint.sum(0)
@@ -85,7 +90,7 @@ def tied_cov_GC(DTE, DTR, LTR):
 
     LPred1 = Post1.argmax(0)
     LPred2 = Post2.argmax(0)
-    return LPred1, LPred2
+    return LPred1, LPred2, numpy.log(dens[1]/dens[0])
 
 
 def tied_cov_naive_GC(DTE, DTR, LTR):
@@ -101,12 +106,13 @@ def tied_cov_naive_GC(DTE, DTR, LTR):
 
     SJoint = numpy.zeros((2, DTE.shape[1]))
     logSJoint = numpy.zeros((2, DTE.shape[1]))
+    dens = numpy.zeros((2, DTE.shape[1]))
     classPriors = [0.5, 0.5]
 
     for label in range(2):
         mu = h[label]
-
-        SJoint[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, Ctot).ravel()) * classPriors[label]
+        dens[label, :] = numpy.exp(logpdf_GAU_ND(DTE, mu, Ctot).ravel())
+        SJoint[label, :] = dens[label, :] * classPriors[label]
         logSJoint[label, :] = logpdf_GAU_ND(DTE, mu, Ctot).ravel() + numpy.log(classPriors[label])
 
     SMarginal = SJoint.sum(0)
@@ -118,7 +124,7 @@ def tied_cov_naive_GC(DTE, DTR, LTR):
 
     LPred1 = Post1.argmax(0)
     LPred2 = Post2.argmax(0)
-    return LPred1, LPred2
+    return LPred1, LPred2, numpy.log(dens[1]/dens[0])
 
 
 def linear_reg(DTR, LTR, DTE, l):

@@ -139,6 +139,14 @@ def bayes_error_plot(pArray, scores, labels, minCost=False):
     return numpy.array(y)
 
 
+def bayes_error_min_act_plot(D, LTE, title, ylim):
+    p = numpy.linspace(-3, 3, 21)
+    pylab.title(title)
+    pylab.plot(p, bayes_error_plot(p, D, LTE, minCost=False), color='r')
+    pylab.plot(p, bayes_error_plot(p, D, LTE, minCost=True), color='b')
+    pylab.ylim(0, ylim)
+    pylab.show()
+
 
 # to be splitted ???? llrs sta per log-likelihood ratios
 def plot_ROC(llrs, LTE):
@@ -155,11 +163,12 @@ def plot_ROC(llrs, LTE):
     pylab.plot(FPR, TPR)
     pylab.show()
 
+
 def generative_acc_err(DTE, DTR, LTE, LTR, title):
-    _, LPred2 = MGC(DTE, DTR, LTR)
-    _, LP2n = naive_MGC(DTE, DTR, LTR)
-    _, LP2t = tied_cov_GC(DTE, DTR, LTR)
-    _, LP2nt = tied_cov_naive_GC(DTE, DTR, LTR)
+    _, LPred2, llrs = MGC(DTE, DTR, LTR)
+    _, LP2n, llrsn = naive_MGC(DTE, DTR, LTR)
+    _, LP2t, llrst = tied_cov_GC(DTE, DTR, LTR)
+    _, LP2nt, llrsnt = tied_cov_naive_GC(DTE, DTR, LTR)
     # logMGC accuracy
     log_acc, log_err = test(LTE, LPred2)
     log_acc_n, log_err_n = test(LTE, LP2n)
@@ -168,8 +177,8 @@ def generative_acc_err(DTE, DTR, LTE, LTR, title):
 
     table = PrettyTable(["", "Accuracy %", "Error "])
     table.title = title
-    table.add_row(["MGC", round(log_acc*100, 3), round(log_err*100, 3)])
-    table.add_row(["Naive MGC", round(log_acc_n*100, 3), round(log_err_n*100, 3)])
-    table.add_row(["Tied GC", round(log_acc_t*100, 3), round(log_err_t*100, 3)])
-    table.add_row(["Naive Tied GC", round(log_acc_nt*100, 3), round(log_err_nt*100, 3)])
+    table.add_row(["MGC", round(log_acc * 100, 3), round(log_err * 100, 3)])
+    table.add_row(["Naive MGC", round(log_acc_n * 100, 3), round(log_err_n * 100, 3)])
+    table.add_row(["Tied GC", round(log_acc_t * 100, 3), round(log_err_t * 100, 3)])
+    table.add_row(["Naive Tied GC", round(log_acc_nt * 100, 3), round(log_err_nt * 100, 3)])
     print(table)
