@@ -148,8 +148,8 @@ def bayes_error_min_act_plot(D, LTE, title, ylim):
     pylab.show()
 
 
-# to be splitted ???? llrs sta per log-likelihood ratios
-def plot_ROC(llrs, LTE):
+
+def plot_ROC(llrs, LTE, title):
     thresholds = numpy.array(llrs)
     thresholds.sort()
     thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
@@ -157,10 +157,11 @@ def plot_ROC(llrs, LTE):
     TPR = numpy.zeros(thresholds.size)
     for idx, t in enumerate(thresholds):
         Pred = numpy.int32(llrs > t)
-        conf = confusion_matrix(Pred, LTE, 2)
+        conf = confusion_matrix_binary(Pred, LTE)
         TPR[idx] = conf[1, 1] / (conf[1, 1] + conf[0, 1])
         FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
     pylab.plot(FPR, TPR)
+    pylab.title(title)
     pylab.show()
 
 

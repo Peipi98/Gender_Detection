@@ -43,27 +43,65 @@ def empirical_covariance(D, mu):
     C = 1 / n * numpy.dot(DC, numpy.transpose(DC))
     return C
 
+def plot_PCA_result(P, D, L, m, filename, LDA_flag):
+    DP = numpy.dot(P.T, D)
+    hlabels = {
+        0: "male",
+        1: "female"
+    }
+    if m == 2:
+        for i in range(2):
+            # I have to invert the sign of the second eigenvector to flip the image
+            plt.scatter(DP[:, L == i][0], -DP[:, L == i][1], label=hlabels.get(i), s=10)
+            plt.legend()
+            plt.tight_layout()
+        if LDA_flag is True:
+            DTR = numpy.dot(P.T, -D)
+            W = LDA(DTR, L, 1) * 100
 
-def PCA(D, L, m=2):
+            plt.quiver(W[0] * -5, W[1] * -5, W[0] * 40, W[1] * 40, units='xy', scale=1, color='g')
+            plt.xlim(-65, 65)
+            plt.ylim(-25, 25)
+        plt.savefig('./images/' + filename + '.png')
+        plt.show()
+    if m == 3:
+        fig = plt.figure(figsize=(6, 6))
+        ax = fig.add_subplot(projection='3d')
+        for i in range(2):
+            x_vals = DP[:, L == i][0]
+            y_vals = -DP[:, L == i][1]
+            z_vals = DP[:, L == i][2]
+
+            # I have to invert the sign of the second eigenvector to flip the image
+            ax.scatter(x_vals, y_vals, z_vals, label=hlabels.get(i), s=10)
+            plt.legend()
+            plt.tight_layout()
+
+        if LDA_flag is True:
+            DTR = numpy.dot(P.T, -D)
+            W = LDA(DTR, L, 1) * 100
+            W = W.ravel()
+            x = numpy.array([W[0]*-3, W[0]*3])
+            y = numpy.array([W[1]*-3, W[1]*3])
+            z = numpy.array([W[2]*-3, W[2]*3])
+            ax.plot3D(x, y, z)
+            ax.view_init(270, 270)
+
+
+        plt.savefig('./images/' + filename + '.png')
+        plt.show()
+
+def PCA(D, L, m=2, filename=None, LDA_flag=False):
     n = numpy.shape(D)[1]
     mu = D.mean(1)
     DC = D - mcol(mu)
     C = 1 / n * numpy.dot(DC, numpy.transpose(DC))
     USVD, s, _ = numpy.linalg.svd(C)
     P = USVD[:, 0:m]
-    DP = numpy.dot(P.T, D)
-    hlabels = {
-        0: "male",
-        1: "female"
-    }
 
-    if m == 2:
-        for i in range(2):
-            # I have to invert the sign of the second eigenvector to flip the image
-            plt.scatter(DP[:, L == i][0], -DP[:, L == i][1], label=hlabels.get(i))
-            plt.legend()
-            plt.tight_layout()
-        plt.show()
+    if filename is not None:
+        plot_PCA_result(P, D, L, m, filename, LDA_flag)
+
     return P
 
 def LDA(D, L, d=1, m=2):
