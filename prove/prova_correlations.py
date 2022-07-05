@@ -44,8 +44,7 @@ def compute_correlation(X,Y):
     
 if __name__ == '__main__':
     DTR, LTR = load("../Train.txt")
-    DTE, LTE = load("../Test.txt")
-    
+    DTR = gaussianize_features(DTR, DTR)
     corr = np.zeros((12,12))
     
     D = DTR[[0,1], :]
@@ -73,7 +72,8 @@ if __name__ == '__main__':
     #sns.heatmap(prova_corr)
     sns.set()
     heatmap = sns.heatmap(np.abs(corr),linewidth=0.2, cmap="Greys", square=True, cbar=False)
-    
+    fig = heatmap.get_figure()
+    fig.savefig("../images/heatmap_no_gauss.png")
             
     #corr = np.hstack(corr)
     #corr = np.reshape(corr, (12,12))
