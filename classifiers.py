@@ -154,3 +154,43 @@ def generative_acc_err(DTE, DTR, LTE, LTR, title):
     table.add_row(["Tied GC", round(log_acc_t*100, 3), round(log_err_t*100, 3)])
     table.add_row(["Naive Tied GC", round(log_acc_nt*100, 3), round(log_err_nt*100, 3)])
     print(table)
+
+def score_SVM_linear(DTR, LTR, DTE, LTE, _K, _C):
+    for K in _K:
+        for C in _C:
+            wStar, primal, dual, gap = train_SVM_linear(DTR, LTR, C=C, K=K)
+            DTEEXT = numpy.vstack([DTE, K*numpy.ones((1, DTE.shape[1]))])
+            score = numpy.dot(wStar.T, DTEEXT)
+            errorRate = (1 - numpy.sum( (score > 0) == LTE) / len(LTE))*100
+            print("K = %d, C = %.1f, primal loss = %e, dual loss = %e, duality gap = %e, errorRate = %.1f" % (K, C, primal, dual, gap, errorRate))
+        
+def score_SVM_poly(DTR, LTR, DTE, LTE, _K, _d):
+    for constant in [0,1]:
+        for degree in _d:
+            for K in _K:
+                
+                aStar, loss = train_SVM_polynomial(DTR, LTR, C=1.0, constant=constant, degree=degree, K=K)
+                
+                
+                kernel = (numpy.dot(DTR.T, DTE)+constant)**degree + K*K
+                score = numpy.sum( numpy.dot(aStar * mrow(Z), kernel), axis=0 )
+                
+                errorRate = (1 - numpy.sum( (score > 0) == LTE) / len(LTE))*100
+                print("K = %d, constant = %d, loss = %e, error =  %.1f" % (K, constant, loss, errorRate))
+
+def score_SVM_RBF(DTR, LTR, DTE, LTE, _K, _gamma):
+    for K in _K:
+        for gamma in _gamma:
+            aStar, loss = train_SVM_RBF(DTR, LTR, C=1.0, K=K, gamma=gamma)
+            
+            kern = numpy.zeros((DTR.shape[1], DTE.shape[1]))
+            for i in range(DTR.shape[1]):
+                for j in range(DTE.shape[1]):
+                    kern[i,j] = numpy.exp(-gamma*(numpy.linalg.norm(DTR[:,i]-DTE[:,j])**2))+ K*K
+            
+            score = numpy.sum( numpy.dot(aStar * mrow(Z), kern), axis=0 )
+            
+            errorRate = (1 - numpy.sum( (score > 0) == LTE) / len(LTE))*100
+            print("K = %d, gamma = %.1f, loss = %e, error =  %.1f" % (K, gamma, loss, errorRate))
+
+        
