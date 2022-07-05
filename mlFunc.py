@@ -126,6 +126,15 @@ def LDA(D, L, d=1, m=2):
     W = U[:, ::-1][:, 0:d]
     return W
 
+def gaussianize_features(DTR, TO_GAUSS):
+    P = []
+
+    for dIdx in range(DTR.shape[0]):
+        DT = mcol(TO_GAUSS[dIdx, :])
+        X = DTR[dIdx, :] < DT
+        R = (X.sum(1) + 1) / (DTR.shape[1] + 2)
+        P.append(scipy.stats.norm.ppf(R))
+    return numpy.vstack(P)
 
 def plot_histogram(D, L, labels, title):
     matplotlib.pyplot.figure()
