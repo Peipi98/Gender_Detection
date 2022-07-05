@@ -1,4 +1,6 @@
 import sys
+
+import matplotlib.pyplot
 import seaborn as sns
 sys.path.append("./")
 from mlFunc import *
@@ -37,21 +39,22 @@ def plot_correlations(DTR, title):
 
 
 def plot_features_histograms(DTR, LTR, _title):
+    matplotlib.rcParams.update(matplotlib.rcParamsDefault)
     for i in range(12):
         labels = ["male", "female"]
         title = _title + str(i)
-        matplotlib.pyplot.figure()
-        matplotlib.pyplot.title(title)
+        plt.figure()
+        plt.title(title)
 
         y = DTR[:, LTR == 0][i]
-        matplotlib.pyplot.hist(y, bins=60, density=True, alpha=0.4, linewidth=1.0, color='red', edgecolor='black',
+        plt.hist(y, bins=60, density=True, alpha=0.4, linewidth=1.0, color='red', edgecolor='black',
                                label=labels[0])
         y = DTR[:, LTR == 1][i]
-        matplotlib.pyplot.hist(y, bins=60, density=True, alpha=0.4, linewidth=1.0, color='blue', edgecolor='black',
+        plt.hist(y, bins=60, density=True, alpha=0.4, linewidth=1.0, color='blue', edgecolor='black',
                                label=labels[1])
-        matplotlib.pyplot.legend()
+        plt.legend()
         plt.savefig('./images/hist_' + title + '.png')
-        matplotlib.pyplot.show()
+        plt.show()
 
 
 def plot_features():
