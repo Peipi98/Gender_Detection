@@ -19,9 +19,9 @@ if __name__ == '__main__':
         matplotlib.pyplot.title(title)
         
         y = DTR[:, LTR == 0][i]
-        matplotlib.pyplot.hist(y, bins=60, density=True, alpha=0.4, label=labels[0])
+        matplotlib.pyplot.hist(y, bins=60, density=True, alpha=0.4, linewidth = 1.0, color = 'red', edgecolor = 'black', label=labels[0])
         y = DTR[:, LTR == 1][i]
-        matplotlib.pyplot.hist(y, bins=60, density=True, alpha=0.4, label=labels[1])
+        matplotlib.pyplot.hist(y, bins=60, density=True, alpha=0.4, linewidth = 1.0, color = 'blue', edgecolor = 'black', label=labels[1])
         matplotlib.pyplot.legend()
         plt.savefig('../images/hist_' + title + '.png')
         matplotlib.pyplot.show()
