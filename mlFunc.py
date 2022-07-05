@@ -51,7 +51,7 @@ def plot_PCA_result(P, D, L, m, filename, LDA_flag):
     }
     if m == 2:
         for i in range(2):
-            # I have to invert the sign of the second eigenvector to flip the images
+            # I have to invert the sign of the second eigenvector to flip the image
             plt.scatter(DP[:, L == i][0], -DP[:, L == i][1], label=hlabels.get(i), s=10)
             plt.legend()
             plt.tight_layout()
@@ -72,7 +72,7 @@ def plot_PCA_result(P, D, L, m, filename, LDA_flag):
             y_vals = -DP[:, L == i][1]
             z_vals = DP[:, L == i][2]
 
-            # I have to invert the sign of the second eigenvector to flip the images
+            # I have to invert the sign of the second eigenvector to flip the image
             ax.scatter(x_vals, y_vals, z_vals, label=hlabels.get(i), s=10)
             plt.legend()
             plt.tight_layout()
