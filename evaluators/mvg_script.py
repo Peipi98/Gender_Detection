@@ -44,10 +44,10 @@ def evaluation(title, pi, MVG_res, MVG_naive, MVG_t, MVG_nt, MVG_labels):
 
 
     #Cfn and Ctp are set to 1
-    bayes_error_min_act_plot(MVG_res, MVG_labels, 'MVG', 0.4)
-    bayes_error_min_act_plot(MVG_naive, MVG_labels, 'MVG + Naive', 1)
-    bayes_error_min_act_plot(MVG_t, MVG_labels, 'MVG + Tied', 0.4)
-    bayes_error_min_act_plot(MVG_nt, MVG_labels, 'MVG + Naive + Tied', 1)
+    # bayes_error_min_act_plot(MVG_res, MVG_labels, 'MVG', 0.4)
+    # bayes_error_min_act_plot(MVG_naive, MVG_labels, 'MVG + Naive', 1)
+    # bayes_error_min_act_plot(MVG_t, MVG_labels, 'MVG + Tied', 0.4)
+    # bayes_error_min_act_plot(MVG_nt, MVG_labels, 'MVG + Naive + Tied', 1)
     
     t = PrettyTable(["Type", "minDCF"])
     t.title = title

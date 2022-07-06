@@ -7,8 +7,7 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_LR(l):
-    DTR, LTR = load("./Train.txt")
+def kfold_LR(DTR, LTR, l):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -79,6 +78,6 @@ def kfold_LR(l):
     print(t)
 
 
-def evaluation_LR():
+def evaluation_LR(DTR, LTR):
     for l in [1e-6, 1e-4, 1e-2, 1.0]:
-        kfold_LR(l)
+        kfold_LR(DTR, LTR, l)
