@@ -57,9 +57,7 @@ def evaluation(title, pi, MVG_res, MVG_naive, MVG_t, MVG_nt, MVG_labels):
     t.add_row(["MVG naive + tied", round(llrsnt_tot, 3)])
     print(t)
 
-if __name__ == '__main__':
-    DTR, LTR = load("../Train.txt")
-    DTE, LTE = load("../Test.txt")
+def kfold_MVG(DTR, LTR, DTE, LTE):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -74,6 +72,11 @@ if __name__ == '__main__':
     PCA_mvg_naive = []
     PCA_mvg_t = []
     PCA_mvg_nt = []
+    
+    PCA2_mvg = []
+    PCA2_mvg_naive = []
+    PCA2_mvg_t = []
+    PCA2_mvg_nt = []
     
     for i in range(k):
         D = []
@@ -111,11 +114,11 @@ if __name__ == '__main__':
             MVG_t, 
             MVG_nt, 
             MVG_labels)
+        
+        # PCA m=10
         P = PCA(D, L, m = 10)
         DTR_PCA = numpy.dot(P.T, D)
         DTE_PCA = numpy.dot(P.T, Dte)
-        
-        # PCA m=10
         
         PCA_mvg, PCA_mvg_naive, PCA_mvg_t, PCA_mvg_nt = compute_MVG_score(
             DTE_PCA, 
@@ -126,6 +129,25 @@ if __name__ == '__main__':
             PCA_mvg_t, 
             PCA_mvg_nt, 
             MVG_labels)    
+        
+        # PCA m=9
+        P = PCA(D, L, m = 10)
+        DTR_PCA = numpy.dot(P.T, D)
+        DTE_PCA = numpy.dot(P.T, Dte)
+        
+        PCA2_mvg, PCA2_mvg_naive, PCA_2mvg_t, PCA2_mvg_nt = compute_MVG_score(
+            DTE_PCA, 
+            DTR_PCA, 
+            L, 
+            PCA2_mvg, 
+            PCA2_mvg_naive, 
+            PCA2_mvg_t, 
+            PCA2_mvg_nt, 
+            MVG_labels) 
+        
+        
+    
+    # RAW DATA
     
     # π = 0.5 (our application prior)
     evaluation("minDCF: π=0.5", 0.5, MVG_res, MVG_naive, MVG_t, MVG_nt, MVG_labels)
@@ -139,3 +161,57 @@ if __name__ == '__main__':
 
     # π = 0.9
     evaluation("minDCF: π=0.1", 0.9, MVG_res, MVG_naive, MVG_t, MVG_nt, MVG_labels)
+    
+    
+    # PCA m=10
+    # π = 0.5 (our application prior)
+    evaluation("minDCF: π=0.5 | PCA m=10", 0.5, PCA_mvg, 
+    PCA_mvg_naive, 
+    PCA_mvg_t, 
+    PCA_mvg_nt, 
+    MVG_labels)
+    
+    ###############################
+    
+    # π = 0.1
+    evaluation("minDCF: π=0.1 | PCA m=10", 0.1, PCA_mvg, 
+    PCA_mvg_naive, 
+    PCA_mvg_t, 
+    PCA_mvg_nt, 
+    MVG_labels)
+    
+    ###############################
+
+    # π = 0.9
+    evaluation("minDCF: π=0.9 | PCA m=10", 0.9,PCA_mvg, 
+    PCA_mvg_naive, 
+    PCA_mvg_t, 
+    PCA_mvg_nt, 
+    MVG_labels)
+    
+    
+    # PCA m=9
+    # π = 0.5 (our application prior)
+    evaluation("minDCF: π=0.5 | PCA m=9", 0.5, PCA2_mvg, 
+    PCA2_mvg_naive, 
+    PCA2_mvg_t, 
+    PCA2_mvg_nt, 
+    MVG_labels)
+    
+    ###############################
+    
+    # π = 0.1
+    evaluation("minDCF: π=0.1 | PCA m=9", 0.1, PCA2_mvg, 
+    PCA2_mvg_naive, 
+    PCA2_mvg_t, 
+    PCA2_mvg_nt, 
+    MVG_labels)
+    
+    ###############################
+
+    # π = 0.9
+    evaluation("minDCF: π=0.9 | PCA m=9", 0.9,PCA2_mvg, 
+    PCA2_mvg_naive, 
+    PCA2_mvg_t, 
+    PCA2_mvg_nt, 
+    MVG_labels)

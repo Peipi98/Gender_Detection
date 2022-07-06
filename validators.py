@@ -145,7 +145,7 @@ def bayes_error_min_act_plot(D, LTE, title, ylim):
     pylab.plot(p, bayes_error_plot(p, D, LTE, minCost=False), color='r')
     pylab.plot(p, bayes_error_plot(p, D, LTE, minCost=True), color='b')
     pylab.ylim(0, ylim)
-    pylab.savefig('../images/DCF_' + title + '.png')
+    pylab.savefig('./images/DCF_' + title + '.png')
     pylab.show()
 
 
@@ -163,7 +163,7 @@ def plot_ROC(llrs, LTE, title):
         FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
     pylab.plot(FPR, TPR)
     pylab.title(title)
-    pylab.savefig('../images/ROC_' + title + '.png')
+    pylab.savefig('./images/ROC_' + title + '.png')
     pylab.show()
 
 
