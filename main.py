@@ -17,7 +17,10 @@ if __name__ == "__main__":
     
     DTR, LTR = load("Train.txt")
     DTE, LTE = load("Test.txt")
-    #kfold_MVG(DTR, LTR, DTE, LTE)
+    print("############    MVG - no gaussianization    ##############")
+
+    kfold_MVG(DTR, LTR, DTE, LTE)
+    print("############    Logistic Regression - no gaussianization    ##############")
     evaluation_LR()
 
 
