@@ -44,6 +44,7 @@ def empirical_covariance(D, mu):
     return C
 
 def plot_PCA_result(P, D, L, m, filename, LDA_flag):
+    plt.figure()
     DP = numpy.dot(P.T, D)
     hlabels = {
         0: "male",

@@ -2,6 +2,7 @@ import sys
 
 import matplotlib.pyplot
 import seaborn as sns
+
 sys.path.append("./")
 from mlFunc import *
 
@@ -48,20 +49,35 @@ def plot_features_histograms(DTR, LTR, _title):
 
         y = DTR[:, LTR == 0][i]
         plt.hist(y, bins=60, density=True, alpha=0.4, linewidth=1.0, color='red', edgecolor='black',
-                               label=labels[0])
+                 label=labels[0])
         y = DTR[:, LTR == 1][i]
         plt.hist(y, bins=60, density=True, alpha=0.4, linewidth=1.0, color='blue', edgecolor='black',
-                               label=labels[1])
+                 label=labels[1])
         plt.legend()
         plt.savefig('./images/hist_' + title + '.png')
         plt.show()
 
 
-def plot_features():
-    DTR, LTR = load("./Train.txt")
+def plot_PCA(DTR, LTR, m, appendToTitle=''):
+    PCA(DTR, LTR, m, appendToTitle + 'PCA_m=' + str(m))
 
+
+def plot_PCA_LDA(DTR, LTR, m, appendToTitle=''):
+    P = PCA(DTR, LTR, m, filename=appendToTitle + 'PCA_m=' + str(m) + ' + LDA', LDA_flag=True)
+    DTR = numpy.dot(P.T, -DTR)
+
+    W = LDA(DTR, LTR, 1)
+    DTR = numpy.dot(W.T, DTR)
+    plot_histogram(DTR, LTR, ['male', 'female'], 'PCA_m=' + str(m) + ' + LDA')
+
+
+def plot_features(DTR, LTR, appendToTitle):
     plot_features_histograms(DTR, LTR, "feature_")
-    plot_correlations(DTR, "heatmap_no_gauss")
-    DTR = gaussianize_features(DTR, DTR)
-    plot_features_histograms(DTR, LTR, "feature_gaussianized")
-    plot_correlations(DTR, "heatmap_gaussianized")
+    plot_correlations(DTR, "heatmap_" + appendToTitle)
+    matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+
+    plot_PCA(DTR, LTR, 2, appendToTitle)
+    plot_PCA(DTR, LTR, 3, appendToTitle)
+
+    plot_PCA_LDA(DTR, LTR, 2, appendToTitle)
+    plot_PCA_LDA(DTR, LTR, 3, appendToTitle)
