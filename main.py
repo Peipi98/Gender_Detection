@@ -1,12 +1,10 @@
-from mlFunc import *
-from classifiers import *
+from evaluators.kfold_lr import evaluation_LR
+from evaluators.mvg_script import kfold_MVG
 from plot_features import plot_features
 from validators import *
 import sys
 sys.path.append("./evaluators")
-from mvg_script import *
-from kfold_lr import *
-from prettytable import PrettyTable
+
 
 if __name__ == "__main__":
     DTR, LTR = load("Train.txt")
