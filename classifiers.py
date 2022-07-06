@@ -1,6 +1,7 @@
 import numpy
 from mlFunc import *
 
+
 def MVG(DTE, DTR, LTR):
     h = {}
 
@@ -19,7 +20,6 @@ def MVG(DTE, DTR, LTR):
         SJoint[label, :] = dens[label, :] * classPriors[label]
         logSJoint[label, :] = logpdf_GAU_ND(DTE, mu, C).ravel() + numpy.log(classPriors[label])
 
-
     SMarginal = SJoint.sum(0)
     logSMarginal = scipy.special.logsumexp(logSJoint, axis=0)
 
@@ -28,7 +28,8 @@ def MVG(DTE, DTR, LTR):
     Post2 = numpy.exp(logPost)
     LPred1 = Post1.argmax(0)
     LPred2 = Post2.argmax(0)
-    return LPred1, LPred2, numpy.log(dens[1]/dens[0])
+    return LPred1, LPred2, numpy.log(dens[1] / dens[0])
+
 
 def naive_MVG(DTE, DTR, LTR):
     h = {}
@@ -58,7 +59,8 @@ def naive_MVG(DTE, DTR, LTR):
 
     LPred1 = Post1.argmax(0)
     LPred2 = Post2.argmax(0)
-    return LPred1, LPred2, numpy.log(dens[1]/dens[0])
+    return LPred1, LPred2, numpy.log(dens[1] / dens[0])
+
 
 def tied_cov_GC(DTE, DTR, LTR):
     h = {}
@@ -90,7 +92,7 @@ def tied_cov_GC(DTE, DTR, LTR):
 
     LPred1 = Post1.argmax(0)
     LPred2 = Post2.argmax(0)
-    return LPred1, LPred2, numpy.log(dens[1]/dens[0])
+    return LPred1, LPred2, numpy.log(dens[1] / dens[0])
 
 
 def tied_cov_naive_GC(DTE, DTR, LTR):
@@ -124,17 +126,27 @@ def tied_cov_naive_GC(DTE, DTR, LTR):
 
     LPred1 = Post1.argmax(0)
     LPred2 = Post2.argmax(0)
-    return LPred1, LPred2, numpy.log(dens[1]/dens[0])
+    return LPred1, LPred2, numpy.log(dens[1] / dens[0])
 
 
 def linear_reg(DTR, LTR, DTE, l):
     logreg_obj = logreg_obj_wrap(DTR, LTR, l)
-    _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0]+1), approx_grad=True)
+    _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0] + 1), approx_grad=True)
     _w = _v[0:DTR.shape[0]]
     _b = _v[-1]
     STE = numpy.dot(_w.T, DTE) + _b
     LP = STE > 0
     return LP, _J
+
+
+def linear_reg_score(DTR, LTR, DTE, l):
+    logreg_obj = logreg_obj_wrap(numpy.array(DTR), LTR, l)
+    _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0] + 1), approx_grad=True)
+    _w = _v[0:DTR.shape[0]]
+    _b = _v[-1]
+    STE = numpy.dot(_w.T, DTE) + _b
+    return STE
+
 
 def generative_acc_err(DTE, DTR, LTE, LTR, title):
     _, LPred2 = MVG(DTE, DTR, LTR)
@@ -149,48 +161,48 @@ def generative_acc_err(DTE, DTR, LTE, LTR, title):
 
     table = PrettyTable(["", "Accuracy %", "Error "])
     table.title = title
-    table.add_row(["MVG", round(log_acc*100, 3), round(log_err*100, 3)])
-    table.add_row(["Naive MVG", round(log_acc_n*100, 3), round(log_err_n*100, 3)])
-    table.add_row(["Tied GC", round(log_acc_t*100, 3), round(log_err_t*100, 3)])
-    table.add_row(["Naive Tied GC", round(log_acc_nt*100, 3), round(log_err_nt*100, 3)])
+    table.add_row(["MVG", round(log_acc * 100, 3), round(log_err * 100, 3)])
+    table.add_row(["Naive MVG", round(log_acc_n * 100, 3), round(log_err_n * 100, 3)])
+    table.add_row(["Tied GC", round(log_acc_t * 100, 3), round(log_err_t * 100, 3)])
+    table.add_row(["Naive Tied GC", round(log_acc_nt * 100, 3), round(log_err_nt * 100, 3)])
     print(table)
+
 
 def score_SVM_linear(DTR, LTR, DTE, LTE, _K, _C):
     for K in _K:
         for C in _C:
             wStar, primal, dual, gap = train_SVM_linear(DTR, LTR, C=C, K=K)
-            DTEEXT = numpy.vstack([DTE, K*numpy.ones((1, DTE.shape[1]))])
+            DTEEXT = numpy.vstack([DTE, K * numpy.ones((1, DTE.shape[1]))])
             score = numpy.dot(wStar.T, DTEEXT)
-            errorRate = (1 - numpy.sum( (score > 0) == LTE) / len(LTE))*100
-            print("K = %d, C = %.1f, primal loss = %e, dual loss = %e, duality gap = %e, errorRate = %.1f" % (K, C, primal, dual, gap, errorRate))
-        
+            errorRate = (1 - numpy.sum((score > 0) == LTE) / len(LTE)) * 100
+            print("K = %d, C = %.1f, primal loss = %e, dual loss = %e, duality gap = %e, errorRate = %.1f" % (
+            K, C, primal, dual, gap, errorRate))
+
+
 def score_SVM_poly(DTR, LTR, DTE, LTE, _K, _d):
-    for constant in [0,1]:
+    for constant in [0, 1]:
         for degree in _d:
             for K in _K:
-                
                 aStar, loss = train_SVM_polynomial(DTR, LTR, C=1.0, constant=constant, degree=degree, K=K)
-                
-                
-                kernel = (numpy.dot(DTR.T, DTE)+constant)**degree + K*K
-                score = numpy.sum( numpy.dot(aStar * mrow(Z), kernel), axis=0 )
-                
-                errorRate = (1 - numpy.sum( (score > 0) == LTE) / len(LTE))*100
+
+                kernel = (numpy.dot(DTR.T, DTE) + constant) ** degree + K * K
+                score = numpy.sum(numpy.dot(aStar * mrow(Z), kernel), axis=0)
+
+                errorRate = (1 - numpy.sum((score > 0) == LTE) / len(LTE)) * 100
                 print("K = %d, constant = %d, loss = %e, error =  %.1f" % (K, constant, loss, errorRate))
+
 
 def score_SVM_RBF(DTR, LTR, DTE, LTE, _K, _gamma):
     for K in _K:
         for gamma in _gamma:
             aStar, loss = train_SVM_RBF(DTR, LTR, C=1.0, K=K, gamma=gamma)
-            
+
             kern = numpy.zeros((DTR.shape[1], DTE.shape[1]))
             for i in range(DTR.shape[1]):
                 for j in range(DTE.shape[1]):
-                    kern[i,j] = numpy.exp(-gamma*(numpy.linalg.norm(DTR[:,i]-DTE[:,j])**2))+ K*K
-            
-            score = numpy.sum( numpy.dot(aStar * mrow(Z), kern), axis=0 )
-            
-            errorRate = (1 - numpy.sum( (score > 0) == LTE) / len(LTE))*100
-            print("K = %d, gamma = %.1f, loss = %e, error =  %.1f" % (K, gamma, loss, errorRate))
+                    kern[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(DTR[:, i] - DTE[:, j]) ** 2)) + K * K
 
-        
+            score = numpy.sum(numpy.dot(aStar * mrow(Z), kern), axis=0)
+
+            errorRate = (1 - numpy.sum((score > 0) == LTE) / len(LTE)) * 100
+            print("K = %d, gamma = %.1f, loss = %e, error =  %.1f" % (K, gamma, loss, errorRate))

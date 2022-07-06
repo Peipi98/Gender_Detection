@@ -61,7 +61,6 @@ if __name__ == '__main__':
     DTR, LTR = load("../Train.txt")
     DTE, LTE = load("../Test.txt")
     k = 5
-    print(DTR.mean(0))
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
     
