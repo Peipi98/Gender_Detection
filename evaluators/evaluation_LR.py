@@ -7,7 +7,7 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_LR(DTR, LTR, l):
+def kfold_LR(DTR, LTR, l, appendToTitle):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -45,10 +45,10 @@ def kfold_LR(DTR, LTR, l):
     scores_append = np.hstack(scores_append)
     scores_tot = compute_min_DCF(scores_append, LR_labels, 0.5, 1, 1)
 
-    plot_ROC(scores_append, LR_labels, 'LR, lambda=' + str(l))
+    plot_ROC(scores_append, LR_labels, appendToTitle + 'LR, lambda=' + str(l))
 
     # Cfn and Ctp are set to 1
-    bayes_error_min_act_plot(scores_append, LR_labels, 'LR, lambda=' + str(l), 0.4)
+    bayes_error_min_act_plot(scores_append, LR_labels, appendToTitle + 'LR, lambda=' + str(l), 0.4)
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.5"
@@ -78,6 +78,6 @@ def kfold_LR(DTR, LTR, l):
     print(t)
 
 
-def evaluation_LR(DTR, LTR):
-    for l in [1e-6, 1e-4, 1e-2, 1.0]:
-        kfold_LR(DTR, LTR, l)
+def evaluation_LR(DTR, LTR, L, appendToTitle):
+    for l in L:
+        kfold_LR(DTR, LTR, l, appendToTitle)
