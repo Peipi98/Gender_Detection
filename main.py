@@ -12,18 +12,25 @@ if __name__ == "__main__":
     DTR, LTR = load("Train.txt")
     DTE, LTE = load("Test.txt")
     plot_features(DTR, LTR, 'RAW_')
+    
+    # RAW data
+    
+    print("############    MVG - no gaussianization    ##############")
+    kfold_MVG(DTR, LTR, DTE, LTE)
+    
+    print("############    Logistic Regression - no gaussianization    ##############")
+    evaluation_LR(DTR, LTR)
+    
+    # Gaussianization
+    
     DTR = gaussianize_features(DTR, DTR)
     plot_features(DTR, LTR, 'GAUSSIANIZED_')
-    
-    DTR, LTR = load("Train.txt")
-    DTE, LTE = load("Test.txt")
-    print("############    MVG - no gaussianization    ##############")
 
+    print("############    MVG - gaussianization    ##############")
     kfold_MVG(DTR, LTR, DTE, LTE)
-    print("############    Logistic Regression - no gaussianization    ##############")
-    evaluation_LR()
-
-
+    
+    print("############    Logistic Regression - gaussianization    ##############")
+    evaluation_LR(DTR, LTR)
 
 
 
