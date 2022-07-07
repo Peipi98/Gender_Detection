@@ -138,6 +138,12 @@ def bayes_error_plot(pArray, scores, labels, minCost=False):
             y.append(compute_act_DCF(scores, labels, pi, 1, 1))
     return numpy.array(y)
 
+def bayes_error_plot_2(pi, scores, labels, minCost=False):
+    y = []
+#    pi = 1.0 / (1.0 + numpy.exp(-pi)) #todo
+    y.append(compute_min_DCF(scores, labels, pi, 1, 1))
+    return numpy.array(y)
+
 
 def bayes_error_min_act_plot(D, LTE, title, ylim):
     p = numpy.linspace(-3, 3, 21)
@@ -148,6 +154,19 @@ def bayes_error_min_act_plot(D, LTE, title, ylim):
     pylab.savefig('./images/DCF_' + title + '.png')
     pylab.show()
 
+def plot_DCF(x, y, xlabel, name, base=10) :
+    plt.figure()
+    plt.plot(x, y[0], label= 'min DCF prior=0.5', color='b')
+    plt.plot(x, y[1], label= 'min DCF prior=0.9', color='g')
+    plt.plot(x, y[2], label= 'min DCF prior=0.1', color='r')
+    plt.xlim([min(x), max(x)])
+    plt.xscale("log", base=base)
+    plt.legend([ "min DCF prior=0.5", "min DCF prior=0.9", "min DCF prior=0.1"])
+    plt.xlabel(xlabel)
+    plt.ylabel("min DCF")
+    plt.show()
+    #plt.savefig(name)
+    return
 
 
 def plot_ROC(llrs, LTE, title):
