@@ -33,6 +33,7 @@ def load(fname):
             pass
     return numpy.hstack(DList), numpy.array(labelsList, dtype=numpy.int32)
 
+
 def emprical_mean(D):
     return mcol(D.mean(1))
 
@@ -42,6 +43,7 @@ def empirical_covariance(D, mu):
     DC = D - mcol(mu)
     C = 1 / n * numpy.dot(DC, numpy.transpose(DC))
     return C
+
 
 def plot_PCA_result(P, D, L, m, filename, LDA_flag):
     plt.figure()
@@ -82,15 +84,15 @@ def plot_PCA_result(P, D, L, m, filename, LDA_flag):
             DTR = numpy.dot(P.T, -D)
             W = LDA(DTR, L, 1) * 100
             W = W.ravel()
-            x = numpy.array([W[0]*-3, W[0]*3])
-            y = numpy.array([W[1]*-3, W[1]*3])
-            z = numpy.array([W[2]*-3, W[2]*3])
+            x = numpy.array([W[0] * -3, W[0] * 3])
+            y = numpy.array([W[1] * -3, W[1] * 3])
+            z = numpy.array([W[2] * -3, W[2] * 3])
             ax.plot3D(x, y, z)
             ax.view_init(270, 270)
 
-
         plt.savefig('./images/' + filename + '.png')
         plt.show()
+
 
 def PCA(D, L, m=2, filename=None, LDA_flag=False):
     n = numpy.shape(D)[1]
@@ -104,6 +106,7 @@ def PCA(D, L, m=2, filename=None, LDA_flag=False):
         plot_PCA_result(P, D, L, m, filename, LDA_flag)
 
     return P
+
 
 def LDA(D, L, d=1, m=2):
     N = numpy.shape(D)[1]
@@ -127,6 +130,7 @@ def LDA(D, L, d=1, m=2):
     W = U[:, ::-1][:, 0:d]
     return W
 
+
 def gaussianize_features(DTR, TO_GAUSS):
     P = []
 
@@ -136,6 +140,7 @@ def gaussianize_features(DTR, TO_GAUSS):
         R = (X.sum(1) + 1) / (DTR.shape[1] + 2)
         P.append(scipy.stats.norm.ppf(R))
     return numpy.vstack(P)
+
 
 def plot_histogram(D, L, labels, title):
     matplotlib.pyplot.figure()
@@ -207,10 +212,11 @@ def plot(D, L):
     plt.figure()
     for i in range(2):
         plt.legend(hLabels)
-        plt.scatter(D[:, L==i][0],D[:, L==i][1], label = hLabels.get(i) )
+        plt.scatter(D[:, L == i][0], D[:, L == i][1], label=hLabels.get(i))
     plt.show()
-    
-def calculate_lbgf(H,DTR, C):
+
+
+def calculate_lbgf(H, DTR, C):
     def JDual(alpha):
         Ha = numpy.dot(H, mcol(alpha))
         aHa = numpy.dot(mrow(alpha), Ha)
@@ -224,37 +230,39 @@ def calculate_lbgf(H,DTR, C):
     alphaStar, _x, _y = scipy.optimize.fmin_l_bfgs_b(
         LDual,
         numpy.zeros(DTR.shape[1]),
-        bounds = [(0, C)]*DTR.shape[1],
-        factr = 1.0,
-        maxiter = 100000,
+        bounds=[(0, C)] * DTR.shape[1],
+        factr=1.0,
+        maxiter=100000,
         maxfun=100000,
     )
 
     return alphaStar, JDual, LDual
 
+
 def train_SVM_linear(DTR, LTR, C, K=1):
-    DTREXT = numpy.vstack([DTR, K*numpy.ones((1, DTR.shape[1]))])
+    DTREXT = numpy.vstack([DTR, K * numpy.ones((1, DTR.shape[1]))])
     Z = numpy.zeros(LTR.shape)
     Z[LTR == 1] = 1
     Z[LTR == 0] = -1
 
     H = numpy.dot(DTREXT.T, DTREXT)
-    #Dist = mcol((DTR**2).sum(0)) + mrow((DTR**2).sum(0)) - 2*numpy.dot(DTR.T, DTR)
-    #H = numpy.exp(-Dist)
+    # Dist = mcol((DTR**2).sum(0)) + mrow((DTR**2).sum(0)) - 2*numpy.dot(DTR.T, DTR)
+    # H = numpy.exp(-Dist)
     H = mcol(Z) * mrow(Z) * H
 
     def JPrimal(w):
         S = numpy.dot(mrow(w), DTREXT)
-        loss = numpy.maximum(numpy.zeros(S.shape), 1-Z*S).sum()
-        return 0.5 * numpy.linalg.norm(w)**2 + C * loss
-    
+        loss = numpy.maximum(numpy.zeros(S.shape), 1 - Z * S).sum()
+        return 0.5 * numpy.linalg.norm(w) ** 2 + C * loss
+
     alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
-    #print(_x),
-    #print(_y)
+    # print(_x),
+    # print(_y)
 
     wStar = numpy.dot(DTREXT, mcol(alphaStar) * mcol(Z))
-    #print (JPrimal(wStar))
-    #print (JDual(alphaStar)[0])
+
+    # print (JPrimal(wStar))
+    # print (JDual(alphaStar)[0])
 
     def get_duality_gap(alpha, w):
         Ha = numpy.dot(H, mcol(alpha))
@@ -264,21 +272,22 @@ def train_SVM_linear(DTR, LTR, C, K=1):
     return wStar, JPrimal(wStar), JDual(alphaStar)[0], get_duality_gap(alphaStar, wStar);
 
 
-def train_SVM_polynomial(DTR, LTR, C, K = 1, constant = 0, degree = 2):
+def train_SVM_polynomial(DTR, LTR, C, K=1, constant=0, degree=2):
     Z = numpy.zeros(LTR.shape)
     Z[LTR == 1] = 1
     Z[LTR == 0] = -1
 
-    H = (numpy.dot(DTR.T, DTR)+constant)**degree + K**2
-    #Dist = mcol((DTR**2).sum(0)) + mrow((DTR**2).sum(0)) - 2*numpy.dot(DTR.T, DTR)
-    #H = numpy.exp(-Dist)
+    H = (numpy.dot(DTR.T, DTR) + constant) ** degree + K ** 2
+    # Dist = mcol((DTR**2).sum(0)) + mrow((DTR**2).sum(0)) - 2*numpy.dot(DTR.T, DTR)
+    # H = numpy.exp(-Dist)
     H = mcol(Z) * mrow(Z) * H
 
     alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
 
     return alphaStar, JDual(alphaStar)[0]
 
-def train_SVM_RBF(DTR, LTR, C, K = 1, gamma=1.):
+
+def train_SVM_RBF(DTR, LTR, C, K=1, gamma=1.):
     Z = numpy.zeros(LTR.shape)
     Z[LTR == 1] = 1
     Z[LTR == 0] = -1
@@ -287,12 +296,9 @@ def train_SVM_RBF(DTR, LTR, C, K = 1, gamma=1.):
     kernel = numpy.zeros((DTR.shape[1], DTR.shape[1]))
     for i in range(DTR.shape[1]):
         for j in range(DTR.shape[1]):
-            
-            kernel[i,j] = numpy.exp(-gamma*(numpy.linalg.norm(DTR[:,i]-DTR[:,j])**2)) +K*K
+            kernel[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(DTR[:, i] - DTR[:, j]) ** 2)) + K * K
     H = mcol(Z) * mrow(Z) * kernel
 
     alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
 
     return alphaStar, JDual(alphaStar)[0]
-
-
