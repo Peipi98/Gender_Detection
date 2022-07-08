@@ -80,7 +80,7 @@ def kfold_LR(DTR, LTR, l, appendToTitle):
     print(t)
 
 
-def kfold_LR_COMPARE(DTR, LTR, l, appendToTitle):
+def kfold_LR_COMPARE(DTR, LTR, l):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -117,9 +117,6 @@ def kfold_LR_COMPARE(DTR, LTR, l, appendToTitle):
 
     return np.hstack(scores_append), LR_labels
 
-    # Cfn and Ctp are set to 1
-    # bayes_error_min_act_plot(scores_append, LR_labels, appendToTitle + 'LR, lambda=' + str(l), 0.4)
-
 
 def evaluation_LR(DTR, LTR, L, appendToTitle):
     for l in L:
@@ -131,13 +128,13 @@ def evaluation_LR(DTR, LTR, L, appendToTitle):
     y_09 = numpy.array([])
     y_01 = numpy.array([])
     for xi in x:
-        scores, labels = kfold_LR_COMPARE(DTR, LTR, xi, 'TESTFIG__')
-        y_05 = numpy.hstack((y_05, bayes_error_plot_2(0.5, scores, labels, minCost=True)))
-        y_09 = numpy.hstack((y_09, bayes_error_plot_2(0.9, scores, labels, minCost=True)))
-        y_01 = numpy.hstack((y_01, bayes_error_plot_2(0.1, scores, labels, minCost=True)))
+        scores, labels = kfold_LR_COMPARE(DTR, LTR, xi)
+        y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
+        y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
+        y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
 
     y = numpy.hstack((y, y_05))
     y = numpy.vstack((y, y_09))
     y = numpy.vstack((y, y_01))
 
-    plot_DCF(x, y, 'lambda', 'testFIG')
+    plot_DCF(x, y, 'lambda', appendToTitle + 'LR_minDCF_comparison')

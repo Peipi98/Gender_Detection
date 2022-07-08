@@ -21,7 +21,7 @@ if __name__ == "__main__":
     print("############    Logistic Regression - RAW    ##############")
     L = [1e-6, 1e-4, 1e-2, 1.0]
 
-    evaluation_LR(DTR, LTR, L, 'RAW_')
+#    evaluation_LR(DTR, LTR, L, 'RAW_')
 
     print("############    Support Vector Machine - RAW    ##############")
     K_arr = [0.1, 1.0, 10.0]
