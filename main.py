@@ -16,7 +16,7 @@ if __name__ == "__main__":
     # RAW data
 
     print("############    MVG - RAW   ##############")
-    #    evaluation_MVG(DTR, LTR, DTE, LTE, 'RAW_')
+#    evaluation_MVG(DTR, LTR, DTE, LTE, 'RAW_')
 
     print("############    Logistic Regression - RAW    ##############")
     L = [1e-6, 1e-4, 1e-2, 1.0]
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     #    plot_features(DTR, LTR, 'GAUSSIANIZED_')
 
     print("############    MVG - gaussianization    ##############")
-    #    evaluation_MVG(DTR, LTR, DTE, LTE, 'GAUSSIANIZED_')
+#    evaluation_MVG(DTR, LTR, DTE, LTE, 'GAUSSIANIZED_')
 
     print("############    Logistic Regression - gaussianization    ##############")
     L = [1e-6, 1e-4, 1e-2]
