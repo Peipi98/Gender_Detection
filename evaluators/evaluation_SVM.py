@@ -35,6 +35,12 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle):
 
         Dte = Dtr[i]
         Lte = Ltr[i]
+        
+        # P_tr = PCA(D, L, optimal_m)
+        # P_te = PCA(Dte, Lte, optimal_m)
+        
+        # D = np.dot(P_tr.T, D)
+        # Dte = np.dot(P_te.T, Dte)
 
         print('train')
         wStar, primal, dual, gap = train_SVM_linear(DTR, LTR, C=C, K=K)

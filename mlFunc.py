@@ -302,3 +302,10 @@ def train_SVM_RBF(DTR, LTR, C, K=1, gamma=1.):
     alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
 
     return alphaStar, JDual(alphaStar)[0]
+
+def get_DTRs(DTR, LTR, number_of_classes):
+
+    DTRs = []
+    for i in range(number_of_classes):
+        DTRs.append(DTR[:, LTR == i])
+    return DTRs

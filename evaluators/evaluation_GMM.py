@@ -2,56 +2,12 @@
 import sys
 import numpy as np
 import scipy
-sys.path.append('../')
+#sys.path.append('../')
 from mlFunc import *
 from validators import *
 from classifiers import *
-from classifiers import *
-from validators import *
 from prettytable import PrettyTable
-
-def initialize_GMM(D, n):
-    gmm = []
-    
-    for i in range(n):
-        weights = 1/n
-        mu = mcol(np.array(D.mean(1)))
-        C = np.matrix(empirical_covariance(D, mu))
-        
-        gmm.append((weights, mu, C))
-    
-    return [(i, numpy.asarray(j), numpy.asarray(k)) for i, j, k in gmm]
-    
-    
-
-def GMM_EM(X, gmm):
-    llNew = None
-    llOld = None
-    G = len(gmm)
-    N = X.shape[1]
-
-    while llOld is None or llNew - llOld > 1e-6:
-        llOld = llNew
-        SJ = numpy.zeros((G,N))
-        for g in range(G):
-            SJ[g, :] = logpdf_GAU_ND(X, gmm[g][1], gmm[g][2]) + numpy.log(gmm[g][0])
-        SM = scipy.special.logsumexp(SJ, axis=0)
-        llNew = SM.sum()/N
-        P = numpy.exp(SJ-SM)
-        gmmNew = []
-        for g in range(G):
-            gamma=P[g, :]
-            Z = gamma.sum()
-            F=(mrow(gamma)*X).sum(1)
-            S = numpy.dot(X, (mrow(gamma)*X).T)
-            w = Z/N
-            mu=mcol(F/Z)
-            Sigma = S/Z - numpy.dot(mu, mu.T)
-            gmmNew.append((w, mu, Sigma))
-        gmm = gmmNew
-        #print(llNew)
-    print(llNew-llOld)
-    return gmm
+from Classifiers.GMM import GMM
 
 def kfold_GMM(DTR, LTR):
     k = 5
@@ -61,34 +17,49 @@ def kfold_GMM(DTR, LTR):
     scores_append = []
     GMM_labels = []
     gmm_tot = []
-    for n in range(2, 5):
-        for i in range(k):
-            D = []
-            L = []
-            if i == 0:
-                D.append(np.hstack(Dtr[i + 1:]))
-                L.append(np.hstack(Ltr[i + 1:]))
-            elif i == k - 1:
-                D.append(np.hstack(Dtr[:i]))
-                L.append(np.hstack(Ltr[:i]))
-            else:
-                D.append(np.hstack(Dtr[:i]))
-                D.append(np.hstack(Dtr[i + 1:]))
-                L.append(np.hstack(Ltr[:i]))
-                L.append(np.hstack(Ltr[i + 1:]))
-    
-            D = np.hstack(D)
-            L = np.hstack(L)
-    
-            Dte = Dtr[i]
-            Lte = Ltr[i]
-            
-            gmm = initialize_GMM(D, n)
-            
-            gmm = GMM_EM(D, gmm)
-            
-            gmm_tot.append(gmm)
-    return gmm_tot
+    for i in range(k):
+        D = []
+        L = []
+        if i == 0:
+            D.append(np.hstack(Dtr[i + 1:]))
+            L.append(np.hstack(Ltr[i + 1:]))
+        elif i == k - 1:
+            D.append(np.hstack(Dtr[:i]))
+            L.append(np.hstack(Ltr[:i]))
+        else:
+            D.append(np.hstack(Dtr[:i]))
+            D.append(np.hstack(Dtr[i + 1:]))
+            L.append(np.hstack(Ltr[:i]))
+            L.append(np.hstack(Ltr[i + 1:]))
+
+        D = np.hstack(D)
+        L = np.hstack(L)
+
+        Dte = Dtr[i]
+        Lte = Ltr[i]
+        
+        #CLASS PRIORS: WE CONSIDER A BALANCED APPLICATION
+        prior_0 = 0.5
+        prior_1 = 0.5
+        
+        #GMM MODELS
+        
+        optimal_m = 10
+        optimal_comp = 2
+        optimal_cov = 'full'
+        optimal_alpha = 0.1
+        optimal_psi = 0.01
+        P_tr = PCA(D, L, optimal_m)
+        P_te = PCA(Dte, Lte, optimal_m)
+        
+        reduced_dtr = np.dot(P_tr.T, D)
+        reduced_dte = np.dot(P_te.T, Dte)
+        
+        gmm = GMM(reduced_dtr, L, reduced_dte, Lte, [prior_0, prior_1], iterations=int(numpy.log2(optimal_comp)), alpha=optimal_alpha, psi=optimal_psi, typeOfGmm=optimal_cov)
+        
+        gmm.train()
+        
+    return compute_min_DCF(scores, labels, pi, Cfn, Cfp)
         
         
 if __name__ == "__main__":
