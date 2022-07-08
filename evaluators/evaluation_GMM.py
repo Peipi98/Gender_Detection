@@ -2,7 +2,7 @@
 import sys
 import numpy as np
 import scipy
-#sys.path.append('../')
+sys.path.append('../')
 from mlFunc import *
 from validators import *
 from classifiers import *
@@ -55,11 +55,14 @@ def kfold_GMM(DTR, LTR):
         reduced_dtr = np.dot(P_tr.T, D)
         reduced_dte = np.dot(P_te.T, Dte)
         
-        gmm = GMM(reduced_dtr, L, reduced_dte, Lte, [prior_0, prior_1], iterations=int(numpy.log2(optimal_comp)), alpha=optimal_alpha, psi=optimal_psi, typeOfGmm=optimal_cov)
-        
+        #gmm = GMM(reduced_dtr, L, reduced_dte, Lte, [prior_0, prior_1], iterations=int(numpy.log2(optimal_comp)), alpha=optimal_alpha, psi=optimal_psi, typeOfGmm=optimal_cov)
+        gmm = GMM(D, L, Dte, Lte, [prior_0, prior_1], iterations=int(numpy.log2(optimal_comp)), alpha=optimal_alpha, psi=optimal_psi, typeOfGmm=optimal_cov)
+
         gmm.train()
-        
-    return compute_min_DCF(scores, labels, pi, Cfn, Cfp)
+        print("llrs", gmm.llrs)
+        min_dcf = gmm.compute_min_dcf()[0]
+
+    return min_dcf
         
         
 if __name__ == "__main__":
@@ -69,7 +72,7 @@ if __name__ == "__main__":
     # print(gmm[0][1].shape)
     # print(gmm[0][2].shape)
     # gmm = GMM_EM(DTR, gmm)
-    gmm_tot = kfold_GMM(DTR, LTR)
+    min_dcf = kfold_GMM(DTR, LTR)
     
         
     

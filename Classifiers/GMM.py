@@ -39,32 +39,28 @@ def GMM_EM_full(X, gmm, psi=0.01):
     llOld = None
     G = len(gmm)
     N = X.shape[1]
+
     while llOld is None or llNew - llOld > 1e-6:
         llOld = llNew
-        SJ = numpy.zeros((G, N))
+        SJ = numpy.zeros((G,N))
         for g in range(G):
-            SJ[g, :] = logpdf_GAU_ND(
-                X, gmm[g][1], gmm[g][2]) + numpy.log(gmm[g][0])
+            SJ[g, :] = logpdf_GAU_ND(X, gmm[g][1], gmm[g][2]) + numpy.log(gmm[g][0])
         SM = scipy.special.logsumexp(SJ, axis=0)
         llNew = SM.sum()/N
         P = numpy.exp(SJ-SM)
         gmmNew = []
         for g in range(G):
-            # m step
-            gamma = P[g, :]
+            gamma=P[g, :]
             Z = gamma.sum()
-            F = (mrow(gamma)*X).sum(1)
+            F=(mrow(gamma)*X).sum(1)
             S = numpy.dot(X, (mrow(gamma)*X).T)
             w = Z/N
-            mu = mcol(F/Z)
+            mu=mcol(F/Z)
             Sigma = S/Z - numpy.dot(mu, mu.T)
-            U, s, _ = numpy.linalg.svd(Sigma)
-            s[s < psi] = psi
-            covNew = numpy.dot(U, mcol(s)*U.T)
-            gmmNew.append((w, mu, covNew))
+            gmmNew.append((w, mu, Sigma))
         gmm = gmmNew
-        # print(llNew)
-    # print(llNew)
+        #print(llNew)
+    print(llNew-llOld)
     return gmm
 
 
@@ -243,7 +239,7 @@ def GMM_LBG(X, iter, alpha=0.1, psi=0.01, type='full'):
     '''
     # start with 1g
     wg = 1.0
-    mu = X.mean(1)
+    mu = mcol(X.mean(1))
     c = empirical_covariance(X, mu)
     gmm_1 = [(wg, mu, c)]
     # initialize gmm
