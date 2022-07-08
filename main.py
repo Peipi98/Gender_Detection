@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     # Gaussianization
 
-    DTR = gaussianize_features(DTR, DTR)
+##    DTR = gaussianize_features(DTR, DTR)
     #    plot_features(DTR, LTR, 'GAUSSIANIZED_')
 
     print("############    MVG - gaussianization    ##############")
@@ -46,11 +46,11 @@ if __name__ == "__main__":
 #   evaluation_SVM(DTR, LTR, K_arr, C_arr, 'GAUSSIANIZED_')
 
 
-    DTR = stats.zscore(DTR, axis=1)
+##    DTR = stats.zscore(DTR, axis=1)
 #    plot_features(DTR, LTR, 'ZNORM')
 
     print("############    MVG - Z Normalization    ##############")
-    #    evaluation_MVG(DTR, LTR, DTE, LTE, 'ZNORM')
+    evaluation_MVG(DTR, LTR, DTE, LTE, 'ZNORM')
 
     print("############    Logistic Regression - Z Normalization    ##############")
     L = [1e-6, 1e-4, 1e-2]
