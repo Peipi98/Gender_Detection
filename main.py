@@ -1,6 +1,6 @@
-from evaluators.evaluation_LR import evaluation_LR
-from evaluators.evaluation_MVG import evaluation_MVG
-from evaluators.evaluation_SVM import evaluation_SVM
+from validation.evaluation_LR import evaluation_LR
+from validation.evaluation_MVG import evaluation_MVG
+from validation.evaluation_SVM import evaluation_SVM
 from plot_features import plot_features
 from validators import *
 import sys

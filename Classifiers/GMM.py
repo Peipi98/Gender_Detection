@@ -5,6 +5,7 @@ import scipy
 from mlFunc import empirical_covariance, mrow, mcol, logpdf_GAU_ND, get_DTRs
 from validators import compute_min_DCF
 
+
 def initialize_GMM(D, n):
     gmm = []
 
@@ -17,11 +18,12 @@ def initialize_GMM(D, n):
 
     return [(i, numpy.asarray(j), numpy.asarray(k)) for i, j, k in gmm]
 
+
 def GMM_ll_perSample(X, gmm):
     G = len(gmm)
     N = X.shape[1]
-    S = numpy.zeros((G,N))
-    
+    S = numpy.zeros((G, N))
+
     for g in range(G):
         S[g, :] = logpdf_GAU_ND(X, gmm[g][1], gmm[g][2]) + numpy.log(gmm[g][0])
     return scipy.special.logsumexp(S, axis=0)
@@ -42,24 +44,25 @@ def GMM_EM_full(X, gmm, psi=0.01):
 
     while llOld is None or llNew - llOld > 1e-6:
         llOld = llNew
-        SJ = numpy.zeros((G,N))
+        SJ = numpy.zeros((G, N))
         for g in range(G):
-            SJ[g, :] = logpdf_GAU_ND(X, gmm[g][1], gmm[g][2]) + numpy.log(gmm[g][0])
+            SJ[g, :] = logpdf_GAU_ND(
+                X, gmm[g][1], gmm[g][2]) + numpy.log(gmm[g][0])
         SM = scipy.special.logsumexp(SJ, axis=0)
         llNew = SM.sum()/N
         P = numpy.exp(SJ-SM)
         gmmNew = []
         for g in range(G):
-            gamma=P[g, :]
+            gamma = P[g, :]
             Z = gamma.sum()
-            F=(mrow(gamma)*X).sum(1)
+            F = (mrow(gamma)*X).sum(1)
             S = numpy.dot(X, (mrow(gamma)*X).T)
             w = Z/N
-            mu=mcol(F/Z)
+            mu = mcol(F/Z)
             Sigma = S/Z - numpy.dot(mu, mu.T)
             gmmNew.append((w, mu, Sigma))
         gmm = gmmNew
-        #print(llNew)
+        # print(llNew)
     print(llNew-llOld)
     return gmm
 
@@ -272,68 +275,71 @@ def GMM_LBG(X, iter, alpha=0.1, psi=0.01, type='full'):
 
 
 class GMM:
-	def __init__(self, DTR, LTR, DTE, LTE, prior_prob_array, iterations=2, alpha=0.1, psi=0.01, typeOfGmm="full"):
-		# initialization of the attributes
-		self.DTR = DTR
-		self.LTR = LTR
-		self.DTE = DTE
-		self.LTE = LTE
-		self.iterations = iterations
-		self.type = typeOfGmm
-		self.alpha = alpha
-		self.psi = psi
+    def __init__(self, DTR, LTR, DTE, LTE, prior_prob_array, iterations=2, alpha=0.1, psi=0.01, typeOfGmm="full"):
+        # initialization of the attributes
+        self.DTR = DTR
+        self.LTR = LTR
+        self.DTE = DTE
+        self.LTE = LTE
+        self.iterations = iterations
+        self.type = typeOfGmm
+        self.alpha = alpha
+        self.psi = psi
 
-		self.mu_array = []
-		self.cov_array = []
-		self.prior_prob_array = prior_prob_array
+        self.mu_array = []
+        self.cov_array = []
+        self.prior_prob_array = prior_prob_array
 
-		self.gmm_array = []
-		self.SPost = []
-		self.llrs = 0.
-		self.predicted_labels = []
-		self.accuracy = 0.
-		self.error = 0.
+        self.gmm_array = []
+        self.SPost = []
+        self.llrs = 0.
+        self.predicted_labels = []
+        self.accuracy = 0.
+        self.error = 0.
 
-		self.dcf = 0.
+        self.dcf = 0.
 
-	def train(self):
+    def train(self):
 
-		DTR_array = get_DTRs(self.DTR, self.LTR, self.LTR.max() +1)
+        DTR_array = get_DTRs(self.DTR, self.LTR, self.LTR.max() + 1)
 
-		for DTRi in DTR_array:
-			mu_i = numpy.mean(DTRi, axis=1)
-			mu_i = mu_i.reshape((mu_i.shape[0], 1))
-			cov_i = 1/DTRi.shape[1] * numpy.dot(DTRi-mu_i, (DTRi-mu_i).T)
+        for DTRi in DTR_array:
+            mu_i = numpy.mean(DTRi, axis=1)
+            mu_i = mu_i.reshape((mu_i.shape[0], 1))
+            cov_i = 1/DTRi.shape[1] * numpy.dot(DTRi-mu_i, (DTRi-mu_i).T)
 
-			self.mu_array.append(mu_i)
-			self.cov_array.append(cov_i)
+            self.mu_array.append(mu_i)
+            self.cov_array.append(cov_i)
 
-			self.gmm_array.append(GMM_LBG(DTRi, self.iterations, self.alpha, self.psi, self.type))
-	
-	def test(self):
-		logS = numpy.zeros((2,self.DTE.shape[1]))
+            self.gmm_array.append(
+                GMM_LBG(DTRi, self.iterations, self.alpha, self.psi, self.type))
 
-		for i, gmm_i in enumerate(self.gmm_array):
-			logS[i, :] = GMM_ll_perSample(self.DTE, gmm_i)
+    def test(self):
+        logS = numpy.zeros((2, self.DTE.shape[1]))
 
-		logSJoint = numpy.vstack((logS))
-		logSMarginal = mrow(scipy.special.logsumexp(logSJoint, axis=0))
-		logSPost = logSJoint - logSMarginal	
+        for i, gmm_i in enumerate(self.gmm_array):
+            logS[i, :] = GMM_ll_perSample(self.DTE, gmm_i)
 
-		self.SPost = numpy.exp(logSPost)
+        logSJoint = numpy.vstack((logS))
+        logSMarginal = mrow(scipy.special.logsumexp(logSJoint, axis=0))
+        logSPost = logSJoint - logSMarginal
 
-		self.predicted_labels = numpy.argmax(self.SPost, axis=0)
+        self.SPost = numpy.exp(logSPost)
 
-		self.accuracy = numpy.sum(self.LTE == self.predicted_labels) / len(self.LTE)
-		self.error = 1 - self.accuracy
+        self.predicted_labels = numpy.argmax(self.SPost, axis=0)
 
-		self.llrs = logSPost[1,:] - logSPost[0,:]
+        self.accuracy = numpy.sum(
+            self.LTE == self.predicted_labels) / len(self.LTE)
+        self.error = 1 - self.accuracy
+
+        self.llrs = logSPost[1, :] - logSPost[0, :]
 
 # 	def compute_dcf(self, threshold = None):
 # 		confusion_matrix = compute_confusion_matrix_binary(self.LTE, self.llrs, self.prior_prob_array[1],1,1, threshold)
 # 		return compute_normalized_dcf_binary(confusion_matrix, self.prior_prob_array[1], 1, 1)
-	
-	def compute_min_dcf(self):
-		return compute_min_DCF(self.llrs, self.LTE, self.prior_prob_array[1], 1, 1)
 
 
+    def compute_min_dcf(self):
+        # compute_min_DCF(scores, labels, pi, Cfn, Cfp):
+
+        return compute_min_DCF(self.llrs, self.LTE, self.prior_prob_array[1], 1, 1)

@@ -9,14 +9,24 @@ from classifiers import *
 from prettytable import PrettyTable
 from Classifiers.GMM import GMM
 
+def validation_GMM(title, pi, GMM_llrs, LTE):
+    GMM_llrs = np.hstack(GMM_llrs)
+    llrs_tot = compute_min_DCF(GMM_llrs, LTE, pi, 1, 1)
+
+    t = PrettyTable(["Type", "minDCF"])
+    t.title = title
+    t.add_row(["GMM_EM", round(llrs_tot, 3)])
+    print(t)
+
 def kfold_GMM(DTR, LTR):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
 
-    scores_append = []
+    GMM_llrs = []
     GMM_labels = []
     gmm_tot = []
+
     for i in range(k):
         D = []
         L = []
@@ -49,21 +59,25 @@ def kfold_GMM(DTR, LTR):
         optimal_cov = 'full'
         optimal_alpha = 0.1
         optimal_psi = 0.01
-        P_tr = PCA(D, L, optimal_m)
-        P_te = PCA(Dte, Lte, optimal_m)
+        # P_tr = PCA(D, L, optimal_m)
+        # P_te = PCA(Dte, Lte, optimal_m)
         
-        reduced_dtr = np.dot(P_tr.T, D)
-        reduced_dte = np.dot(P_te.T, Dte)
+        # reduced_dtr = np.dot(P_tr.T, D)
+        # reduced_dte = np.dot(P_te.T, Dte)
         
         #gmm = GMM(reduced_dtr, L, reduced_dte, Lte, [prior_0, prior_1], iterations=int(numpy.log2(optimal_comp)), alpha=optimal_alpha, psi=optimal_psi, typeOfGmm=optimal_cov)
         gmm = GMM(D, L, Dte, Lte, [prior_0, prior_1], iterations=int(numpy.log2(optimal_comp)), alpha=optimal_alpha, psi=optimal_psi, typeOfGmm=optimal_cov)
 
         gmm.train()
-        print("llrs", gmm.llrs)
-        min_dcf = gmm.compute_min_dcf()[0]
-
-    return min_dcf
+        gmm.test()
         
+        print("fold " + str(i) + " - ","llrs", gmm.llrs)
+        print(len(gmm.llrs))
+        GMM_llrs.append(gmm.llrs)
+        GMM_labels = np.append(GMM_labels, Lte)
+        GMM_labels = np.hstack(GMM_labels)
+
+    validation_GMM("GMM | pi=0.5", 0.5, GMM_llrs, GMM_labels)
         
 if __name__ == "__main__":
     DTR, LTR = load("../Train.txt")
@@ -72,7 +86,7 @@ if __name__ == "__main__":
     # print(gmm[0][1].shape)
     # print(gmm[0][2].shape)
     # gmm = GMM_EM(DTR, gmm)
-    min_dcf = kfold_GMM(DTR, LTR)
+    kfold_GMM(DTR, LTR)
     
         
     
