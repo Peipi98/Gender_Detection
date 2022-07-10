@@ -75,11 +75,11 @@ def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False):
     #    plot_ROC(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
 
     # Cfn and Ctp are set to 1
-    bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C), 0.4)
+    bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM_RFB, K=' + str(K) + ', C=' + str(C), 0.4)
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.5"
-    t.add_row(['SVM, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    t.add_row(['SVM_RFB, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
     print(t)
 
     ###############################
@@ -89,7 +89,7 @@ def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False):
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.1"
-    t.add_row(['SVM, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    t.add_row(['SVM_RFB, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
 
     print(t)
 
@@ -100,7 +100,7 @@ def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False):
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.9"
-    t.add_row(['SVM, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    t.add_row(['SVM_RFB, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
 
     print(t)
 
@@ -138,8 +138,16 @@ def single_F_RFB(D, L, C, K, gamma):
     print(t)
 
 
-def evaluation_SVM(DTR, LTR, K_arr, C_arr, appendToTitle, PCA_Flag=True):
-    for K in [1.]:
-        for gamma in [0.001]:
-            kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=0.1, gamma=gamma, PCA_Flag=False)
-            # single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
+def evaluation_SVM_RFB(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=True):
+    # for K in [1.]:
+    #     for gamma in [0.001]:
+    #         kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=0.1, gamma=gamma, PCA_Flag=False)
+    #         single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
+    for K in K_arr:
+        for gamma in gamma_arr:
+            kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False)
+            #single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
+    for K in K_arr:
+        for gamma in gamma_arr:
+            kfold_SVM_RFB(DTR, LTR, appendToTitle, C=10.0, K=K, gamma=gamma, PCA_Flag=False)
+            #single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)

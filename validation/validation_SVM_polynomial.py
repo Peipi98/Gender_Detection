@@ -37,11 +37,6 @@ def kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=2, P
         Dte = Dtr[i]
         Lte = Ltr[i]
         print(i)
-        # wStar, primal, dual, gap = train_SVM_linear(DTR, LTR, C=C, K=K)
-        #
-        # DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
-        #
-        # scores = numpy.dot(wStar.T, DTEEXT).ravel()
 
         aStar, loss = train_SVM_polynomial(D, L, C=C, constant=costant, degree=degree, K=K)
         Z = numpy.zeros(L.shape)
@@ -77,11 +72,11 @@ def kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=2, P
     #    plot_ROC(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
 
     # Cfn and Ctp are set to 1
-    bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C), 0.4)
+    bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM_POLY, K=' + str(K) + ', C=' + str(C), 0.4)
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.5"
-    t.add_row(['SVM, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    t.add_row(['SVM_POLY, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
     print(t)
 
     ###############################
@@ -91,7 +86,7 @@ def kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=2, P
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.1"
-    t.add_row(['SVM, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    t.add_row(['SVM_POLY, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
 
     print(t)
 
@@ -102,7 +97,7 @@ def kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=2, P
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.9"
-    t.add_row(['SVM, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    t.add_row(['SVM_POLY, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
 
     print(t)
 
@@ -136,9 +131,14 @@ def single_F_POLY(D, L, C, K, costant=1.0, degree=2):
     print(t)
 
 
-def evaluation_SVM(DTR, LTR, K_arr, C_arr, appendToTitle, PCA_Flag=True):
-    for costant in [1000]:
+def evaluation_SVM_polynomial(DTR, LTR, K_arr, C, appendToTitle, CON_array, PCA_Flag=True):
+    # for costant in [1000]:
+    #     for degree in [4]:
+    #         for K in [1., 10.]:
+    #             kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=degree, PCA_Flag=False)
+    #             single_F_POLY(DTR, LTR, C=1.0, K=K, costant=1000, degree=4)
+    for costant in CON_array:
         for degree in [4]:
-            for K in [1., 10.]:
-                kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=degree, PCA_Flag=False)
-                single_F_POLY(DTR, LTR, C=1.0, K=K, costant=1000, degree=4)
+            for K in K_arr:
+                kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=C, degree=degree, PCA_Flag=False)
+                #single_F_POLY(DTR, LTR, C=C, K=K, costant=1000, degree=4)
