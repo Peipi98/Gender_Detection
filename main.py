@@ -23,7 +23,7 @@ if __name__ == "__main__":
     print("############    Logistic Regression - RAW    ##############")
     L = [1e-6, 1e-4, 1e-2, 1.0]
 
-#    evaluation_LR(DTR, LTR, L, 'RAW_')
+    evaluation_LR(DTR, LTR, L, 'RAW_')
 
     print("############    Support Vector Machine - RAW    ##############")
     K_arr = [0.1, 1.0, 10.0]
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     K_arr = [0.1, 1., 10.]
     C_arr = [1., 10.]
     gamma_Arr = [0.001]
-    evaluation_SVM_RFB(DTR, LTR, K_arr, gamma_Arr, 'RAW_', PCA_Flag=False)
+    #evaluation_SVM_RFB(DTR, LTR, K_arr, gamma_Arr, 'RAW_', PCA_Flag=False)
 
     # Gaussianization
 
