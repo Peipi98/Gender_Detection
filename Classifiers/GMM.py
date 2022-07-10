@@ -60,10 +60,13 @@ def GMM_EM_full(X, gmm, psi=0.01):
             w = Z/N
             mu = mcol(F/Z)
             Sigma = S/Z - numpy.dot(mu, mu.T)
+            U, s, _ = numpy.linalg.svd(Sigma)
+            s[s<psi] = psi
+            Sigma = numpy.dot(U, mcol(s)*U.T)
             gmmNew.append((w, mu, Sigma))
         gmm = gmmNew
         # print(llNew)
-    print(llNew-llOld)
+    #print(llNew-llOld)
     return gmm
 
 
@@ -281,7 +284,7 @@ class GMM:
         self.LTR = LTR
         self.DTE = DTE
         self.LTE = LTE
-        self.iterations = iterations
+        self.iterations = iterations if iterations == 0 else int(numpy.log2(iterations))
         self.type = typeOfGmm
         self.alpha = alpha
         self.psi = psi
