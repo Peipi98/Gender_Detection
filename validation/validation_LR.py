@@ -9,12 +9,51 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_LR(DTR, LTR, l, appendToTitle):
+def validate_LR(scores, LR_labels, appendToTitle, l):
+    scores_append = np.hstack(scores)
+    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.5, 1, 1)
+
+    plot_ROC(scores_append, LR_labels, appendToTitle + 'LR, lambda=' + str(l))
+
+    # Cfn and Ctp are set to 1
+    bayes_error_min_act_plot(scores_append, LR_labels, appendToTitle + 'LR, lambda=' + str(l), 0.4)
+
+    t = PrettyTable(["Type", "minDCF"])
+    t.title = appendToTitle + "minDCF: π=0.5"
+    t.add_row(['LR, lambda=' + str(l), round(scores_tot, 3)])
+    print(t)
+
+    ###############################
+
+    # π = 0.1
+    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.1, 1, 1)
+
+    t = PrettyTable(["Type", "minDCF"])
+    t.title = appendToTitle + "minDCF: π=0.1"
+    t.add_row(['LR, lambda=' + str(l), round(scores_tot, 3)])
+
+    print(t)
+
+    ###############################
+
+    # π = 0.9
+    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.9, 1, 1)
+
+    t = PrettyTable(["Type", "minDCF"])
+    t.title = appendToTitle + "minDCF: π=0.9"
+    t.add_row(['LR, lambda=' + str(l), round(scores_tot, 3)])
+
+    print(t)
+
+
+def kfold_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
 
     scores_append = []
+    PCA_LR_scores_append = []
+    PCA2_LR_scores_append = []
     LR_labels = []
 
     for i in range(k):
@@ -38,46 +77,35 @@ def kfold_LR(DTR, LTR, l, appendToTitle):
         Dte = Dtr[i]
         Lte = Ltr[i]
 
-        scores = linear_reg_score(D, L, Dte, l)
+        scores = logistic_reg_score(D, L, Dte, l)
         scores_append.append(scores)
 
         LR_labels = np.append(LR_labels, Lte, axis=0)
         LR_labels = np.hstack(LR_labels)
 
-    scores_append = np.hstack(scores_append)
-    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.5, 1, 1)
+        if PCA_Flag is True:
+            # PCA m=10
+            P = PCA(D, L, m=10)
+            DTR_PCA = numpy.dot(P.T, D)
+            DTE_PCA = numpy.dot(P.T, Dte)
 
-    plot_ROC(scores_append, LR_labels, appendToTitle + 'LR, lambda=' + str(l))
+            PCA_LR_scores = logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
+            PCA_LR_scores_append.append(PCA_LR_scores)
 
-    # Cfn and Ctp are set to 1
-    bayes_error_min_act_plot(scores_append, LR_labels, appendToTitle + 'LR, lambda=' + str(l), 0.4)
+            # PCA m=9
+            P = PCA(D, L, m=9)
+            DTR_PCA = numpy.dot(P.T, D)
+            DTE_PCA = numpy.dot(P.T, Dte)
 
-    t = PrettyTable(["Type", "minDCF"])
-    t.title = "minDCF: π=0.5"
-    t.add_row(['LR, lambda=' + str(l), round(scores_tot, 3)])
-    print(t)
+            PCA2_LR_scores = logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
+            PCA2_LR_scores_append.append(PCA2_LR_scores)
 
-    ###############################
+    validate_LR(scores_append, LR_labels, appendToTitle, l)
 
-    # π = 0.1
-    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.1, 1, 1)
+    if PCA_Flag is True:
+        validate_LR(PCA_LR_scores_append, LR_labels, appendToTitle + 'PCA_m10_', l)
 
-    t = PrettyTable(["Type", "minDCF"])
-    t.title = "minDCF: π=0.1"
-    t.add_row(['LR, lambda=' + str(l), round(scores_tot, 3)])
-
-    print(t)
-
-    ###############################
-
-    # π = 0.9
-    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.9, 1, 1)
-
-    t = PrettyTable(["Type", "minDCF"])
-    t.title = "minDCF: π=0.9"
-    t.add_row(['LR, lambda=' + str(l), round(scores_tot, 3)])
-
-    print(t)
+        validate_LR(PCA2_LR_scores_append, LR_labels, appendToTitle + 'PCA_m9_', l)
 
 
 def kfold_LR_COMPARE(DTR, LTR, l):
@@ -109,7 +137,7 @@ def kfold_LR_COMPARE(DTR, LTR, l):
         Dte = Dtr[i]
         Lte = Ltr[i]
 
-        scores = linear_reg_score(D, L, Dte, l)
+        scores = logistic_reg_score(D, L, Dte, l)
         scores_append.append(scores)
 
         LR_labels = np.append(LR_labels, Lte, axis=0)
@@ -118,9 +146,9 @@ def kfold_LR_COMPARE(DTR, LTR, l):
     return np.hstack(scores_append), LR_labels
 
 
-def evaluation_LR(DTR, LTR, L, appendToTitle):
+def evaluation_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True):
     for l in L:
-        kfold_LR(DTR, LTR, l, appendToTitle)
+        kfold_LR(DTR, LTR, l, appendToTitle, PCA_Flag)
 
     x = numpy.logspace(-5, 1, 30)
     y = numpy.array([])

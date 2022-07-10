@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sys
 
 import numpy as np
@@ -8,7 +7,7 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True):
+def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -39,11 +38,15 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True):
         Dte = Dtr[i]
         Lte = Ltr[i]
         print(i)
-        wStar, primal, dual, gap = train_SVM_linear(D, L, C=C, K=K)
 
-        DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
+        Z = L * 2 - 1
+        aStar, loss = train_SVM_RBF(D, L, C=C, K=K, gamma=gamma)
+        kern = numpy.zeros((D.shape[1], Dte.shape[1]))
+        for i in range(D.shape[1]):
+            for j in range(Dte.shape[1]):
+                kern[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(D[:, i] - Dte[:, j]) ** 2)) + K * K
+        scores = numpy.sum(numpy.dot(aStar * mrow(Z), kern), axis=0)
 
-        scores = numpy.dot(wStar.T, DTEEXT).ravel()
         scores_append.append(scores)
 
         SVM_labels = np.append(SVM_labels, Lte, axis=0)
@@ -102,7 +105,41 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True):
     print(t)
 
 
+def single_F_RFB(D, L, C, K, gamma):
+    nTrain = int(D.shape[1] * 0.8)
+    numpy.random.seed(0)
+    idx = numpy.random.permutation(D.shape[1])
+    idxTrain = idx[0:nTrain]
+    idxTest = idx[nTrain:]
+    DTR = D[:, idxTrain]
+    DTE = D[:, idxTest]
+    LTR = L[idxTrain]
+    LTE = L[idxTest]
+    Z = numpy.zeros(LTR.shape)
+    Z[LTR == 1] = 1
+    Z[LTR == 0] = -1
+
+    aStar, loss = train_SVM_RBF(DTR, LTR, C=1.0, K=K, gamma=gamma)
+
+    kern = numpy.zeros((DTR.shape[1], DTE.shape[1]))
+    for i in range(DTR.shape[1]):
+        for j in range(DTE.shape[1]):
+            kern[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(DTR[:, i] - DTE[:, j]) ** 2)) + K * K
+
+    score = numpy.sum(numpy.dot(aStar * mrow(Z), kern), axis=0)
+
+    errorRate = (1 - numpy.sum((score > 0) == LTE) / len(LTE)) * 100
+    print("K = %d, gamma = %.1f, loss = %e, error =  %.1f" % (K, gamma, loss, errorRate))
+    scores_append = numpy.hstack(score)
+    scores_tot = compute_min_DCF(scores_append, LTE, 0.5, 1, 1)
+    t = PrettyTable(["Type", "minDCF"])
+    t.title = "minDCF: π=0.5"
+    t.add_row(['SVM, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    print(t)
+
+
 def evaluation_SVM(DTR, LTR, K_arr, C_arr, appendToTitle, PCA_Flag=True):
-    for K in K_arr:
-        for C in C_arr:
-            kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=False)
+    for K in [1.]:
+        for gamma in [0.001]:
+            kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=0.1, gamma=gamma, PCA_Flag=False)
+            # single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)

@@ -139,7 +139,7 @@ def linear_reg(DTR, LTR, DTE, l):
     return LP, _J
 
 
-def linear_reg_score(DTR, LTR, DTE, l):
+def logistic_reg_score(DTR, LTR, DTE, l):
     logreg_obj = logreg_obj_wrap(numpy.array(DTR), LTR, l)
     _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0] + 1), approx_grad=True)
     _w = _v[0:DTR.shape[0]]

@@ -232,7 +232,7 @@ def calculate_lbgf(H, DTR, C):
         numpy.zeros(DTR.shape[1]),
         bounds=[(0, C)] * DTR.shape[1],
         factr=1.0,
-        maxiter=100000,
+        maxiter=10000,
         maxfun=100000,
     )
 
