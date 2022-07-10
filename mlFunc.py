@@ -34,7 +34,7 @@ def load(fname):
     return numpy.hstack(DList), numpy.array(labelsList, dtype=numpy.int32)
 
 
-def emprical_mean(D):
+def empirical_mean(D):
     return mcol(D.mean(1))
 
 

@@ -9,6 +9,7 @@ from validators import *
 from classifiers import *
 from prettytable import PrettyTable
 from Classifiers.GMM import GMM
+import scipy.stats as stats
 
 def validation_GMM(title, pi, GMM_llrs, LTE):
     GMM_llrs = np.hstack(GMM_llrs)
@@ -47,14 +48,18 @@ def print_minDCF_tables(score_raw, score_gauss, components):
     types = ['full-cov', 'diag-cov', 'tied full-cov', 'tied diag-cov']
     
     header = ['']
-    
+    print(np.shape(score_raw))
+    print(score_raw)
+    score_raw = np.reshape(np.hstack(score_raw), ((components+1), 4)).T
+    score_gauss = np.reshape(np.hstack(score_gauss), ((components+1), 4)).T
+
+    print(np.shape(score_raw))
     for i in range(components+1):
         header.append(2 ** i)
         
     for i in range(len(types)):
         t1 = PrettyTable(header)
-        score_raw = np.reshape(np.hstack(score_raw), ((components+1), 4)).T
-        score_gauss = np.reshape(np.hstack(score_gauss), ((components+1), 4)).T
+        
         t1.title = types[i]
         
         raw_full = score_raw[i].tolist()
@@ -153,7 +158,7 @@ def kfold_GMM(DTR, LTR, comp):
 if __name__ == "__main__":
     DTR, LTR = load("../Train.txt")
     DTR_gauss = gaussianize_features(DTR, DTR)
-    #DTR = stats.zscore(DTR, axis=1)
+    DTR = stats.zscore(DTR, axis=1)
     score_raw = []
     score_gauss = []
     
