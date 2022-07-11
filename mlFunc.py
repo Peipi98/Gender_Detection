@@ -216,6 +216,18 @@ def weighted_logreg_obj_wrap(DTR, LTR, l):
 
     return logreg_obj
 
+def quad_logreg_obj_wrap(DTR, LTR, l):
+    M = DTR.shape[0]
+    Z = LTR * 2.0 - 1.0
+
+    def logreg_obj(v):
+        w = mcol(v[0:M])
+        b = v[-1]
+        S = numpy.dot(w.T, DTR) + b
+        cxe = numpy.logaddexp(0, -S * Z)
+        return numpy.linalg.norm(w) ** 2 * l / 2.0 + cxe.mean()
+
+    return logreg_obj
 
 def plot(D, L):
     D0 = D[:, L == 0]

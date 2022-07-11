@@ -1,5 +1,6 @@
 from validation.validation_LR import evaluation_LR
 from validation.validation_weighted_LR import evaluation_weighted_LR
+from validation.validation_quad_LR import evaluation_quad_LR
 from validation.validation_MVG import evaluation_MVG
 from validation.validation_SVM import evaluation_SVM
 from validation.validation_SVM_RFB import evaluation_SVM_RFB
@@ -27,6 +28,7 @@ if __name__ == "__main__":
 #    evaluation_LR(DTR, LTR, L, 'RAW_')
     L = [1e-4, 1e-2, 1e-1, 1.0]
 #    evaluation_weighted_LR(DTR, LTR, L, 'RAW_')
+    #evaluation_quad_LR(DTR, LTR, L, 'RAW_')
 
     print("############    Support Vector Machine - RAW    ##############")
     K_arr = [0.1, 1.0, 10.0]
@@ -59,7 +61,7 @@ if __name__ == "__main__":
 #   evaluation_SVM(DTR, LTR, K_arr, C_arr, 'GAUSSIANIZED_')
 
 
-##    DTR = stats.zscore(DTR, axis=1)
+    DTR = stats.zscore(DTR, axis=1)
 #    plot_features(DTR, LTR, 'ZNORM')
 
     print("############    MVG - Z Normalization    ##############")
@@ -68,6 +70,8 @@ if __name__ == "__main__":
     print("############    Logistic Regression - Z Normalization    ##############")
     L = [1e-6, 1e-4, 1e-2]
 #    evaluation_LR(DTR, LTR, L, 'ZNORM_')
+    L = [1e-4, 1e-2, 1e-1, 1.0]
+    #evaluation_weighted_LR(DTR, LTR, L, 'RAW_', PCA_Flag=False)
 
     print("############    Support Vector Machine - Z Normalization    ##############")
     K_arr = [0.1, 1.0, 10.0]
