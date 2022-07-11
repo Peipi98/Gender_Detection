@@ -2,8 +2,9 @@
 import numpy 
 import scipy.special 
 from mlFunc import empirical_covariance, gaussianize_features
-from validators import compute_min_DCF
+from validators import compute_min_DCF, confusion_matrix_binary
 import scipy.stats as stats
+import pylab
 
 
 #==============================================================================
@@ -21,6 +22,21 @@ def mrow(v):
 def empirical_mean(D):
     return mcol(D.mean(1))
 
+def plot_ROC(llrs, LTE, title):
+    thresholds = numpy.array(llrs)
+    thresholds.sort()
+    thresholds = numpy.concatenate([numpy.array([-numpy.inf]), thresholds, numpy.array([numpy.inf])])
+    FPR = numpy.zeros(thresholds.size)
+    TPR = numpy.zeros(thresholds.size)
+    for idx, t in enumerate(thresholds):
+        Pred = numpy.int32(llrs > t)
+        conf = confusion_matrix_binary(Pred, LTE)
+        TPR[idx] = conf[1, 1] / (conf[1, 1] + conf[0, 1])
+        FPR[idx] = conf[1, 0] / (conf[1, 0] + conf[0, 0])
+    pylab.plot(FPR, TPR)
+    pylab.title(title)
+    pylab.savefig('./images/ROC_' + title + '.png')
+    pylab.show()
 #==============================================================================
 
 #==============================================================================
@@ -44,27 +60,6 @@ def logpdf_GAU_ND(X,mu,C) :
     res += -0.5*numpy.linalg.slogdet(C)[1]
     res += -0.5*((X-mu)*numpy.dot(numpy.linalg.inv(C), (X-mu))).sum(0) #1
     return res
-#==============================================================================
-
-#==============================================================================
-# --------- LOAD FILE ---------------------------------------------------------
-def load(fname):
-    DList = []
-    labelsList = []
-
-    with open(fname) as f:
-        try:
-            for line in f:
-                attrs = line.replace(" ", "").split(',')[0:12]
-                attrs = mcol(numpy.array([float(i) for i in attrs]))
-                name = line.split(',')[-1].strip()
-                label = int(name)
-                DList.append(attrs)
-                labelsList.append(label)
-        except:
-            pass
-    return numpy.hstack(DList), numpy.array(labelsList, dtype=numpy.int32)
-#==============================================================================
 
 #==============================================================================
 # -------------------------------- LBG ----------------------------------------
@@ -89,13 +84,13 @@ def LBG( X,alpha,G,psi, typeOf='Full'):
     while len(GMM)<=G:
         #print('########################################## NEW ITER')
         if len(GMM) != 1:
-            if typeOf=='Full':
+            if typeOf=='full':
                 GMM=GMM_EM(X,GMM,psi)
-            if typeOf=='Diag':
+            if typeOf=='diag':
                 GMM=GMM_EM_diag(X,GMM,psi)
-            if typeOf=='Tied':
+            if typeOf=='tied_full':
                 GMM=GMM_EM_tied(X,GMM,psi)
-            if typeOf=='TiedDiag':
+            if typeOf=='tied_diag':
                 GMM=GMM_EM_tiedDiag(X,GMM,psi)
         #print('########################################## FIN ITER')
         if len(GMM)==G: 
@@ -117,70 +112,83 @@ def LBG( X,alpha,G,psi, typeOf='Full'):
 
 #==============================================================================
 # ---------------------- GMM _ EM, GMM _ FULL DIAGONAL,K FOLD -----------------
-def GMM_EM(X,gmm,psi= 0.1): #X -> ev
-    llNew=None
-    llOld=None
-    G=len(gmm)
-    N=X.shape[1]
-    while llOld is None or llNew-llOld>1e-6: #how much the likelihood increase
-    #compute the matrix of joint density for sample and components
-        llOld=llNew
+def GMM_EM(X, gmm, psi=0.01):
+    '''
+    EM algorithm for GMM full covariance
+    It estimates the parameters of a GMM that maximize the ll for
+    a training set X
+    If psi is given it's used for constraining the eigenvalues of the
+    covariance matrices to be larger or equal to psi
+    '''
+    llNew = None
+    llOld = None
+    G = len(gmm)
+    N = X.shape[1]
+
+    while llOld is None or llNew - llOld > 1e-6:
+        llOld = llNew
         SJ, SM = logpdf_GMM(X,gmm)
-        llNew=SM.sum()/N #compute the log likelihood for all the data -> samples are independent
-        #E STEP ----- compute posterior
-        #print("E STEP")
-        P=numpy.exp(SJ-SM) #posterior: join - marginal 
-        gmmNew=[]
-        #then we need to do the update and generate updated parameters
-        #for each component of G we need to compute the mean, empirical_covariance and weight (we use the sufficient statistics)
-        #M STEP -------- calcolo nuovi valori
+        llNew = SM.sum()/N
+        P = numpy.exp(SJ-SM)
+        gmmNew = []
         for g in range(G):
-            #print("M STEP")
-            gamma=P[g,:] #simple way to compute weighted sum
-            Z=gamma.sum()
-            F=(mrow(gamma)*X).sum(1) #broadcasted each element of matrix X with the corresponding gamma and then sum over al samples
-            S=numpy.dot(X,(mrow(gamma)*X).T) #matrix matrix multiplication
-            w=Z/N  #peso
-            mu=mcol(F/Z) #media
-            Sigma=S/Z-numpy.dot(mu,mu.T) #empirical_covariance
+            gamma = P[g, :]
+            Z = gamma.sum()
+            F = (mrow(gamma)*X).sum(1)
+            S = numpy.dot(X, (mrow(gamma)*X).T)
+            w = Z/N
+            mu = mcol(F/Z)
+            Sigma = S/Z - numpy.dot(mu, mu.T)
             U, s, _ = numpy.linalg.svd(Sigma)
             s[s<psi] = psi
             Sigma = numpy.dot(U, mcol(s)*U.T)
-            gmmNew.append((w,mu,Sigma))
-        gmm=gmmNew
-        #print(llNew,'llnew') #increase - if decrease problem
-    #print(llNew-llOld,'llnew-llold')
+            gmmNew.append((w, mu, Sigma))
+        gmm = gmmNew
+        # print(llNew)
+    #print(llNew-llOld)
     return gmm
 
-def GMM_EM_tiedDiag(X,gmm,psi= 0.1): #X -> ev
-    llNew=None
-    llOld=None
-    G=len(gmm)
-    N=X.shape[1]
-    while llOld is None or llNew-llOld>1e-6: #how much the likelihood increase
-    #compute the matrix of joint density for sample and components
-        llOld=llNew
-        SJ, SM = logpdf_GMM(X,gmm)
-        llNew=SM.sum()/N #compute the log likelihood for all the data -> samples are independent
-        #E STEP ----- compute posterior
-        #print("E STEP")
-        P=numpy.exp(SJ-SM) #posterior: join - marginal 
-        gmmNew=[]
-        #then we need to do the update and generate updated parameters
-        #for each component of G we need to compute the mean, empirical_covariance and weight (we use the sufficient statistics)
-        #M STEP -------- calcolo nuovi valori
+def GMM_EM_tiedDiag(X,gmm,psi= 0.01): #X -> ev
+    '''
+    EM algorithm for GMM tied diagonal covariance
+    It estimates the parameters of a GMM that maximize the ll for
+    a training set X
+    If psi is given it's used for constraining the eigenvalues of the
+    covariance matrices to be larger or equal to psi
+    '''
+    llNew = None
+    llOld = None
+    G = len(gmm)
+    N = X.shape[1]
+    sigma_array = []
+    while llOld is None or llNew - llOld > 1e-6:
+        llOld = llNew
+        SJ = numpy.zeros((G, N))
+        for g in range(G):
+            SJ[g, :] = logpdf_GAU_ND(
+                X, gmm[g][1], gmm[g][2]) + numpy.log(gmm[g][0])
+        SM = scipy.special.logsumexp(SJ, axis=0)
+        llNew = SM.sum()/N
+        P = numpy.exp(SJ-SM)
+        gmmNew = []
         sigmaTied=numpy.zeros((X.shape[0],X.shape[0]))
         for g in range(G):
-            #print("M STEP")
-            gamma=P[g,:] #simple way to compute weighted sum
-            Z=gamma.sum()
-            F=(mrow(gamma)*X).sum(1) #broadcasted each element of matrix X with the corresponding gamma and then sum over al samples
-            S=numpy.dot(X,(mrow(gamma)*X).T) #matrix matrix multiplication
-            w=Z/N  #peso
-            mu=mcol(F/Z) #media
+            # m step
+            gamma = P[g, :]
+            Z = gamma.sum()
+            F = (mrow(gamma)*X).sum(1)
+            S = numpy.dot(X, (mrow(gamma)*X).T)
+            w = Z/N
+            mu = mcol(F/Z)
+            #Sigma = S/Z - numpy.dot(mu, mu.T)
+            #Sigma = Sigma * numpy.eye(Sigma.shape[0])
+            #Sigma = Sigma * Z
+            #gmmNew.append((w, mu, Sigma))
             sigma = S/Z - numpy.dot(mu, mu.T)
             sigmaTied += Z * sigma
-            gmmNew.append((w, mu))   
+            gmmNew.append((w, mu))  
+
+        # calculate tied covariance
         gmm = gmmNew
         sigmaTied /= N
         sigmaTied *= numpy.eye(sigma.shape[0])
@@ -198,42 +206,42 @@ def GMM_EM_tiedDiag(X,gmm,psi= 0.1): #X -> ev
     #print(llNew-llOld,'llnew-llold')
     return gmm
 
-def GMM_EM_tied(X,gmm,psi=0.01):
-    #print("TIED APPLICATION")
-    llNew=None
-    llOld=None
-    G=len(gmm)
-    N=X.shape[1]
-    while llOld is None or llNew-llOld>1e-5: #how much the likelihood increase
-    #compute the matrix of joint density for sample and components
-        
-        llOld=llNew
-        SJ=numpy.zeros((G,N))
-        #qui devo calcolare joint e marginal
-        #SJ,SM=logpdf_GMM(D,gmm)
-        #llOld=llNew
+def GMM_EM_tied(X, gmm, psi=0.01):
+    '''
+    EM algorithm for GMM tied full covariance
+    It estimates the parameters of a GMM that maximize the ll for
+    a training set X
+    If psi is given it's used for constraining the eigenvalues of the
+    covariance matrices to be larger or equal to psi
+    '''
+    llNew = None
+    llOld = None
+    G = len(gmm)
+    N = X.shape[1]
+    sigma_array = []
+    while llOld is None or llNew - llOld > 1e-6:
+        llOld = llNew
         SJ, SM = logpdf_GMM(X,gmm)
-        llNew=SM.sum()/N #compute the log likelihood for all the data -> samples are independent
-        #E STEP ----- 
-        #print("E STEP")
-        P=numpy.exp(SJ-SM) #posterior: join - marginal 
-        #Modello tied
-        gmmNew=[]
-        #then we need to do the update and generate updated parameters
-        #for each component of G we need to compute the mean, empirical_covariance and weight (we use the sufficient statistics)
-        #M STEP -------- calcolo nuovi valori
+        llNew = SM.sum()/N
+        P = numpy.exp(SJ-SM)
+        gmmNew = []
+
         sigmaTied = numpy.zeros((X.shape[0],X.shape[0]))
         for g in range(G):
-            #print("M STEP")
-            gamma=P[g,:] #simple way to compute weighted sum
-            Z=gamma.sum()
-            F=(mrow(gamma)*X).sum(1) #broadcasted each element of matrix X with the corresponding gamma and then sum over al samples
-            S=numpy.dot(X,(mrow(gamma)*X).T) #matrix matrix multiplication
-            w=Z/N  #peso
-            mu=mcol(F/Z) #media
-            Sigma=S/Z-numpy.dot(mu,mu.T) #empirical_covariance
-            sigmaTied+=Z*Sigma
+            # m step
+            gamma = P[g, :]
+            Z = gamma.sum()
+            F = (mrow(gamma)*X).sum(1)
+            S = numpy.dot(X, (mrow(gamma)*X).T)
+            w = Z/N
+            mu = mcol(F/Z)
+            Sigma = S/Z - numpy.dot(mu, mu.T)
+            sigmaTied += Z*Sigma
             gmmNew.append((w,mu))
+            #Sigma = Sigma * Z
+            #gmmNew.append((w, mu, Sigma))
+
+        # calculate tied covariance
         gmm=gmmNew
         sigmaTied /= N
         U,s,_ = numpy.linalg.svd(sigmaTied)
@@ -261,40 +269,44 @@ def GMM_Full(DTR,DTE,LTR,alpha, G, typeOf ,psi = 0.01):
 
     return llr1-llr0
         
-def GMM_EM_diag(X,gmm,psi=0.01):
+def GMM_EM_diag(X, gmm, psi=0.01):
+    '''
+    EM algorithm for GMM diagonal covariance
+    It estimates the parameters of a GMM that maximize the ll for
+    a training set X
+    If psi is given it's used for constraining the eigenvalues of the
+    covariance matrices to be larger or equal to psi
+    '''
     llNew = None
     llOld = None
-    G=len(gmm)
+    G = len(gmm)
     N = X.shape[1]
-    while llOld == None or llNew-llOld>1e-5:
-        llOld=llNew
-        SJ=numpy.zeros((G,N))
-        #qui devo calcolare joint e marginal
-        #llOld=llNew
+    while llOld is None or llNew - llOld > 1e-6:
+        llOld = llNew
         SJ, SM = logpdf_GMM(X,gmm)
-        llNew=SM.sum()/N #compute the log likelihood for all the data -> samples are independent
-        #E STEP ----- 
-        #print("E STEP")
-        P = numpy.exp(SJ - SM)
-        #then we need to do the update and generate updated parameters
-        #for each component of G we need to compute the mean, empirical_covariance and weight (we use the sufficient statistics)
-        #M STEP -------- calcolo nuovi valori
+        llNew = SM.sum()/N
+        P = numpy.exp(SJ-SM)
+
         gmmNew = []
-        for i in range(G):
-            gamma = P[i, :]
+        for g in range(G):
+            # m step
+            gamma = P[g, :]
             Z = gamma.sum()
             F = (mrow(gamma)*X).sum(1)
             S = numpy.dot(X, (mrow(gamma)*X).T)
             w = Z/N
             mu = mcol(F/Z)
-            sigma = S/Z - numpy.dot(mu, mu.T)
-            sigma *= numpy.eye(sigma.shape[0])
-            U, s, _ = numpy.linalg.svd(sigma)
-            s[s<psi] = psi
+            Sigma = S/Z - numpy.dot(mu, mu.T)
+            Sigma = Sigma * numpy.eye(Sigma.shape[0])
+            U, s, _ = numpy.linalg.svd(Sigma)
+            s[s < psi] = psi
             sigma = numpy.dot(U, mcol(s)*U.T)
             gmmNew.append((w, mu, sigma))
         gmm = gmmNew
+        # print(llNew)
+    # print(llNew)
     return gmm
+
 '''
 def k_fold(D,L,k, alpha, G, seed=0):
     nTrain = int(D.shape[1]*(k-1)/k)

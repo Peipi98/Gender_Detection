@@ -22,6 +22,7 @@ def validation_GMM(title, pi, GMM_llrs, LTE):
     return round(llrs_tot, 3)
     
 def ll_GMM(D, L, Dte, Lte, llr, cov, comp, i):
+    # GMM_llrs, 'full', comp, i
     #CLASS PRIORS: WE CONSIDER A BALANCED APPLICATION
     prior_0 = 0.5
     prior_1 = 0.5
@@ -34,7 +35,7 @@ def ll_GMM(D, L, Dte, Lte, llr, cov, comp, i):
     optimal_alpha = 0.1
     optimal_psi = 0.01
     
-    llr.extend(GMM_Full(D, Dte, L, optimal_alpha, 2 ** optimal_comp, optimal_cov))
+    llr.extend(GMM_Full(D, Dte, L, optimal_alpha, 2 ** optimal_comp, optimal_cov).tolist())
     return llr
     
     #gmm = GMM(D, L, Dte, Lte, [prior_0, prior_1], iterations=optimal_comp, alpha=optimal_alpha, psi=optimal_psi, typeOfGmm=optimal_cov)
@@ -170,7 +171,7 @@ if __name__ == "__main__":
     
     components = 7
     # We'll train from 1 to 2^7 components
-    componentsToTry=[0,1,2,3,4,5,6,7] 
+    componentsToTry=[1,2,3,4,5,6,7] 
     
     for comp in componentsToTry:
         print('RAW DATA')
