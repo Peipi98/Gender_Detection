@@ -1,4 +1,5 @@
 from validation.validation_LR import evaluation_LR
+from validation.validation_weighted_LR import evaluation_weighted_LR
 from validation.validation_MVG import evaluation_MVG
 from validation.validation_SVM import evaluation_SVM
 from validation.validation_SVM_RFB import evaluation_SVM_RFB
@@ -23,7 +24,9 @@ if __name__ == "__main__":
     print("############    Logistic Regression - RAW    ##############")
     L = [1e-6, 1e-4, 1e-2, 1.0]
 
-    evaluation_LR(DTR, LTR, L, 'RAW_')
+#    evaluation_LR(DTR, LTR, L, 'RAW_')
+    L = [1e-4, 1e-2, 1e-1, 1.0]
+#    evaluation_weighted_LR(DTR, LTR, L, 'RAW_')
 
     print("############    Support Vector Machine - RAW    ##############")
     K_arr = [0.1, 1.0, 10.0]

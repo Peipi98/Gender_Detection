@@ -147,6 +147,14 @@ def logistic_reg_score(DTR, LTR, DTE, l):
     STE = numpy.dot(_w.T, DTE) + _b
     return STE
 
+def weighted_logistic_reg_score(DTR, LTR, DTE, l):
+    logreg_obj = weighted_logreg_obj_wrap(numpy.array(DTR), LTR, l)
+    _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0] + 1), approx_grad=True)
+    _w = _v[0:DTR.shape[0]]
+    _b = _v[-1]
+    STE = numpy.dot(_w.T, DTE) + _b
+    return STE
+
 
 def generative_acc_err(DTE, DTR, LTE, LTR, title):
     _, LPred2 = MVG(DTE, DTR, LTR)
