@@ -102,7 +102,7 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True):
     print(t)
 
 
-def evaluation_SVM(DTR, LTR, K_arr, C_arr, appendToTitle, PCA_Flag=True):
+def validation_SVM(DTR, LTR, K_arr, C_arr, appendToTitle, PCA_Flag=True):
     for K in K_arr:
         for C in C_arr:
             kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=False)

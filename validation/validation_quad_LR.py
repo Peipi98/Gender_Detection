@@ -167,7 +167,7 @@ def kfold_QUAD_LR_calibration(DTR, LTR, l):
     return np.hstack(scores_append), LR_labels
 
 
-def evaluation_quad_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True):
+def validation_quad_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True):
     for l in L:
         kfold_QUAD_LR(DTR, LTR, l, appendToTitle, PCA_Flag)
 

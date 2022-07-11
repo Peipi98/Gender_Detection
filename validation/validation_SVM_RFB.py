@@ -138,7 +138,7 @@ def single_F_RFB(D, L, C, K, gamma):
     print(t)
 
 
-def evaluation_SVM_RFB(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=True):
+def validation_SVM_RFB(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=True):
     # for K in [1.]:
     #     for gamma in [0.001]:
     #         kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=0.1, gamma=gamma, PCA_Flag=False)

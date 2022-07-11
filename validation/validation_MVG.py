@@ -58,7 +58,7 @@ def evaluation(title, pi, MVG_res, MVG_naive, MVG_t, MVG_nt, MVG_labels, appendT
     print(t)
 
 
-def evaluation_MVG(DTR, LTR, DTE, LTE, appendToTitle, PCA_Flag=True):
+def validation_MVG(DTR, LTR, DTE, LTE, appendToTitle, PCA_Flag=True):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)

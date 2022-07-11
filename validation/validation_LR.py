@@ -146,7 +146,7 @@ def kfold_LR_calibration(DTR, LTR, l):
     return np.hstack(scores_append), LR_labels
 
 
-def evaluation_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True):
+def validation_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True):
     for l in L:
         kfold_LR(DTR, LTR, l, appendToTitle, PCA_Flag)
 

@@ -131,7 +131,7 @@ def single_F_POLY(D, L, C, K, costant=1.0, degree=2):
     print(t)
 
 
-def evaluation_SVM_polynomial(DTR, LTR, K_arr, C, appendToTitle, CON_array, PCA_Flag=True):
+def validation_SVM_polynomial(DTR, LTR, K_arr, C, appendToTitle, CON_array, PCA_Flag=True):
     # for costant in [1000]:
     #     for degree in [4]:
     #         for K in [1., 10.]:
