@@ -151,7 +151,7 @@ def bayes_error_min_act_plot(D, LTE, title, ylim):
     pylab.plot(p, bayes_error_plot(p, D, LTE, minCost=False), color='r')
     pylab.plot(p, bayes_error_plot(p, D, LTE, minCost=True), color='b')
     pylab.ylim(0, ylim)
-    pylab.savefig('./images/DCF_' + title + '.png')
+    pylab.savefig('../images/DCF_' + title + '.png')
     pylab.show()
 
 
