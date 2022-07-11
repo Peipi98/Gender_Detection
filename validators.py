@@ -128,14 +128,14 @@ def compute_min_DCF(scores, labels, pi, Cfn, Cfp):
     return numpy.array(dcfList).min()
 
 
-def bayes_error_plot(pArray, scores, labels, minCost=False):
+def bayes_error_plot(pArray, scores, labels, minCost=False, th=None):
     y = []
     for p in pArray:
         pi = 1.0 / (1.0 + numpy.exp(-p))
         if minCost:
             y.append(compute_min_DCF(scores, labels, pi, 1, 1))
         else:
-            y.append(compute_act_DCF(scores, labels, pi, 1, 1))
+            y.append(compute_act_DCF(scores, labels, pi, 1, 1, th))
     return numpy.array(y)
 
 def bayes_error_plot_compare(pi, scores, labels):
