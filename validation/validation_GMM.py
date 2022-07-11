@@ -8,7 +8,7 @@ from mlFunc import *
 from validators import *
 from classifiers import *
 from prettytable import PrettyTable
-from Classifiers.GMM import GMM
+from Classifiers.GMM import GMM_Full
 import scipy.stats as stats
 
 def validation_GMM(title, pi, GMM_llrs, LTE):
@@ -34,15 +34,21 @@ def ll_GMM(D, L, Dte, Lte, llr, cov, comp, i):
     optimal_alpha = 0.1
     optimal_psi = 0.01
     
-    gmm = GMM(D, L, Dte, Lte, [prior_0, prior_1], iterations=optimal_comp, alpha=optimal_alpha, psi=optimal_psi, typeOfGmm=optimal_cov)
+    llr.extend(GMM_Full(D, Dte, L, optimal_alpha, 2 ** optimal_comp, optimal_cov))
+    return llr
+    
+    #gmm = GMM(D, L, Dte, Lte, [prior_0, prior_1], iterations=optimal_comp, alpha=optimal_alpha, psi=optimal_psi, typeOfGmm=optimal_cov)
 
-    gmm.train()
-    gmm.test()
+    #return gmm.train()
+    #gmm.test()
+    
+    
     
     #llr.append(gmm.llrs)
-    llr = np.append(llr, gmm.llrs)
-    llr = np.hstack(llr)
-    return llr
+    
+    # llr = np.append(llr, gmm.llrs)
+    # llr = np.hstack(llr)
+    # return llr
 
 def print_minDCF_tables(score_raw, score_gauss, components):
     types = ['full-cov', 'diag-cov', 'tied full-cov', 'tied diag-cov']
@@ -164,7 +170,9 @@ if __name__ == "__main__":
     
     components = 7
     # We'll train from 1 to 2^7 components
-    for comp in range(components+1):
+    componentsToTry=[0,1,2,3,4,5,6,7] 
+    
+    for comp in componentsToTry:
         print('RAW DATA')
         score_raw.append(kfold_GMM(DTR, LTR, comp))
         print('GAUSSIANIZED')

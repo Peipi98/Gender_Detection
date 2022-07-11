@@ -1,9 +1,30 @@
-# -*- coding: utf-8 -*-
 
-import numpy
-import scipy
-from mlFunc import empirical_covariance, empirical_mean, mrow, mcol, logpdf_GAU_ND, get_DTRs
+import numpy 
+import scipy.special 
+from mlFunc import empirical_covariance, gaussianize_features
 from validators import compute_min_DCF
+import scipy.stats as stats
+
+
+#==============================================================================
+# ------ BASIC FUNCTIONS --------
+
+def mcol(v):
+    #reshape a row vector in a column vector
+    #!!!! if u write (v.size,) it will remain a ROW vector
+    #So don't forget the column value "1"
+    return v.reshape((v.size,1))
+
+def mrow(v):
+    return v.reshape((1, v.size))
+
+def empirical_mean(D):
+    return mcol(D.mean(1))
+
+#==============================================================================
+
+#==============================================================================
+# ----------- LOG DENSITIES AND MARGINALS -------------------------------------
 
 def logpdf_GMM(X, gmm):
     S = numpy.zeros((len(gmm), X.shape[1]))
@@ -17,336 +38,49 @@ def logpdf_GMM(X, gmm):
     
     return S, logdens
 
-def initialize_GMM(D, n):
-    gmm = []
+def logpdf_GAU_ND(X,mu,C) :
+    
+    res = -0.5*X.shape[0]*numpy.log(2*numpy.pi)
+    res += -0.5*numpy.linalg.slogdet(C)[1]
+    res += -0.5*((X-mu)*numpy.dot(numpy.linalg.inv(C), (X-mu))).sum(0) #1
+    return res
+#==============================================================================
 
-    for i in range(n):
-        weights = 1/n
-        mu = mcol(numpy.array(D.mean(1)))
-        C = numpy.matrix(empirical_covariance(D, mu))
+#==============================================================================
+# --------- LOAD FILE ---------------------------------------------------------
+def load(fname):
+    DList = []
+    labelsList = []
 
-        gmm.append((weights, mu, C))
+    with open(fname) as f:
+        try:
+            for line in f:
+                attrs = line.replace(" ", "").split(',')[0:12]
+                attrs = mcol(numpy.array([float(i) for i in attrs]))
+                name = line.split(',')[-1].strip()
+                label = int(name)
+                DList.append(attrs)
+                labelsList.append(label)
+        except:
+            pass
+    return numpy.hstack(DList), numpy.array(labelsList, dtype=numpy.int32)
+#==============================================================================
 
-    return [(i, numpy.asarray(j), numpy.asarray(k)) for i, j, k in gmm]
-
-
-def GMM_ll_perSample(X, gmm):
-    G = len(gmm)
-    N = X.shape[1]
-    S = numpy.zeros((G, N))
-
-    for g in range(G):
-        S[g, :] = logpdf_GAU_ND(X, gmm[g][1], gmm[g][2]) + numpy.log(gmm[g][0])
-    return scipy.special.logsumexp(S, axis=0)
-
-
-def GMM_EM_full(X, gmm, psi=0.01):
-    '''
-    EM algorithm for GMM full covariance
-    It estimates the parameters of a GMM that maximize the ll for
-    a training set X
-    If psi is given it's used for constraining the eigenvalues of the
-    covariance matrices to be larger or equal to psi
-    '''
-    llNew = None
-    llOld = None
-    G = len(gmm)
-    N = X.shape[1]
-
-    while llOld is None or llNew - llOld > 1e-6:
-        llOld = llNew
-        SJ, SM = logpdf_GMM(X,gmm)
-        llNew = SM.sum()/N
-        P = numpy.exp(SJ-SM)
-        gmmNew = []
-        for g in range(G):
-            gamma = P[g, :]
-            Z = gamma.sum()
-            F = (mrow(gamma)*X).sum(1)
-            S = numpy.dot(X, (mrow(gamma)*X).T)
-            w = Z/N
-            mu = mcol(F/Z)
-            Sigma = S/Z - numpy.dot(mu, mu.T)
-            U, s, _ = numpy.linalg.svd(Sigma)
-            s[s<psi] = psi
-            Sigma = numpy.dot(U, mcol(s)*U.T)
-            gmmNew.append((w, mu, Sigma))
-        gmm = gmmNew
-        # print(llNew)
-    #print(llNew-llOld)
-    return gmm
-
-
-def GMM_EM_diag(X, gmm, psi=0.01):
-    '''
-    EM algorithm for GMM diagonal covariance
-    It estimates the parameters of a GMM that maximize the ll for
-    a training set X
-    If psi is given it's used for constraining the eigenvalues of the
-    covariance matrices to be larger or equal to psi
-    '''
-    llNew = None
-    llOld = None
-    G = len(gmm)
-    N = X.shape[1]
-    while llOld is None or llNew - llOld > 1e-6:
-        llOld = llNew
-        SJ, SM = logpdf_GMM(X,gmm)
-        llNew = SM.sum()/N
-        P = numpy.exp(SJ-SM)
-
-        gmmNew = []
-        for g in range(G):
-            # m step
-            gamma = P[g, :]
-            Z = gamma.sum()
-            F = (mrow(gamma)*X).sum(1)
-            S = numpy.dot(X, (mrow(gamma)*X).T)
-            w = Z/N
-            mu = mcol(F/Z)
-            Sigma = S/Z - numpy.dot(mu, mu.T)
-            Sigma = Sigma * numpy.eye(Sigma.shape[0])
-            U, s, _ = numpy.linalg.svd(Sigma)
-            s[s < psi] = psi
-            sigma = numpy.dot(U, mcol(s)*U.T)
-            gmmNew.append((w, mu, sigma))
-        gmm = gmmNew
-        # print(llNew)
-    # print(llNew)
-    return gmm
-
-
-def GMM_EM_tied_full(X, gmm, psi=0.01):
-    '''
-    EM algorithm for GMM tied full covariance
-    It estimates the parameters of a GMM that maximize the ll for
-    a training set X
-    If psi is given it's used for constraining the eigenvalues of the
-    covariance matrices to be larger or equal to psi
-    '''
-    llNew = None
-    llOld = None
-    G = len(gmm)
-    N = X.shape[1]
-    sigma_array = []
-    while llOld is None or llNew - llOld > 1e-6:
-        llOld = llNew
-        SJ, SM = logpdf_GMM(X,gmm)
-        llNew = SM.sum()/N
-        P = numpy.exp(SJ-SM)
-        gmmNew = []
-
-        sigmaTied = numpy.zeros((X.shape[0],X.shape[0]))
-        for g in range(G):
-            # m step
-            gamma = P[g, :]
-            Z = gamma.sum()
-            F = (mrow(gamma)*X).sum(1)
-            S = numpy.dot(X, (mrow(gamma)*X).T)
-            w = Z/N
-            mu = mcol(F/Z)
-            Sigma = S/Z - numpy.dot(mu, mu.T)
-            sigmaTied += Z*Sigma
-            gmmNew.append((w,mu))
-            #Sigma = Sigma * Z
-            #gmmNew.append((w, mu, Sigma))
-
-        # calculate tied covariance
-        gmm=gmmNew
-        sigmaTied /= N
-        U,s,_ = numpy.linalg.svd(sigmaTied)
-        s[s<psi]=psi 
-        sigmaTied = numpy.dot(U, mcol(s)*U.T)
-
-        gmmNew=[]
-        for g in range(G):
-            (w,mu)=gmm[g]
-            gmmNew.append((w,mu,sigmaTied))
-        gmm=gmmNew
-        #print(llNew,'llnew') #increase - if decrease problem
-    #print(llNew-llOld,'llnew-llold')
-    return gmm
-'''
-        sigma_array = []
-        for g in range(G):
-            sigma_array.append(gmmNew[g][2])
-        tiedSigma = numpy.array(sigma_array).sum(axis=0) / N
-        U, s, _ = numpy.linalg.svd(tiedSigma)
-        s[s < psi] = psi
-        covNew = numpy.dot(U, mcol(s)*U.T)
-        gmmNew = [(w, mu, covNew) for w, mu, _ in gmmNew]
-
-        gmm = gmmNew
-        # print(llNew)
-    # print(llNew)
-
-    return gmm
-'''
-
-def GMM_EM_tied_diag(X, gmm, psi=0.01):
-    '''
-    EM algorithm for GMM tied diagonal covariance
-    It estimates the parameters of a GMM that maximize the ll for
-    a training set X
-    If psi is given it's used for constraining the eigenvalues of the
-    covariance matrices to be larger or equal to psi
-    '''
-    llNew = None
-    llOld = None
-    G = len(gmm)
-    N = X.shape[1]
-    sigma_array = []
-    while llOld is None or llNew - llOld > 1e-6:
-        llOld = llNew
-        SJ = numpy.zeros((G, N))
-        for g in range(G):
-            SJ[g, :] = logpdf_GAU_ND(
-                X, gmm[g][1], gmm[g][2]) + numpy.log(gmm[g][0])
-        SM = scipy.special.logsumexp(SJ, axis=0)
-        llNew = SM.sum()/N
-        P = numpy.exp(SJ-SM)
-        gmmNew = []
-        sigmaTied=numpy.zeros((X.shape[0],X.shape[0]))
-        for g in range(G):
-            # m step
-            gamma = P[g, :]
-            Z = gamma.sum()
-            F = (mrow(gamma)*X).sum(1)
-            S = numpy.dot(X, (mrow(gamma)*X).T)
-            w = Z/N
-            mu = mcol(F/Z)
-            #Sigma = S/Z - numpy.dot(mu, mu.T)
-            #Sigma = Sigma * numpy.eye(Sigma.shape[0])
-            #Sigma = Sigma * Z
-            #gmmNew.append((w, mu, Sigma))
-            sigma = S/Z - numpy.dot(mu, mu.T)
-            sigmaTied += Z * sigma
-            gmmNew.append((w, mu))  
-
-        # calculate tied covariance
-        gmm = gmmNew
-        sigmaTied /= N
-        sigmaTied *= numpy.eye(sigma.shape[0])
-        U, s, _ = numpy.linalg.svd(sigmaTied)
-        s[s<psi] = psi
-        sigmaTied = numpy.dot(U, mcol(s)*U.T)
-        
-        newGmm = []
-        for i in range(len(gmm)):
-            (w, mu) = gmm[i]
-            newGmm.append((w, mu, sigmaTied))
-        
-        gmm = newGmm
-        #print(llNew,'llnew') #increase - if decrease problem
-    #print(llNew-llOld,'llnew-llold')
-    return gmm
-'''
-        sigma_array = []
-        for g in range(G):
-            sigma_array.append(gmmNew[g][2])
-        tiedSigma = numpy.array(sigma_array).sum(axis=0) / N
-        U, s, _ = numpy.linalg.svd(tiedSigma)
-        s[s < psi] = psi
-        covNew = numpy.dot(U, mcol(s)*U.T)
-        gmmNew = [(w, mu, covNew) for w, mu, _ in gmmNew]
-
-        gmm = gmmNew
-        # print(llNew)
-    # print(llNew)
-
-    return gmm
-'''
-
-
-def GMM_split(gmm, alpha=0.1):
-    '''
-    Split a GMM into two GMMs
-    '''
-    size = len(gmm)
-    splitted = []
+#==============================================================================
+# -------------------------------- LBG ----------------------------------------
+def split(GMM, alpha = 0.1): 
+    size = len(GMM)
+    splittedGMM = []
     for i in range(size):
-        '''
-        U, s, V = numpy.linalg.svd(gmm[i][2])
-        d = U[:, 0:1] * s[0]**0.5 * alpha
-        # (wg/2, mu+d, sigma)
-        splitted.append((gmm[i][0]/2, gmm[i][1]+d, gmm[i][2]))
-        # (wg/2, mu-d, sigma)
-        splitted.append((gmm[i][0]/2, gmm[i][1]-d, gmm[i][2]))
-        '''
-        (w,mu,sigma)=gmm[i]
-        U,s,vh=numpy.linalg.svd(sigma)
-        d=U[:,0:1]*s[0]**0.5*alpha
-        splitted.append((w/2, mu + d, sigma))
-        splitted.append((w/2, mu - d, sigma))
-    return splitted
+        U, s, Vh = numpy.linalg.svd(GMM[i][2])
+        # compute displacement vector
+        d = U[:, 0:1] * s[0] ** 0.5 * alpha
+        splittedGMM.append((GMM[i][0]/2, GMM[i][1]+d, GMM[i][2]))
+        splittedGMM.append((GMM[i][0]/2, GMM[i][1]-d, GMM[i][2]))
+    return splittedGMM
 
-
-def GMM_LBG(X, iter, alpha=0.1, psi=0.01, type='full'):
-    '''
-    LBG algorithm for GMM
-    iter is the number of iterations, for each iteration it
-    split the data in two parts:
-    (wg/2, mu+d, sigma) and (wg/2, mu-d, sigma)
-    if iter == 0 it returns gmm with only 1 component
-    '''
-    # start with 1g
-    U, s, _ = numpy.linalg.svd(empirical_covariance(X,empirical_mean(X)))
-    s[s<psi] = psi
-    covNew = numpy.dot(U, mcol(s)*U.T)
-    gmm = [(1,empirical_mean(X), covNew)]
-    '''
-    wg = 1.0
-    mu = mcol(X.mean(1))
-    c = empirical_covariance(X, mu)
-    gmm_1 = [(wg, mu, c)]
-    '''
-    # initialize gmm
-    # gmm = EM_FN(X, gmm_1, psi)
-    
-    if type == 'full':
-        gmm = GMM_EM_full(X, gmm, psi)
-    elif type == 'diag':
-        gmm = GMM_EM_diag(X, gmm, psi)
-    elif type == 'tied_full':
-        gmm = GMM_EM_tied_full(X, gmm, psi)
-    elif type == 'tied_diag':
-        gmm = GMM_EM_tied_diag(X, gmm, psi)
-
-    # iter == 0 -> 1g
-    if iter == 0:
-        return gmm
-
-    for i in range(iter):
-        gmm = GMM_split(gmm, alpha=alpha)
-        # gmm = EM_FN(X, gmm, psi)
-        if type == 'full':
-            gmm = GMM_EM_full(X, gmm, psi)
-        elif type == 'diag':
-            gmm = GMM_EM_diag(X, gmm, psi)
-        elif type == 'tied_full':
-            gmm = GMM_EM_tied_full(X, gmm, psi)
-        elif type == 'tied_diag':
-            gmm = GMM_EM_tied_diag(X, gmm, psi)
-    return gmm
-    
-    '''
-    while len(gmm) <= iter:
-        if len(gmm) != 1:
-            # gmm = EM_FN(X, gmm, psi)
-            if type == 'full':
-                gmm = GMM_EM_full(X, gmm, psi)
-            elif type == 'diag':
-                gmm = GMM_EM_diag(X, gmm, psi)
-            elif type == 'tied_full':
-                gmm = GMM_EM_tied_full(X, gmm, psi)
-            elif type == 'tied_diag':
-                gmm = GMM_EM_tied_diag(X, gmm, psi)
-        if len(gmm)==iter: 
-            break
-        gmm = GMM_split(gmm, alpha=alpha)
-    return gmm
-    '''
-def LBG( X, G, alpha,psi, typeOf='full'):
+#
+def LBG( X,alpha,G,psi, typeOf='Full'):
     U, s, _ = numpy.linalg.svd(empirical_covariance(X,empirical_mean(X)))
     s[s<psi] = psi
     covNew = numpy.dot(U, mcol(s)*U.T)
@@ -356,13 +90,13 @@ def LBG( X, G, alpha,psi, typeOf='full'):
         #print('########################################## NEW ITER')
         if len(GMM) != 1:
             if typeOf=='Full':
-                GMM=GMM_EM_full(X,GMM,psi)
-            if typeOf=='diag':
+                GMM=GMM_EM(X,GMM,psi)
+            if typeOf=='Diag':
                 GMM=GMM_EM_diag(X,GMM,psi)
-            if typeOf=='tied_full':
-                GMM=GMM_EM_tied_full(X,GMM,psi)
-            if typeOf=='tied_diag':
-                GMM=GMM_EM_tied_diag(X,GMM,psi)
+            if typeOf=='Tied':
+                GMM=GMM_EM_tied(X,GMM,psi)
+            if typeOf=='TiedDiag':
+                GMM=GMM_EM_tiedDiag(X,GMM,psi)
         #print('########################################## FIN ITER')
         if len(GMM)==G: 
             break
@@ -379,73 +113,317 @@ def LBG( X, G, alpha,psi, typeOf='full'):
         GMM = gmmNew
             
     return GMM
+#==============================================================================
 
-class GMM:
-    def __init__(self, DTR, LTR, DTE, LTE, prior_prob_array, iterations=2, alpha=0.1, psi=0.01, typeOfGmm="full"):
-        # initialization of the attributes
-        self.DTR = DTR
-        self.LTR = LTR
-        self.DTE = DTE
-        self.LTE = LTE
-        self.iterations = iterations #if iterations == 0 else int(numpy.log2(iterations))
-        self.type = typeOfGmm
-        self.alpha = alpha
-        self.psi = psi
+#==============================================================================
+# ---------------------- GMM _ EM, GMM _ FULL DIAGONAL,K FOLD -----------------
+def GMM_EM(X,gmm,psi= 0.1): #X -> ev
+    llNew=None
+    llOld=None
+    G=len(gmm)
+    N=X.shape[1]
+    while llOld is None or llNew-llOld>1e-6: #how much the likelihood increase
+    #compute the matrix of joint density for sample and components
+        llOld=llNew
+        SJ, SM = logpdf_GMM(X,gmm)
+        llNew=SM.sum()/N #compute the log likelihood for all the data -> samples are independent
+        #E STEP ----- compute posterior
+        #print("E STEP")
+        P=numpy.exp(SJ-SM) #posterior: join - marginal 
+        gmmNew=[]
+        #then we need to do the update and generate updated parameters
+        #for each component of G we need to compute the mean, empirical_covariance and weight (we use the sufficient statistics)
+        #M STEP -------- calcolo nuovi valori
+        for g in range(G):
+            #print("M STEP")
+            gamma=P[g,:] #simple way to compute weighted sum
+            Z=gamma.sum()
+            F=(mrow(gamma)*X).sum(1) #broadcasted each element of matrix X with the corresponding gamma and then sum over al samples
+            S=numpy.dot(X,(mrow(gamma)*X).T) #matrix matrix multiplication
+            w=Z/N  #peso
+            mu=mcol(F/Z) #media
+            Sigma=S/Z-numpy.dot(mu,mu.T) #empirical_covariance
+            U, s, _ = numpy.linalg.svd(Sigma)
+            s[s<psi] = psi
+            Sigma = numpy.dot(U, mcol(s)*U.T)
+            gmmNew.append((w,mu,Sigma))
+        gmm=gmmNew
+        #print(llNew,'llnew') #increase - if decrease problem
+    #print(llNew-llOld,'llnew-llold')
+    return gmm
 
-        self.mu_array = []
-        self.cov_array = []
-        self.prior_prob_array = prior_prob_array
+def GMM_EM_tiedDiag(X,gmm,psi= 0.1): #X -> ev
+    llNew=None
+    llOld=None
+    G=len(gmm)
+    N=X.shape[1]
+    while llOld is None or llNew-llOld>1e-6: #how much the likelihood increase
+    #compute the matrix of joint density for sample and components
+        llOld=llNew
+        SJ, SM = logpdf_GMM(X,gmm)
+        llNew=SM.sum()/N #compute the log likelihood for all the data -> samples are independent
+        #E STEP ----- compute posterior
+        #print("E STEP")
+        P=numpy.exp(SJ-SM) #posterior: join - marginal 
+        gmmNew=[]
+        #then we need to do the update and generate updated parameters
+        #for each component of G we need to compute the mean, empirical_covariance and weight (we use the sufficient statistics)
+        #M STEP -------- calcolo nuovi valori
+        sigmaTied=numpy.zeros((X.shape[0],X.shape[0]))
+        for g in range(G):
+            #print("M STEP")
+            gamma=P[g,:] #simple way to compute weighted sum
+            Z=gamma.sum()
+            F=(mrow(gamma)*X).sum(1) #broadcasted each element of matrix X with the corresponding gamma and then sum over al samples
+            S=numpy.dot(X,(mrow(gamma)*X).T) #matrix matrix multiplication
+            w=Z/N  #peso
+            mu=mcol(F/Z) #media
+            sigma = S/Z - numpy.dot(mu, mu.T)
+            sigmaTied += Z * sigma
+            gmmNew.append((w, mu))   
+        gmm = gmmNew
+        sigmaTied /= N
+        sigmaTied *= numpy.eye(sigma.shape[0])
+        U, s, _ = numpy.linalg.svd(sigmaTied)
+        s[s<psi] = psi
+        sigmaTied = numpy.dot(U, mcol(s)*U.T)
+        
+        newGmm = []
+        for i in range(len(gmm)):
+            (w, mu) = gmm[i]
+            newGmm.append((w, mu, sigmaTied))
+        
+        gmm = newGmm
+        #print(llNew,'llnew') #increase - if decrease problem
+    #print(llNew-llOld,'llnew-llold')
+    return gmm
 
-        self.gmm_array = []
-        self.SPost = []
-        self.llrs = 0.
-        self.predicted_labels = []
-        self.accuracy = 0.
-        self.error = 0.
+def GMM_EM_tied(X,gmm,psi=0.01):
+    #print("TIED APPLICATION")
+    llNew=None
+    llOld=None
+    G=len(gmm)
+    N=X.shape[1]
+    while llOld is None or llNew-llOld>1e-5: #how much the likelihood increase
+    #compute the matrix of joint density for sample and components
+        
+        llOld=llNew
+        SJ=numpy.zeros((G,N))
+        #qui devo calcolare joint e marginal
+        #SJ,SM=logpdf_GMM(D,gmm)
+        #llOld=llNew
+        SJ, SM = logpdf_GMM(X,gmm)
+        llNew=SM.sum()/N #compute the log likelihood for all the data -> samples are independent
+        #E STEP ----- 
+        #print("E STEP")
+        P=numpy.exp(SJ-SM) #posterior: join - marginal 
+        #Modello tied
+        gmmNew=[]
+        #then we need to do the update and generate updated parameters
+        #for each component of G we need to compute the mean, empirical_covariance and weight (we use the sufficient statistics)
+        #M STEP -------- calcolo nuovi valori
+        sigmaTied = numpy.zeros((X.shape[0],X.shape[0]))
+        for g in range(G):
+            #print("M STEP")
+            gamma=P[g,:] #simple way to compute weighted sum
+            Z=gamma.sum()
+            F=(mrow(gamma)*X).sum(1) #broadcasted each element of matrix X with the corresponding gamma and then sum over al samples
+            S=numpy.dot(X,(mrow(gamma)*X).T) #matrix matrix multiplication
+            w=Z/N  #peso
+            mu=mcol(F/Z) #media
+            Sigma=S/Z-numpy.dot(mu,mu.T) #empirical_covariance
+            sigmaTied+=Z*Sigma
+            gmmNew.append((w,mu))
+        gmm=gmmNew
+        sigmaTied /= N
+        U,s,_ = numpy.linalg.svd(sigmaTied)
+        s[s<psi]=psi 
+        sigmaTied = numpy.dot(U, mcol(s)*U.T)
 
-        self.dcf = 0.
+        gmmNew=[]
+        for g in range(G):
+            (w,mu)=gmm[g]
+            gmmNew.append((w,mu,sigmaTied))
+        gmm=gmmNew
+        #print(llNew,'llnew') #increase - if decrease problem
+    #print(llNew-llOld,'llnew-llold')
+    return gmm
 
-    def train(self):
+def GMM_Full(DTR,DTE,LTR,alpha, G, typeOf ,psi = 0.01):
+    
+    DTR0=DTR[:,LTR==0]
+    gmm0=LBG(DTR0,alpha,G,psi,typeOf)
+    _,llr0=logpdf_GMM(DTE,gmm0)
 
-        DTR_array = get_DTRs(self.DTR, self.LTR, self.LTR.max() + 1)
+    DTR1=DTR[:,LTR==1]
+    gmm1=LBG(DTR1,alpha,G,psi,typeOf)
+    _,llr1=logpdf_GMM(DTE,gmm1)
 
-        for DTRi in DTR_array:
-            mu_i = numpy.mean(DTRi, axis=1)
-            mu_i = mu_i.reshape((mu_i.shape[0], 1))
-            cov_i = 1/DTRi.shape[1] * numpy.dot(DTRi-mu_i, (DTRi-mu_i).T)
+    return llr1-llr0
+        
+def GMM_EM_diag(X,gmm,psi=0.01):
+    llNew = None
+    llOld = None
+    G=len(gmm)
+    N = X.shape[1]
+    while llOld == None or llNew-llOld>1e-5:
+        llOld=llNew
+        SJ=numpy.zeros((G,N))
+        #qui devo calcolare joint e marginal
+        #llOld=llNew
+        SJ, SM = logpdf_GMM(X,gmm)
+        llNew=SM.sum()/N #compute the log likelihood for all the data -> samples are independent
+        #E STEP ----- 
+        #print("E STEP")
+        P = numpy.exp(SJ - SM)
+        #then we need to do the update and generate updated parameters
+        #for each component of G we need to compute the mean, empirical_covariance and weight (we use the sufficient statistics)
+        #M STEP -------- calcolo nuovi valori
+        gmmNew = []
+        for i in range(G):
+            gamma = P[i, :]
+            Z = gamma.sum()
+            F = (mrow(gamma)*X).sum(1)
+            S = numpy.dot(X, (mrow(gamma)*X).T)
+            w = Z/N
+            mu = mcol(F/Z)
+            sigma = S/Z - numpy.dot(mu, mu.T)
+            sigma *= numpy.eye(sigma.shape[0])
+            U, s, _ = numpy.linalg.svd(sigma)
+            s[s<psi] = psi
+            sigma = numpy.dot(U, mcol(s)*U.T)
+            gmmNew.append((w, mu, sigma))
+        gmm = gmmNew
+    return gmm
+'''
+def k_fold(D,L,k, alpha, G, seed=0):
+    nTrain = int(D.shape[1]*(k-1)/k)
+    nTest = int(D.shape[1]) - nTrain
+    numpy.random.seed(seed) 
+    idx_ = numpy.random.permutation(D.shape[1])
+    scores = []
+    labels = []
+    priors = [0.5,0.1,0.9]
+    minDCF05Tied=numpy.zeros((1,3))
+    minDCF05Diag=numpy.zeros((1,3))
+    for pi in priors:
+        scores = []
+        scoresTied=[]
+        labels = []
+        idx = idx_
+        for i in range(k):
+            #print("Fold :", i+1)
+            idxTrain = idx[0:nTrain] 
+            idxTest = idx[nTrain:]
+            DTR = D[:, idxTrain] 
+            DTE = D[:, idxTest]
+            LTR = L[idxTrain] 
+            LTE = L[idxTest]
+            scores.extend(GMM_Full(DTR,DTE,LTR,alpha,2**G,'Diag').tolist())
+            scoresTied.extend(GMM_Full(DTR,DTE,LTR,alpha,2**G,'Tied').tolist())
+            labels.append(LTE.tolist())
+            idx = numpy.roll(idx,nTest,axis=0)
+        #if gaussianized == 1:
+            #print('minDCF LR with prior ', pi_T ,' and application ', pi,', ', 1,', ', 1 , ' with gaussianized features : ', compute_min_DCF(scores, numpy.hstack(labels), pi, 1, 1))
+        #else :
+            if pi == 0.5:
+                minDCF05Tied[0][0]=compute_min_DCF(scoresTied, numpy.hstack(labels), pi, 1, 1)
+                minDCF05Diag[0][0]=compute_min_DCF(scores, numpy.hstack(labels), pi, 1, 1)
+        print('minDCF GMM with application DIAG 64 c', pi,', ', 1,', ', 1 , ' : ', "%.3f" % compute_min_DCF(scores, numpy.hstack(labels), pi, 1, 1))
+        print('minDCF GMM with application TIED 64 c', pi,', ', 1,', ', 1 , ' : ', "%.3f" % compute_min_DCF(scoresTied, numpy.hstack(labels), pi, 1, 1))
+        #if pi == 0.5 and pi_T == 0.5:
+            #DCF.plot_minDCF(scores, numpy.hstack(labels))
+   
 
-            self.mu_array.append(mu_i)
-            self.cov_array.append(cov_i)
+    
+    #print("Avarage error with cross-validation Tied PCA=7 prior: 0.1: ", "%.3f" % (acc2*100/k) , "%")
+    #print("Avarage error with cross-validation Naive PCA=7 prior: 0.1: ", "%.3f" % (acc3*100/k) , "%")
+    #"R" are the train, "E" are evaluations.
+    return scores,minDCF05Tied,minDCF05Diag
+'''
+'''
+def k_fold05(D,L,k, alpha, G, seed=0):
+    nTrain = int(D.shape[1]*(k-1)/k)
+    nTest = int(D.shape[1]) - nTrain
+    numpy.random.seed(seed) 
+    idx_ = numpy.random.permutation(D.shape[1])
+    scoresDiag = []
+    scoresTied=[]
+    scoresFull=[]
+    scoresTiedDiag=[]
+    labels = []
+    idx = idx_
+    #priors = [0.5,0.1,0.9]
+    minDCFTied05=None
+    minDCFDiag05=None
+    for i in range(k):
+        #print("Fold :", i+1)
+        idxTrain = idx[0:nTrain] 
+        idxTest = idx[nTrain:]
+        DTR = D[:, idxTrain] 
+        DTE = D[:, idxTest]
+        LTR = L[idxTrain] 
+        LTE = L[idxTest]
+        scoresDiag.extend(GMM_Full(DTR,DTE,LTR,alpha,2**G,'Diag').tolist())
+        scoresTied.extend(GMM_Full(DTR,DTE,LTR,alpha,2**G,'Tied').tolist())
+        scoresFull.extend(GMM_Full(DTR,DTE,LTR,alpha,2**G,'Full').tolist())
+        scoresTiedDiag.extend(GMM_Full(DTR,DTE,LTR,alpha,2**G,'TiedDiag').tolist())
+        labels.append(LTE.tolist())
+        idx = numpy.roll(idx,nTest,axis=0)
+    #if gaussianized == 1:
+        #print('minDCF LR with prior ', pi_T ,' and application ', pi,', ', 1,', ', 1 , ' with gaussianized features : ', compute_min_DCF(scores, numpy.hstack(labels), pi, 1, 1))
+    #else :
+    minDCFDiag05=compute_min_DCF(scoresDiag, numpy.hstack(labels), 0.5, 1, 1)
+    minDCFTied05=compute_min_DCF(scoresTied, numpy.hstack(labels), 0.5, 1, 1)
+    minDCFFull05=compute_min_DCF(scoresFull, numpy.hstack(labels), 0.5, 1, 1)
+    minDCFTiedDiag05=compute_min_DCF(scoresTiedDiag, numpy.hstack(labels), 0.5, 1, 1)
+    print('minDCF GMM with application DIAG ', 0.5,', ', 1,', ', 1 , ' : ', "%.3f" % minDCFDiag05)
+    print('minDCF GMM with application TIED', 0.5,', ', 1,', ', 1 , ' : ', "%.3f" % minDCFTied05)
+    print('minDCF GMM with application FUKLL ', 0.5,', ', 1,', ', 1 , ' : ', "%.3f" % minDCFFull05)
+    print('minDCF GMM with application TIEDDIAG', 0.5,', ', 1,', ', 1 , ' : ', "%.3f" % minDCFTiedDiag05)
+    #if pi == 0.5 and pi_T == 0.5:
+        #DCF.plot_minDCF(scores, numpy.hstack(labels))
+   
 
-            self.gmm_array.append(
-                GMM_LBG(DTRi, self.iterations ** 2, self.alpha, self.psi, self.type))
-
-    def test(self):
-        logS = numpy.zeros((2, self.DTE.shape[1]))
-
-        for i, gmm_i in enumerate(self.gmm_array):
-            logS[i, :] = GMM_ll_perSample(self.DTE, gmm_i)
-
-        logSJoint = numpy.vstack((logS))
-        logSMarginal = mrow(scipy.special.logsumexp(logSJoint, axis=0))
-        logSPost = logSJoint - logSMarginal
-
-        self.SPost = numpy.exp(logSPost)
-
-        self.predicted_labels = numpy.argmax(self.SPost, axis=0)
-
-        self.accuracy = numpy.sum(
-            self.LTE == self.predicted_labels) / len(self.LTE)
-        self.error = 1 - self.accuracy
-
-        self.llrs = logSPost[1, :] - logSPost[0, :]
-
-# 	def compute_dcf(self, threshold = None):
-# 		confusion_matrix = compute_confusion_matrix_binary(self.LTE, self.llrs, self.prior_prob_array[1],1,1, threshold)
-# 		return compute_normalized_dcf_binary(confusion_matrix, self.prior_prob_array[1], 1, 1)
-
-
-    def compute_min_dcf(self):
-        # compute_min_DCF(scores, labels, pi, Cfn, Cfp):
-
-        return compute_min_DCF(self.llrs, self.LTE, self.prior_prob_array[1], 1, 1)
+    
+    #print("Avarage error with cross-validation Tied PCA=7 prior: 0.1: ", "%.3f" % (acc2*100/k) , "%")
+    #print("Avarage error with cross-validation Naive PCA=7 prior: 0.1: ", "%.3f" % (acc3*100/k) , "%")
+    #"R" are the train, "E" are evaluations.
+    return minDCFDiag05,minDCFTied05,minDCFFull05,minDCFTiedDiag05
+#==============================================================================  
+'''  
+'''
+if __name__ == '__main__':
+    D, L = load('Train.txt')
+    DE, LE = load('Test.txt')
+    #_ = k_fold(D,L,5)
+    ZD = stats.zscore(D, axis=1)
+    GD = gaussianize_features(ZD, ZD)
+    # ---------------------------
+    vettoreMatriciDiagZ=[]
+    vettoreMatriciTiedZ=[]
+    vettoreMatriciFullZ=[]
+    vettoreMatriciTiedDiagZ=[]
+    # --------------------------
+    vettoreMatriciDiagG=[]
+    vettoreMatriciTiedG=[]
+    vettoreMatriciFullG=[]
+    vettoreMatriciTiedDiagG=[]
+    # ----------------
+    componentsToTry=[1,2,3,4,5,6,7] 
+    exponents=[2,4,8,16,32,64,128]
+    for i in componentsToTry:
+        print("components: ",i)
+        matriceTiedZ, matriceDiagZ, matriceFullZ, matriceTiedDiagZ = k_fold05(ZD,L,3,0.1,i)
+        matriceTiedG, matriceDiagG, matriceFullG, matriceTiedDiagG = k_fold05(GD,L,3,0.1,i)
+        # Z NORM
+        vettoreMatriciDiagZ.append(matriceDiagZ)
+        vettoreMatriciTiedZ.append(matriceTiedZ)
+        vettoreMatriciFullZ.append(matriceFullZ)
+        vettoreMatriciTiedDiagZ.append(matriceTiedDiagZ)
+        # G NORM
+        vettoreMatriciDiagG.append(matriceDiagG)
+        vettoreMatriciTiedG.append(matriceTiedG)
+        vettoreMatriciFullG.append(matriceFullG)
+        vettoreMatriciTiedDiagG.append(matriceTiedDiagG)
+        '''
