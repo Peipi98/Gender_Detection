@@ -147,6 +147,15 @@ def logistic_reg_score(DTR, LTR, DTE, l):
     STE = numpy.dot(_w.T, DTE) + _b
     return STE
 
+def logistic_reg_calibration(DTR, LTR, DTE, l, pi=None):
+    logreg_obj = weighted_logreg_obj_wrap(numpy.array(DTR), LTR, l)
+    _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0] + 1), approx_grad=True)
+    _w = _v[0:DTR.shape[0]]
+    _b = _v[-1]
+    calibration = 0 if pi is None else numpy.log(pi / (1 - pi))
+    STE = numpy.dot(_w.T, DTE) + _b - calibration
+    return STE, _w, _b
+
 def weighted_logistic_reg_score(DTR, LTR, DTE, l):
     logreg_obj = weighted_logreg_obj_wrap(numpy.array(DTR), LTR, l)
     _v, _J, _d = opt.fmin_l_bfgs_b(logreg_obj, numpy.zeros(DTR.shape[0] + 1), approx_grad=True)

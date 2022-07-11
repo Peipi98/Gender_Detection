@@ -1,3 +1,4 @@
+from functions.calibrationFunc import calibrate_SVM
 from validation.validation_LR import validation_LR
 from validation.validation_weighted_LR import validation_weighted_LR
 from validation.validation_quad_LR import validation_quad_LR
@@ -25,13 +26,16 @@ if __name__ == "__main__":
 
 #    validation_LR(DTR, LTR, L, 'RAW_')
     L = [1e-4, 1e-2, 1e-1, 1.0]
-#    validation_weighted_LR(DTR, LTR, L, 'RAW_')
+    #validation_weighted_LR(DTR, LTR, L, 'RAW_', PCA_Flag=False)
     #validation_quad_LR(DTR, LTR, L, 'RAW_')
 
     print("############    Support Vector Machine - RAW    ##############")
     K_arr = [0.1, 1.0, 10.0]
     C_arr = [0.01, 0.1, 1.0, 10.0]
+    K_arr = [1.0]
+    C_arr = [1.0]
     #validation_SVM(DTR, LTR, K_arr, C_arr, 'RAW_')
+    #calibrate_SVM(DTR, LTR, 'RAW_CALIBRATED_')
     CON_array = [1000]
     K_arr = [1., 10.]
 

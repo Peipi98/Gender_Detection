@@ -89,7 +89,7 @@ def kfold_WEIGHTED_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True):
             DTR_PCA = numpy.dot(P.T, D)
             DTE_PCA = numpy.dot(P.T, Dte)
 
-            PCA_LR_scores = logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
+            PCA_LR_scores = weighted_logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
             PCA_LR_scores_append.append(PCA_LR_scores)
 
             # PCA m=9
@@ -97,7 +97,7 @@ def kfold_WEIGHTED_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True):
             DTR_PCA = numpy.dot(P.T, D)
             DTE_PCA = numpy.dot(P.T, Dte)
 
-            PCA2_LR_scores = logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
+            PCA2_LR_scores = weighted_logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
             PCA2_LR_scores_append.append(PCA2_LR_scores)
 
     validate_LR(scores_append, LR_labels, appendToTitle, l)

@@ -122,7 +122,7 @@ def LDA(D, L, d=1, m=2):
 
     SW = 0
     for i in range(2):
-        SW += (L == i).sum() * empirical_covariance(D[:, L == i], emprical_mean(D))
+        SW += (L == i).sum() * empirical_covariance(D[:, L == i], empirical_mean(D))
 
     SW = SW / N
 
@@ -155,7 +155,7 @@ def plot_histogram(D, L, labels, title):
 
 
 def ML_GAU(D):
-    m = emprical_mean(D)
+    m = empirical_mean(D)
     C = empirical_covariance(D, m)
     return m, C
 
