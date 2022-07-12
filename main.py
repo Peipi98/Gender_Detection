@@ -1,4 +1,4 @@
-from functions.calibrationFunc import calibrate_SVM
+#from functions.calibrationFunc import calibrate_SVM
 from validation.validation_LR import validation_LR
 from validation.validation_weighted_LR import validation_weighted_LR
 from validation.validation_quad_LR import validation_quad_LR
@@ -6,6 +6,7 @@ from validation.validation_MVG import validation_MVG
 from validation.validation_SVM import validation_SVM
 from validation.validation_SVM_RFB import validation_SVM_RFB
 from validation.validation_SVM_polynomial import validation_SVM_polynomial
+from validation.validation_GMM import validation_GMM
 #from plot_features import plot_features
 from validators import *
 import scipy.stats as stats
@@ -95,16 +96,15 @@ if __name__ == "__main__":
     |                           |
     +---------------------------+
     '''
-    DTR, LTR = load("Train.txt")
-    DTE, LTE = load("Test.txt")
-    DTR = DTR.hstack(DTR.append(DTE))
-    LTR = numpy.hstack(LTR.append(LTE))
+
+    DTR, LTR = load("Dataset.txt")
+    DTR, LTR = randomize(DTR, LTR)
     print(DTR.shape, LTR.shape)
     DTR, LTR = randomize(DTR, LTR)
 
 
     print("############    MVG - RAW   ##############")
-    validation_MVG(DTR, LTR, DTE, LTE, 'RAW_')
+    validation_MVG(DTR, LTR, 'RAW_')
 
     print("############    Logistic Regression - RAW    ##############")
     L = [1e-6, 1e-4, 1e-2, 1.0]  # 1e-6
@@ -115,8 +115,6 @@ if __name__ == "__main__":
     validation_quad_LR(DTR, LTR, L, 'RAW_')
 
     print("############    Support Vector Machine - RAW    ##############")
-    K_arr = [0.1, 1.0, 10.0]
-    C_arr = [0.01, 0.1, 1.0, 10.0]
     K_arr = [1.0]  #
     C_arr = [1.0]  #
     validation_SVM(DTR, LTR, K_arr, C_arr, 'RAW_')
@@ -140,7 +138,7 @@ if __name__ == "__main__":
     #    plot_features(DTR, LTR, 'GAUSSIANIZED_')
 
     print("############    MVG - gaussianization    ##############")
-    validation_MVG(DTR, LTR, DTE, LTE, 'GAUSSIANIZED_')
+    validation_MVG(DTR, LTR, 'GAUSSIANIZED_')
 
     print("############    Logistic Regression - gaussianization    ##############")
     L = [1e-6, 1e-4, 1e-2]
@@ -155,7 +153,7 @@ if __name__ == "__main__":
     #    plot_features(DTR, LTR, 'ZNORM')
 
     print("############    MVG - Z Normalization    ##############")
-    validation_MVG(DTR, LTR, DTE, LTE, 'ZNORM')
+    validation_MVG(DTR, LTR, 'ZNORM')
 
     print("############    Logistic Regression - Z Normalization    ##############")
     L = [1e-6, 1e-4, 1e-2]

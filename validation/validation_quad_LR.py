@@ -186,4 +186,4 @@ def validation_quad_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True):
     y = numpy.vstack((y, y_09))
     y = numpy.vstack((y, y_01))
 
-    plot_DCF(x, y, 'lambda', appendToTitle + 'QUAD_LR_minDCF_comparison')
+    #plot_DCF(x, y, 'lambda', appendToTitle + 'QUAD_LR_minDCF_comparison')
