@@ -8,7 +8,7 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True):
+def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -36,6 +36,14 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True):
 
         Dte = Dtr[i]
         Lte = Ltr[i]
+
+        if zscore_Flag is True:
+            D, Dte = znorm(D, Dte)
+
+        if gauss_Flag is True:
+            D = gaussianize_features(D, D)
+            Dte = gaussianize_features(D, Dte)
+
         print(i)
         wStar, primal, dual, gap = train_SVM_linear(D, L, C=C, K=K)
 
@@ -83,7 +91,7 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True):
 
     print(t)
 
-def kfold_SVM_calibration(DTR, LTR, K, C):
+def kfold_SVM_calibration(DTR, LTR, K, C, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -111,6 +119,14 @@ def kfold_SVM_calibration(DTR, LTR, K, C):
 
         Dte = Dtr[i]
         Lte = Ltr[i]
+
+        if zscore_Flag is True:
+            D, Dte = znorm(D, Dte)
+
+        if gauss_Flag is True:
+            D = gaussianize_features(D, D)
+            Dte = gaussianize_features(D, Dte)
+
         print(i)
         wStar, primal, dual, gap = train_SVM_linear(D, L, C=C, K=K)
         DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
@@ -123,17 +139,17 @@ def kfold_SVM_calibration(DTR, LTR, K, C):
 
     return np.hstack(scores_append), LR_labels
 
-def validation_SVM(DTR, LTR, K_arr, C_arr, appendToTitle, PCA_Flag=True):
+def validation_SVM(DTR, LTR, K_arr, C_arr, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     for K in K_arr:
         for C in C_arr:
-            kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag)
+            kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag, gauss_Flag, zscore_Flag)
     x = numpy.logspace(-3, 2, 15)
     y = numpy.array([])
     y_05 = numpy.array([])
     y_09 = numpy.array([])
     y_01 = numpy.array([])
     for xi in x:
-        scores, labels = kfold_SVM_calibration(DTR, LTR, 1.0, xi)
+        scores, labels = kfold_SVM_calibration(DTR, LTR, 1.0, xi, PCA_Flag, gauss_Flag, zscore_Flag)
         y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
         y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
         y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))

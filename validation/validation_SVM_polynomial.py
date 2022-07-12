@@ -7,7 +7,7 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=2, PCA_Flag=True):
+def kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=2, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -36,6 +36,14 @@ def kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=2, P
         L = np.hstack(L)
         Dte = Dtr[i]
         Lte = Ltr[i]
+
+        if zscore_Flag is True:
+            D, Dte = znorm(D, Dte)
+
+        if gauss_Flag is True:
+            D = gaussianize_features(D, D)
+            Dte = gaussianize_features(D, Dte)
+
         print(i)
 
         aStar, loss = train_SVM_polynomial(D, L, C=C, constant=costant, degree=degree, K=K)
@@ -131,7 +139,7 @@ def single_F_POLY(D, L, C, K, costant=1.0, degree=2):
     print(t)
 
 
-def validation_SVM_polynomial(DTR, LTR, K_arr, C, appendToTitle, CON_array, PCA_Flag=True):
+def validation_SVM_polynomial(DTR, LTR, K_arr, C, appendToTitle, CON_array, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     # for costant in [1000]:
     #     for degree in [4]:
     #         for K in [1., 10.]:
@@ -140,5 +148,5 @@ def validation_SVM_polynomial(DTR, LTR, K_arr, C, appendToTitle, CON_array, PCA_
     for costant in CON_array:
         for degree in [4]:
             for K in K_arr:
-                kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=C, degree=degree, PCA_Flag=False)
+                kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=C, degree=degree, PCA_Flag=PCA_Flag, gauss_Flag=gauss_Flag, zscore_Flag=zscore_Flag)
                 #single_F_POLY(DTR, LTR, C=C, K=K, costant=1000, degree=4)

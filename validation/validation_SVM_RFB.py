@@ -7,7 +7,7 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False):
+def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False, gauss_Flag=False, zscore_Flag=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -37,6 +37,14 @@ def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False):
 
         Dte = Dtr[i]
         Lte = Ltr[i]
+
+        if zscore_Flag is True:
+            D, Dte = znorm(D, Dte)
+
+        if gauss_Flag is True:
+            D = gaussianize_features(D, D)
+            Dte = gaussianize_features(D, Dte)
+
         print(i)
 
         Z = L * 2 - 1
@@ -138,12 +146,12 @@ def single_F_RFB(D, L, C, K, gamma):
     print(t)
 
 
-def validation_SVM_RFB(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=True):
+def validation_SVM_RFB(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     # for K in [1.]:
     #     for gamma in [0.001]:
     #         kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=0.1, gamma=gamma, PCA_Flag=False)
     #         single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
     for K in K_arr:
         for gamma in gamma_arr:
-            kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False)
+            kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False, gauss_Flag=gauss_Flag, zscore_Flag=zscore_Flag)
             #single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)

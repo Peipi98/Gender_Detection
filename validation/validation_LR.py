@@ -46,7 +46,7 @@ def validate_LR(scores, LR_labels, appendToTitle, l):
     print(t)
 
 
-def kfold_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True):
+def kfold_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -76,6 +76,13 @@ def kfold_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True):
 
         Dte = Dtr[i]
         Lte = Ltr[i]
+
+        if zscore_Flag is True:
+            D, Dte = znorm(D, Dte)
+
+        if gauss_Flag is True:
+            D = gaussianize_features(D, D)
+            Dte = gaussianize_features(D, Dte)
 
         scores = logistic_reg_score(D, L, Dte, l)
         scores_append.append(scores)
@@ -108,7 +115,7 @@ def kfold_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True):
         validate_LR(PCA2_LR_scores_append, LR_labels, appendToTitle + 'PCA_m9_', l)
 
 
-def kfold_LR_calibration(DTR, LTR, l):
+def kfold_LR_calibration(DTR, LTR, l, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -137,6 +144,14 @@ def kfold_LR_calibration(DTR, LTR, l):
         Dte = Dtr[i]
         Lte = Ltr[i]
 
+
+        if zscore_Flag is True:
+            D, Dte = znorm(D, Dte)
+
+        if gauss_Flag is True:
+            D = gaussianize_features(D, D)
+            Dte = gaussianize_features(D, Dte)
+
         scores = logistic_reg_score(D, L, Dte, l)
         scores_append.append(scores)
 
@@ -146,9 +161,9 @@ def kfold_LR_calibration(DTR, LTR, l):
     return np.hstack(scores_append), LR_labels
 
 
-def validation_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True):
+def validation_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     for l in L:
-        kfold_LR(DTR, LTR, l, appendToTitle, PCA_Flag)
+        kfold_LR(DTR, LTR, l, appendToTitle, PCA_Flag, gauss_Flag, zscore_Flag)
 
     x = numpy.logspace(-5, 1, 30)
     y = numpy.array([])
@@ -156,7 +171,7 @@ def validation_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True):
     y_09 = numpy.array([])
     y_01 = numpy.array([])
     for xi in x:
-        scores, labels = kfold_LR_calibration(DTR, LTR, xi)
+        scores, labels = kfold_LR_calibration(DTR, LTR, xi, PCA_Flag, gauss_Flag, zscore_Flag)
         y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
         y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
         y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
