@@ -99,15 +99,15 @@ def validation_MVG(DTR, LTR, appendToTitle, PCA_Flag=True, Gauss_flag = False, z
 
         Dte = Dtr[i]
         Lte = Ltr[i]
+        
+        if (zscore):
+            D, Dte = znorm(D, Dte)
 
         if(Gauss_flag):
             D = gaussianize_features(D, D)
             Dte = gaussianize_features(D, Dte)
         MVG_labels = np.append(MVG_labels, Lte, axis=0)
         MVG_labels = np.hstack(MVG_labels)
-
-        if(zscore):
-            D, Dte = znorm(D, Dte)
         # Once we have computed our folds, we can try different models
         # RAW DATA
 

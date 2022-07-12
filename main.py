@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     print("############    MVG - gaussianization    ##############")
     '''
-    validation_MVG(DTR, LTR, 'GAUSSIANIZED_', Gauss_flag=True)
+    #validation_MVG(DTR, LTR, 'GAUSSIANIZED_', Gauss_flag=True)
     '''
     print("############    Logistic Regression - gaussianization    ##############")
     L = [1e-6, 1e-4, 1e-2]
