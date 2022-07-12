@@ -75,7 +75,7 @@ def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False):
     #    plot_ROC(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
 
     # Cfn and Ctp are set to 1
-    bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM_RFB, K=' + str(K) + ', C=' + str(C), 0.4)
+    # bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM_RFB, K=' + str(K) + ', C=' + str(C), 0.4)
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.5"

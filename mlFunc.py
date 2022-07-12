@@ -15,6 +15,16 @@ def mcol(v):
 def mrow(v):
     return v.reshape((1, v.size))
 
+def randomize(D, L, seed=0):
+    nTrain = int(D.shape[1])
+    numpy.random.seed(seed)
+    idx = numpy.random.permutation(D.shape[1])
+    idxTrain = idx[0:nTrain]
+    
+    DTR = D[:, idxTrain]
+    LTR = L[idxTrain]
+    
+    return DTR, LTR
 
 def load(fname):
     DList = []

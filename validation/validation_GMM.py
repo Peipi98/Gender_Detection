@@ -17,11 +17,11 @@ def validation_GMM(title, pi, GMM_llrs, LTE):
     llrs_tot_act = compute_act_DCF(GMM_llrs, LTE, pi, 1, 1)
     llrs_tot_xvd = compute_act_DCF(GMM_llrs, LTE, pi, 1, 1, -np.log(pi / (1-pi)))
     
-    t = PrettyTable(["Type", "minDCF"])
-    t.title = title
-    t.add_row(["GMM_EM", round(llrs_tot, 3)])
-    print(t)
-    return round(llrs_tot, 3), round(llrs_tot_act, 3), round(llrs_tot_xvd, 3)
+    # t = PrettyTable(["Type", "minDCF"])
+    # t.title = title
+    # t.add_row(["GMM_EM", round(llrs_tot, 3)])
+    # print(t)
+    # return round(llrs_tot, 3), round(llrs_tot_act, 3), round(llrs_tot_xvd, 3)
     
 def ll_GMM(D, L, Dte, Lte, llr, cov, comp, i):
     # GMM_llrs, 'full', comp, i
@@ -69,7 +69,7 @@ def print_minDCF_tables(score_raw, score_gauss, components):
         t1.add_row(raw_full)
         t1.add_row(gauss_full)
         print(t1)
-        plot_minDCF_GMM(score_raw[i].tolist(), score_gauss[i].tolist(), types[i], components)
+        #plot_minDCF_GMM(score_raw[i].tolist(), score_gauss[i].tolist(), types[i], components)
         
 def print_act_DCF_tables(score_raw, score_gauss, components):
     types = ['full-cov', 'diag-cov', 'tied full-cov', 'tied diag-cov']
@@ -203,8 +203,7 @@ def bayes_plot_bestGMM(title, pi, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GM
 def ROC_GMM():
  '''   
         
-if __name__ == "__main__":
-    DTR, LTR = load("../Train.txt")
+def validation_GMM(DTR, DTR_gauss, LTR):
     DTR_gauss = gaussianize_features(DTR, DTR)
     DTR = stats.zscore(DTR, axis=1)
     score_raw_min = []
@@ -216,9 +215,9 @@ if __name__ == "__main__":
     score_raw_xvd = []
     score_gauss_xvd = []
     # We'll train from 1 to 2^7 components
-    '''
+    
     # We'll train from 1 to 2^7 components
-    componentsToTry=[0,1,2] 
+    componentsToTry=[1,2,3,4,5,6,7] 
     for comp in componentsToTry:
         print('RAW DATA')
         raw_min, raw_act, raw_xvd, *_ = kfold_GMM(DTR, LTR, comp)
@@ -231,14 +230,19 @@ if __name__ == "__main__":
         score_gauss_min.append(gauss_min)
         score_gauss_act.append(gauss_act)
         score_gauss_xvd.append(gauss_xvd)
-    
+    print("======= min DCF =======")
     print_minDCF_tables(score_raw_min, score_gauss_min, componentsToTry)
+    print("======= act DCF =======")
     print_act_DCF_tables(score_raw_act, score_gauss_act, componentsToTry)
+    print("======= theoretical =======")
     print_act_DCF_tables(score_raw_xvd, score_gauss_xvd, componentsToTry)
-'''
+
     
     
     _, _, _, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels = kfold_GMM(DTR, LTR, 2)
-    bayes_plot_bestGMM("prova", 0.5, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels)
-    
+    # bayes_plot_bestGMM("prova", 0.5, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels)
+    # plot_ROC(GMM_llrs, GMM_labels, 'GMM_full2')
+    # plot_ROC(GMM_llrsn, GMM_labels, 'GMM_diag2')
+    # plot_ROC(GMM_llrst, GMM_labels, 'GMM_tied2')
+    # plot_ROC(GMM_llrsnt, GMM_labels, 'GMM_tied_diag2')
     

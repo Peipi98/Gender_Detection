@@ -72,7 +72,7 @@ def kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=2, P
     #    plot_ROC(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
 
     # Cfn and Ctp are set to 1
-    bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM_POLY, K=' + str(K) + ', C=' + str(C), 0.4)
+    # bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM_POLY, K=' + str(K) + ', C=' + str(C), 0.4)
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.5"

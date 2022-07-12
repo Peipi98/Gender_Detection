@@ -69,10 +69,10 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True):
     scores_append = np.hstack(scores_append)
     scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.5, 1, 1)
 
-    plot_ROC(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
+    # plot_ROC(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
 
     # Cfn and Ctp are set to 1
-    bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C), 0.4)
+    # bayes_error_min_act_plot(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C), 0.4)
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.5"
@@ -160,4 +160,4 @@ def validation_SVM(DTR, LTR, K_arr, C_arr, appendToTitle, PCA_Flag=True):
     y = numpy.vstack((y, y_09))
     y = numpy.vstack((y, y_01))
 
-    plot_DCF(x, y, 'lambda', appendToTitle + 'SVM_minDCF_comparison')
+    # plot_DCF(x, y, 'lambda', appendToTitle + 'SVM_minDCF_comparison')

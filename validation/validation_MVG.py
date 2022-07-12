@@ -38,16 +38,16 @@ def evaluation(title, pi, MVG_res, MVG_naive, MVG_t, MVG_nt, MVG_labels, appendT
     llrst_tot = compute_min_DCF(MVG_t, MVG_labels, pi, 1, 1)
     llrsnt_tot = compute_min_DCF(MVG_nt, MVG_labels, pi, 1, 1)
 
-    plot_ROC(MVG_res, MVG_labels, appendToTitle + 'MVG')
-    plot_ROC(MVG_naive, MVG_labels, appendToTitle + 'MVG + Naive')
-    plot_ROC(MVG_t, MVG_labels, appendToTitle + 'MVG + Tied')
-    plot_ROC(MVG_nt, MVG_labels, appendToTitle + 'MVG + Naive + Tied')
+    # plot_ROC(MVG_res, MVG_labels, appendToTitle + 'MVG')
+    # plot_ROC(MVG_naive, MVG_labels, appendToTitle + 'MVG + Naive')
+    # plot_ROC(MVG_t, MVG_labels, appendToTitle + 'MVG + Tied')
+    # plot_ROC(MVG_nt, MVG_labels, appendToTitle + 'MVG + Naive + Tied')
 
-    # Cfn and Ctp are set to 1
-    bayes_error_min_act_plot(MVG_res, MVG_labels, appendToTitle + 'MVG', 0.4)
-    bayes_error_min_act_plot(MVG_naive, MVG_labels, appendToTitle + 'MVG + Naive', 1)
-    bayes_error_min_act_plot(MVG_t, MVG_labels, appendToTitle + 'MVG + Tied', 0.4)
-    bayes_error_min_act_plot(MVG_nt, MVG_labels, appendToTitle + 'MVG + Naive + Tied', 1)
+    # # Cfn and Ctp are set to 1
+    # bayes_error_min_act_plot(MVG_res, MVG_labels, appendToTitle + 'MVG', 0.4)
+    # bayes_error_min_act_plot(MVG_naive, MVG_labels, appendToTitle + 'MVG + Naive', 1)
+    # bayes_error_min_act_plot(MVG_t, MVG_labels, appendToTitle + 'MVG + Tied', 0.4)
+    # bayes_error_min_act_plot(MVG_nt, MVG_labels, appendToTitle + 'MVG + Naive + Tied', 1)
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = title

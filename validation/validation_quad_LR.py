@@ -12,10 +12,10 @@ def validate_LR(scores, LR_labels, appendToTitle, l):
     scores_append = np.hstack(scores)
     scores_tot = compute_min_DCF(scores_append, LR_labels, 0.5, 1, 1)
 
-    plot_ROC(scores_append, LR_labels, appendToTitle + 'QUAD_LR, lambda=' + str(l))
+    # plot_ROC(scores_append, LR_labels, appendToTitle + 'QUAD_LR, lambda=' + str(l))
 
     # Cfn and Ctp are set to 1
-    bayes_error_min_act_plot(scores_append, LR_labels, appendToTitle + 'QUAD_LR, lambda=' + str(l), 0.4)
+    # bayes_error_min_act_plot(scores_append, LR_labels, appendToTitle + 'QUAD_LR, lambda=' + str(l), 0.4)
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = appendToTitle + "minDCF: π=0.5"
