@@ -9,7 +9,7 @@ from classifiers import *
 from classifiers import *
 from validators import *
 from prettytable import PrettyTable
-
+from plot_features import plot_features
 
 def compute_MVG_score(Dte, D, L, MVG_res, MVG_naive, MVG_t, MVG_nt, MVG_labels):
     _, _, llrs = MVG(Dte, D, L)
@@ -58,7 +58,7 @@ def evaluation(title, pi, MVG_res, MVG_naive, MVG_t, MVG_nt, MVG_labels, appendT
     print(t)
 
 
-def validation_MVG(DTR, LTR, appendToTitle, PCA_Flag=True):
+def validation_MVG(DTR, LTR, appendToTitle, PCA_Flag=True, Gauss_flag = False, zscore=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -100,9 +100,14 @@ def validation_MVG(DTR, LTR, appendToTitle, PCA_Flag=True):
         Dte = Dtr[i]
         Lte = Ltr[i]
 
+        if(Gauss_flag):
+            D = gaussianize_features(D, D)
+            Dte = gaussianize_features(D, Dte)
         MVG_labels = np.append(MVG_labels, Lte, axis=0)
         MVG_labels = np.hstack(MVG_labels)
 
+        if(zscore):
+            D, Dte = znorm(D, Dte)
         # Once we have computed our folds, we can try different models
         # RAW DATA
 
@@ -212,3 +217,10 @@ def validation_MVG(DTR, LTR, appendToTitle, PCA_Flag=True):
                    PCA2_mvg_t,
                    PCA2_mvg_nt,
                    MVG_labels, appendToTitle + "minDCF_π=0.9_PCA m=9__")
+
+if __name__ == '__main__':
+    DTR, LTR = load('../Train.txt')
+    DTR, LTR = randomize(DTR, LTR)
+
+    validation_MVG(DTR, LTR, 'RAW_')
+    validation_MVG(DTR, LTR, 'RAW_', Gauss_flag=True)

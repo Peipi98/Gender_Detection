@@ -26,6 +26,14 @@ def randomize(D, L, seed=0):
     
     return DTR, LTR
 
+def znorm(DTR, DTE):
+    mu_DTR = mcol(DTR.mean(1))
+    std_DTR = mcol(DTR.std(1))
+
+    DTR_z = (DTR - mu_DTR) / std_DTR
+    DTE_z = (DTE - mu_DTR) / std_DTR
+    return DTR_z, DTE_z
+
 def load(fname):
     DList = []
     labelsList = []

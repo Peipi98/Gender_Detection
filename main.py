@@ -31,13 +31,13 @@ import scipy.stats as stats
 
 
 if __name__ == "__main__":
-    '''
+
     DTR, LTR = load("Train.txt")
     DTR, LTR = randomize(DTR, LTR)
     DTE, LTE = load("Test.txt")
     DTE, LTE = randomize(DTE, LTE)
     #    plot_features(DTR, LTR, 'RAW_')
-
+    '''
     # RAW data
 
     print("############    MVG - RAW   ##############")
@@ -77,8 +77,9 @@ if __name__ == "__main__":
     #    plot_features(DTR, LTR, 'GAUSSIANIZED_')
 
     print("############    MVG - gaussianization    ##############")
-    validation_MVG(DTR, LTR, DTE, LTE, 'GAUSSIANIZED_')
-
+    '''
+    validation_MVG(DTR, LTR, 'GAUSSIANIZED_', Gauss_flag=True)
+    '''
     print("############    Logistic Regression - gaussianization    ##############")
     L = [1e-6, 1e-4, 1e-2]
     validation_LR(DTR, LTR, L, 'GAUSSIANIZED_')
@@ -123,7 +124,7 @@ if __name__ == "__main__":
 
     print("############    MVG - RAW   ##############")
     #validation_MVG(DTR, LTR, 'RAW_')
-    evaluation_MVG(DTR, LTR, DTE, LTE, 'RAW_')
+    evaluation_MVG(DTR, LTR, DTE, LTE, 'RAW_', False)
     '''
     print("############    Logistic Regression - RAW    ##############")
     L = [1e-6]  # 1e-6
