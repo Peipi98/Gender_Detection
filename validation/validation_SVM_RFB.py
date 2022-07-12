@@ -147,7 +147,3 @@ def validation_SVM_RFB(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=True)
         for gamma in gamma_arr:
             kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False)
             #single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
-    for K in K_arr:
-        for gamma in gamma_arr:
-            kfold_SVM_RFB(DTR, LTR, appendToTitle, C=10.0, K=K, gamma=gamma, PCA_Flag=False)
-            #single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
