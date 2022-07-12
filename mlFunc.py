@@ -151,7 +151,6 @@ def LDA(D, L, d=1, m=2):
 
 def gaussianize_features(DTR, TO_GAUSS):
     P = []
-
     for dIdx in range(DTR.shape[0]):
         DT = mcol(TO_GAUSS[dIdx, :])
         X = DTR[dIdx, :] < DT

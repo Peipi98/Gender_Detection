@@ -158,4 +158,4 @@ def validation_SVM(DTR, LTR, K_arr, C_arr, appendToTitle, PCA_Flag=True, gauss_F
     y = numpy.vstack((y, y_09))
     y = numpy.vstack((y, y_01))
 
-    # plot_DCF(x, y, 'lambda', appendToTitle + 'SVM_minDCF_comparison')
+    plot_DCF(x, y, 'C', appendToTitle + 'SVM_minDCF_comparison')

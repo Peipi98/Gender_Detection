@@ -161,7 +161,7 @@ def validation_quad_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True, gauss_Flag=Fal
     for l in L:
         kfold_QUAD_LR(DTR, LTR, l, appendToTitle, PCA_Flag, gauss_Flag, zscore_Flag)
 
-    x = numpy.logspace(-5, 1, 30)
+    x = numpy.logspace(-5, 1, 20)
     y = numpy.array([])
     y_05 = numpy.array([])
     y_09 = numpy.array([])
@@ -176,4 +176,4 @@ def validation_quad_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True, gauss_Flag=Fal
     y = numpy.vstack((y, y_09))
     y = numpy.vstack((y, y_01))
 
-    #plot_DCF(x, y, 'lambda', appendToTitle + 'QUAD_LR_minDCF_comparison')
+    plot_DCF(x, y, 'lambda', appendToTitle + 'QUAD_LR_minDCF_comparison')
