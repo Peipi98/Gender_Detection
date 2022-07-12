@@ -124,7 +124,7 @@ if __name__ == "__main__":
     print("############    MVG - RAW   ##############")
     #validation_MVG(DTR, LTR, 'RAW_')
     evaluation_MVG(DTR, LTR, DTE, LTE, 'RAW_')
-
+    '''
     print("############    Logistic Regression - RAW    ##############")
     L = [1e-6]  # 1e-6
 
@@ -146,21 +146,21 @@ if __name__ == "__main__":
     C_arr = [10.]
     gamma_Arr = [0.001]
     validation_SVM_RFB(DTR, LTR, K_arr, gamma_Arr, 'RAW_', PCA_Flag=False)
-
+    '''
     print("############    Gaussian Mixture Model - RAW    ##############")
-    DTR_gauss = gaussianize_features(DTR, DTR)
-    evaluation_GMM_ncomp("RAW", DTR,LTR, DTE, LTE, 0.5, 2)
+    evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.5, 2)
     evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.1, 2)
     evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.9, 2)
 
     # Gaussianization
 
     DTR = gaussianize_features(DTR, DTR)
+    DTE = gaussianize_features(DTR, DTE)
     #    plot_features(DTR, LTR, 'GAUSSIANIZED_')
 
     print("############    MVG - gaussianization    ##############")
     evaluation_MVG(DTR, LTR, DTE, LTE, 'GAUSSIANIZED_')
-
+    '''
     print("############    Logistic Regression - gaussianization    ##############")
     L = [1e-6, 1e-4, 1e-2]
     validation_LR(DTR, LTR, L, evaluation_MVG(DTR, LTR, DTE, LTE, 'RAW_'))
@@ -169,9 +169,8 @@ if __name__ == "__main__":
     K_arr = [0.1, 1.0, 10.0]
     C_arr = [0.01, 0.1, 1.0, 10.0]
     validation_SVM(DTR, LTR, K_arr, C_arr, 'GAUSSIANIZED_')
-    
+    '''
     print("############    Gaussian Mixture Model - gaussianization    ##############")
-    DTR_gauss = gaussianize_features(DTR, DTR)
     evaluation_GMM_ncomp("gauss.", DTR,LTR, DTE, LTE, 0.5, 2)
     evaluation_GMM_ncomp("gauss.", DTR, LTR, DTE, LTE, 0.1, 2)
     evaluation_GMM_ncomp("gauss.", DTR, LTR, DTE, LTE, 0.9, 2)

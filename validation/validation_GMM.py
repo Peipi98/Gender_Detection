@@ -21,7 +21,7 @@ def validation_GMM(title, pi, GMM_llrs, LTE):
     # t.title = title
     # t.add_row(["GMM_EM", round(llrs_tot, 3)])
     # print(t)
-    # return round(llrs_tot, 3), round(llrs_tot_act, 3), round(llrs_tot_xvd, 3)
+    return round(llrs_tot, 3), round(llrs_tot_act, 3), round(llrs_tot_xvd, 3)
     
 def ll_GMM(D, L, Dte, Lte, llr, cov, comp, i):
     # GMM_llrs, 'full', comp, i
@@ -46,12 +46,11 @@ def print_minDCF_tables(score_raw, score_gauss, components):
     n_comp = len(components)
     print(np.shape(score_raw))
     print(score_raw)
-    score_raw = np.reshape(np.hstack(score_raw), ((n_comp), 4)).T
-    score_gauss = np.reshape(np.hstack(score_gauss), ((n_comp), 4)).T
+    score_raw = np.reshape(np.hstack(score_raw), (n_comp, 4)).T
+    score_gauss = np.reshape(np.hstack(score_gauss), (n_comp, 4)).T
     
     comp = np.exp2(components).astype(int).tolist()
 
-    
     print(np.shape(score_raw))
     for i in comp:
         header.append(i)
@@ -240,15 +239,28 @@ def validation_GMM_tot(DTR, DTR_gauss, LTR, pi, zscore=False):
 
     
 def validation_GMM_ncomp(DTR, DTR_gauss, LTR, pi, n, zscore=False):
-    raw_min, raw_act, raw_x, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels = kfold_GMM(DTR, LTR, pi, n, zscore)
-    gauss_min, gauss_act, gauss_x, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels = kfold_GMM(DTR_gauss, LTR, pi, n, zscore)
+    raw_min, raw_act, raw_x, *_ = kfold_GMM(DTR, LTR, pi, n, zscore)
+    gauss_min, gauss_act, gauss_x, *_ = kfold_GMM(DTR_gauss, LTR, pi, n, zscore)
+
+    types = ['full-cov', 'diag-cov', 'tied full-cov', 'tied diag-cov']
     t = PrettyTable(["", 'minDCF', 'actDCF', 'theoretical'])
     t.title = "GMM π=" + str(pi)
-    t.add_row(["raw", raw_min, raw_act, raw_x])
-    t.add_row(['gaussian.', gauss_min, gauss_act, gauss_x])
+    for i in range(len(raw_min)):
+        t.add_row(["raw " + types[i], raw_min[i], raw_act[i], raw_x[i]])
+    for i in range(len(gauss_min)):
+        t.add_row(['gaussian. ' + types[i], gauss_min[i], gauss_act[i], gauss_x[i]])
     print(t)
     # bayes_plot_bestGMM("prova", 0.5, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels)
     # plot_ROC(GMM_llrs, GMM_labels, 'GMM_full2')
     # plot_ROC(GMM_llrsn, GMM_labels, 'GMM_diag2')
     # plot_ROC(GMM_llrst, GMM_labels, 'GMM_tied2')
     # plot_ROC(GMM_llrsnt, GMM_labels, 'GMM_tied_diag2')
+
+if __name__ == '__main__':
+    DTR, LTR = load("../Train.txt")
+    DTR, LTR = randomize(DTR, LTR)
+    DTE, LTE = load("../Test.txt")
+    DTE, LTE = randomize(DTE, LTE)
+    DTR_gauss = gaussianize_features(DTR, DTR)
+
+    validation_GMM_ncomp(DTR, DTR_gauss, LTR, 0.5, 2)

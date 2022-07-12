@@ -23,7 +23,7 @@ def validation_GMM(title, pi, GMM_llrs, LTE):
     # t.title = title
     # t.add_row(["GMM_EM", round(llrs_tot, 3)])
     # print(t)
-    # return round(llrs_tot, 3), round(llrs_tot_act, 3), round(llrs_tot_xvd, 3)
+    return round(llrs_tot, 3), round(llrs_tot_act, 3), round(llrs_tot_xvd, 3)
 
 
 def ll_GMM(D, L, Dte, Lte, llr, cov, comp):
@@ -193,9 +193,11 @@ def evaluation_GMM_ncomp(typeof,DTR, LTR, DTE, LTE, pi, n, zscore=False):
     raw_min, raw_act, raw_x, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels = evaluation_GMM(
         DTR, LTR, DTE, LTE, pi, n, zscore)
 
+    types = ['full-cov', 'diag-cov', 'tied full-cov', 'tied diag-cov']
     t = PrettyTable(["", 'minDCF', 'actDCF', 'theoretical'])
     t.title = "GMM π=" + str(pi)
-    t.add_row([typeof, raw_min, raw_act, raw_x])
+    for i in range(len(raw_min)):
+        t.add_row([typeof + " " + types[i], raw_min[i], raw_act[i], raw_x[i]])
     print(t)
     # bayes_plot_bestGMM("prova", 0.5, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels)
     # plot_ROC(GMM_llrs, GMM_labels, 'GMM_full2')
