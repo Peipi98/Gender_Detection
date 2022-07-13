@@ -16,12 +16,10 @@ def bayes_error_plot_2best(D, L, pi, title, ylim):
     pylab.title(title)
     pylab.plot(p, bayes_error_plot(p, D[0], L, minCost=False), color='r', label='GMM_RAW_actDCF')
     pylab.plot(p, bayes_error_plot(p, D[0], L, minCost=True), 'r--', label='GMM_RAW_minDCF')
-    #pylab.plot(p, bayes_error_plot(p, D, LTE, minCost=False, th=-np.log(pi / (1-pi))), color='y')
-    
+
     pylab.plot(p, bayes_error_plot(p, D[1], L, minCost=False), color='b', label='MVG_TIED_RAW_actDCF')
-    pylab.plot(p, bayes_error_plot(p, D[1], L, minCost=True), 'b--', label='MVG_TIED_RAW_minDCF')
-    #pylab.plot(p, bayes_error_plot(p, D, LTE, minCost=False, th=-np.log(pi / (1-pi))), color='y')
-    
+    pylab.plot(p, bayes_error_plot(p, D[1], L, minCost=True), 'b--', label='MVG_TIED_minDCF')
+
     pylab.ylim(0, ylim)
     pylab.legend()
     #pylab.savefig('../images/comparison/DCF_2best' + title + '.png')

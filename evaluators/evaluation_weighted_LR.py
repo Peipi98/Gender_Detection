@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 
+
 sys.path.append('../')
 from validators import *
 from prettytable import PrettyTable
@@ -117,23 +118,45 @@ def kfold_LR_calibration(DTR, LTR, l):
     return np.hstack(scores_append), LR_labels
 
 
+def lr_calibration(DTR, LTR, DTE, LTE, xi):
+    scores_append = []
+    LR_labels = []
+
+    def vecxxT(x):
+        x = x[:, None]
+        xxT = x.dot(x.T).reshape(x.size ** 2, order='F')
+        return xxT
+
+    expanded_DTR = numpy.apply_along_axis(vecxxT, 0, DTR)
+    expanded_DTE = numpy.apply_along_axis(vecxxT, 0, DTE)
+    phi = numpy.vstack([expanded_DTR, DTR])
+
+    phi_DTE = numpy.vstack([expanded_DTE, DTE])
+    scores = quad_logistic_reg_score(phi, LTR, phi_DTE, xi)
+    scores_append.append(scores)
+
+    LR_labels = np.append(LR_labels, LTE, axis=0)
+    LR_labels = np.hstack(LR_labels)
+
+    return np.hstack(scores_append), LR_labels
+
 def evaluation_weighted_LR(DTR, LTR, DTE, LTE, L, appendToTitle, PCA_Flag=True):
     for l in L:  # l is a constant, not an array
         evaluate_LR(DTR, LTR, DTE, LTE, l, appendToTitle, PCA_Flag)
 
-    # x = numpy.logspace(-5, 1, 30)
-    # y = numpy.array([])
-    # y_05 = numpy.array([])
-    # y_09 = numpy.array([])
-    # y_01 = numpy.array([])
-    # for xi in x:
-    #     scores, labels = kfold_WEIGHTED_LR_calibration(DTR, LTR, xi)
-    #     y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
-    #     y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
-    #     y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
-    #
-    # y = numpy.hstack((y, y_05))
-    # y = numpy.vstack((y, y_09))
-    # y = numpy.vstack((y, y_01))
-    #
-    # plot_DCF(x, y, 'lambda', appendToTitle + 'LR_minDCF_comparison')
+    x = numpy.logspace(-5, 1, 30)
+    y = numpy.array([])
+    y_05 = numpy.array([])
+    y_09 = numpy.array([])
+    y_01 = numpy.array([])
+    for xi in x:
+        scores, labels = lr_calibration(DTR, LTR, DTE, LTE, xi)
+        y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
+        y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
+        y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
+
+    y = numpy.hstack((y, y_05))
+    y = numpy.vstack((y, y_09))
+    y = numpy.vstack((y, y_01))
+
+    plot_DCF(x, y, 'lambda', appendToTitle + 'EVAL_LR_minDCF_comparison')

@@ -13,6 +13,7 @@ from Classifiers.GMM import GMM_Full
 import scipy.stats as stats
 from validation.validation_GMM import kfold_GMM
 
+
 def validation_GMM(title, pi, GMM_llrs, LTE):
     GMM_llrs = np.hstack(GMM_llrs)
     llrs_tot = compute_min_DCF(GMM_llrs, LTE, pi, 1, 1)
@@ -54,9 +55,9 @@ def plot_minDCF_GMM_eval(score_raw, score_gauss, title, components):
     x = np.arange(len(labels))  # the label locations
     width = 0.1  # the width of the bars
     plt.bar(x - 0.15, raw_val, width, label='Raw [val]', edgecolor='black', color='tab:orange', alpha=0.5)
-    plt.bar(x - 0.05, raw_eval, width, label='Raw [eval]',edgecolor='black', color='tab:orange')
-    plt.bar(x + 0.05, gauss_val, width, label='Gauss [val]',edgecolor='black', color='r', alpha=0.5)
-    plt.bar(x + 0.15, gauss_eval, width, label='Gauss [eval]',edgecolor='black', color='r')
+    plt.bar(x - 0.05, raw_eval, width, label='Raw [eval]', edgecolor='black', color='tab:orange')
+    plt.bar(x + 0.05, gauss_val, width, label='Gauss [val]', edgecolor='black', color='r', alpha=0.5)
+    plt.bar(x + 0.15, gauss_eval, width, label='Gauss [eval]', edgecolor='black', color='r')
 
     plt.xticks(x, labels)
     plt.ylabel("DCF")
@@ -64,6 +65,7 @@ def plot_minDCF_GMM_eval(score_raw, score_gauss, title, components):
     plt.legend()
     plt.savefig('./images/GMM/' + title)
     plt.show()
+
 
 def print_minDCF_tables(score_raw, score_gauss, components):
     types = ['full-cov', 'diag-cov', 'tied full-cov', 'tied diag-cov']
@@ -148,7 +150,6 @@ def plot_minDCF_GMM(score_raw, score_gauss, title, components):
 
 
 def evaluation_GMM(DTR, LTR, DTE, LTE, pi, comp, zscore=False):
-
     GMM_llrs = []
     GMM_llrsn = []
     GMM_llrst = []
@@ -211,7 +212,8 @@ def bayes_plot_bestGMM(title, pi, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GM
     bayes_error_min_act_plot_GMM(GMM_llrst, GMM_labels, pi, 'GMM_tied', 0.4)
     bayes_error_min_act_plot_GMM(GMM_llrsnt, GMM_labels, pi, 'GMM_tied_diag', 0.4)
 
-def evaluation_GMM_ncomp(typeof,DTR, LTR, DTE, LTE, pi, n, zscore=False):
+
+def evaluation_GMM_ncomp(typeof, DTR, LTR, DTE, LTE, pi, n, zscore=False):
     raw_min, raw_act, raw_x, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels = evaluation_GMM(
         DTR, LTR, DTE, LTE, pi, n, zscore)
     print(raw_act, raw_x)
@@ -225,10 +227,18 @@ def evaluation_GMM_ncomp(typeof,DTR, LTR, DTE, LTE, pi, n, zscore=False):
 
     return GMM_llrst
     # bayes_plot_bestGMM("prova", 0.5, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels)
-    plot_ROC(GMM_llrs, GMM_labels, 'GMM_full2')
+    # plot_ROC(GMM_llrs, GMM_labels, 'GMM_full2')
     # plot_ROC(GMM_llrsn, GMM_labels, 'GMM_diag2')
     # plot_ROC(GMM_llrst, GMM_labels, 'GMM_tied2')
     # plot_ROC(GMM_llrsnt, GMM_labels, 'GMM_tied_diag2')
+
+
+def evaluation_scores_GMM_ncomp(typeof, DTR, LTR, DTE, LTE, pi, n, zscore=False):
+    raw_min, raw_act, raw_x, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels = evaluation_GMM(
+        DTR, LTR, DTE, LTE, pi, n, zscore)
+
+    return GMM_llrst
+
 
 def experimental_GMM(DTR, LTR, DTE, LTE):
     score_raw_val = []
@@ -241,7 +251,7 @@ def experimental_GMM(DTR, LTR, DTE, LTE):
     # We'll train from 1 to 2^7 components
 
     # We'll train from 1 to 2^7 components
-    componentsToTry = [1,2,3,4,5,6,7]
+    componentsToTry = [1, 2, 3, 4, 5, 6, 7]
     for comp in componentsToTry:
         print('RAW DATA')
         raw_min, *_ = kfold_GMM(DTR, LTR, 0.5, comp, Gauss_flag=False)

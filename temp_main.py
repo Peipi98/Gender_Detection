@@ -7,56 +7,62 @@ from evaluators.evaluation_SVM_polynomial import evaluation_SVM_polynomial
 from evaluators.evaluation_quad_LR import evaluation_quad_LR
 from evaluators.evaluation_weighted_LR import evaluation_weighted_LR
 from mlFunc import *
-from validation.compare_best_2 import compute_2best_plots
+from evaluators.compare_best_2 import compute_2best_plots
+from plot_features import plot_features
+from validation.validation_GMM import validation_GMM_ncomp, validation_GMM_tot
 from validation.validation_LR import validation_LR
+from validation.validation_MVG import validation_MVG
 from validation.validation_SVM import validation_SVM
+from validation.validation_SVM_RFB import validation_SVM_RFB
+from validation.validation_SVM_polynomial import validation_SVM_polynomial
+from validation.validation_compare import compare_2_validation
 from validation.validation_quad_LR import validation_quad_LR
 from validation.validation_weighted_LR import validation_weighted_LR
 
 def validation(DTR, LTR):
     print("############    MVG    ##############")
-    # validation_MVG(DTR, LTR, 'RAW_')
-    # validation_MVG(DTR, LTR, 'GAUSSIANIZED_', Gauss_flag=True)
-    # validation_MVG(DTR, LTR, DTE, LTE, 'ZNORM_', zscore=True)
+    validation_MVG(DTR, LTR, 'RAW_')
+    validation_MVG(DTR, LTR, 'GAUSSIANIZED_', Gauss_flag=True)
+    validation_MVG(DTR, LTR, DTE, LTE, 'ZNORM_', zscore=True)
 
     print("############    Logistic Regression    ##############")
     L = [1e-6, 1e-4, 1e-2, 1.0]
-    # validation_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
-    # validation_LR(DTR, LTR, L, 'GAUSSIANIZED_', PCA_Flag=True, gauss_Flag=True, zscore_Flag=False)
-    # validation_LR(DTR, LTR, L, 'ZNORMALIZED_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=True)
+    validation_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
+    validation_LR(DTR, LTR, L, 'GAUSSIANIZED_', PCA_Flag=True, gauss_Flag=True, zscore_Flag=False)
+    validation_LR(DTR, LTR, L, 'ZNORMALIZED_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=True)
     print("############    Weighted Logistic Regression    ##############")
     L = [1e-4, 1e-2, 1e-1, 1.0]
-    # validation_weighted_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
-    # validation_weighted_LR(DTR, LTR, L, 'GAUSSIANIZED_', PCA_Flag=True, gauss_Flag=True, zscore_Flag=False)
-    # validation_weighted_LR(DTR, LTR, L, 'ZNORMALIZED_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=True)
+    validation_weighted_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
+    validation_weighted_LR(DTR, LTR, L, 'GAUSSIANIZED_', PCA_Flag=True, gauss_Flag=True, zscore_Flag=False)
+    validation_weighted_LR(DTR, LTR, L, 'ZNORMALIZED_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=True)
 
     print("############    Quadratic Logistic Regression    ##############")
-    # validation_quad_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
+    validation_quad_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
 
     print("############    Support Vector Machine - Primal    ##############")
     K_arr = [0.1, 1.0, 10.0]
     C_arr = [0.01, 0.1, 1.0, 10.0]
-    # validation_SVM(DTR, LTR, K_arr, C_arr, 'RAW_', gauss_Flag=False, zscore_Flag=False)
-    # validation_SVM(DTR, LTR, K_arr, C_arr, 'GAUSSIANIZED_', gauss_Flag=True, zscore_Flag=False)
-    # validation_SVM(DTR, LTR, K_arr, C_arr, 'ZNORMALIZED_', gauss_Flag=False, zscore_Flag=True)
+    validation_SVM(DTR, LTR, K_arr, C_arr, 'RAW_', gauss_Flag=False, zscore_Flag=False)
+    validation_SVM(DTR, LTR, K_arr, C_arr, 'GAUSSIANIZED_', gauss_Flag=True, zscore_Flag=False)
+    validation_SVM(DTR, LTR, K_arr, C_arr, 'ZNORMALIZED_', gauss_Flag=False, zscore_Flag=True)
 
 
     print("############    Support Vector Machine - Dual - Polynomial    ##############")
     K_arr = [1., 10.]
-    # validation_SVM_polynomial(DTR, LTR, [1.0, 10.0], 1.0, 'RAW_', [1000], PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
+    validation_SVM_polynomial(DTR, LTR, [1.0, 10.0], 1.0, 'RAW_', [1000], PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
 
     K_arr = [0.1, 1., 10.]
     C_arr = [1., 10.]
 
     print("############    Support Vector Machine - Dual - RFB    ##############")
-    # validation_SVM_RFB(DTR, LTR, K_arr, [0.001], 'RAW_', PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
+    validation_SVM_RFB(DTR, LTR, K_arr, [0.001], 'RAW_', PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
 
     print("############    Gaussian Mixture Model   ##############")
 
-    # validation_GMM_tot(DTR, LTR, 0.5)
-    # validation_GMM_ncomp(DTR, LTR, 0.5, 2)
-    # validation_GMM_ncomp(DTR, LTR, 0.1, 2)
-    # validation_GMM_ncomp(DTR, LTR, 0.9, 2)
+    validation_GMM_tot(DTR, LTR, 0.5)
+    validation_GMM_ncomp(DTR, LTR, 0.5, 2)
+    validation_GMM_ncomp(DTR, LTR, 0.1, 2)
+    validation_GMM_ncomp(DTR, LTR, 0.9, 2)
 
 def evaluation(DTR, LTR, DTE, LTE):
     DTR_GAUSS = gaussianize_features(DTR, DTR)
@@ -102,15 +108,20 @@ if __name__ == "__main__":
     DTE, LTE = load("Test.txt")
     DTE, LTE = randomize(DTE, LTE)
     DTR_GAUSS = gaussianize_features(DTR, DTR)
-    #    plot_features(DTR, LTR, 'RAW_')
-    #    plot_features(DTR, LTR, 'GAUSSIANIZED_')
+    plot_features(DTR, LTR, 'RAW_')
+    plot_features(DTR, LTR, 'GAUSSIANIZED_')
     print("############    Validation    ##############")
     validation(DTR, LTR)
     print("############    Evaluation    ##############")
     evaluation(DTR, LTR, DTE, LTE)
 
+
+    # Warning # Warning # Warning # Warning
+    # Warning # Warning # Warning # Warning
+    # Warning # Warning # Warning # Warning
+    # Warning: the following code has not been cleaned yet. It has been used to generate comparison plots.
     # Creates barcharts for GMM with validation and evaluation
     # experimental_GMM(DTR, LTR, DTE, LTE)
-
     # Creates bayes error and ROC plots for 2 best models chosen (see inside)
-    compute_2best_plots(DTR, LTR, DTE, LTE)
+    # compute_2best_plots(DTR, LTR, DTE, LTE)
+    # compare_2_validation(DTR, LTR, [1e-4])
