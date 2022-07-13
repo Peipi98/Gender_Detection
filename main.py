@@ -7,7 +7,7 @@
 |                           |
 +---------------------------+
 '''
-
+from validation.compare_best_2 import compute_2best_plots
 from validation.validation_LR import validation_LR
 from validation.validation_weighted_LR import validation_weighted_LR
 from validation.validation_quad_LR import validation_quad_LR
@@ -25,7 +25,7 @@ from validation.validation_GMM import validation_GMM_ncomp, validation_GMM_tot
 +---------------------------+
 '''
 from evaluators.evaluation_MVG import evaluation_MVG
-from evaluators.evaluation_GMM import evaluation_GMM_ncomp
+from evaluators.evaluation_GMM import evaluation_GMM_ncomp, experimental_GMM
 from evaluators.evaluation_LR import evaluation_LR
 from evaluators.evaluation_SVM import evaluation_SVM
 from evaluators.evaluation_SVM_RFB import evaluation_SVM_RFB
@@ -33,7 +33,7 @@ from evaluators.evaluation_SVM_polynomial import evaluation_SVM_polynomial
 from evaluators.evaluation_quad_LR import evaluation_quad_LR
 from evaluators.evaluation_weighted_LR import evaluation_weighted_LR
 
-# from plot_features import plot_features
+#from plot_features import plot_features
 from validators import *
 import scipy.stats as stats
 
@@ -185,15 +185,14 @@ def evaluation(DTR, LTR, DTE, LTE):
     # evaluation_GMM_ncomp("Z-NORM", DTR_z, LTR, DTE_z, LTE, 0.1, 2)
     # evaluation_GMM_ncomp("Z-NORM", DTR_z, LTR, DTE_z, LTE, 0.9, 2)
 
-
 if __name__ == "__main__":
     DTR, LTR = load("Train.txt")
     DTR, LTR = randomize(DTR, LTR)
     DTE, LTE = load("Test.txt")
     DTE, LTE = randomize(DTE, LTE)
-    #    plot_features(DTR, LTR, 'RAW_')
+    #plot_features(DTR, LTR, 'RAW_')
 
-    validation(DTR, LTR)
+    # validation(DTR, LTR)
     '''
     +---------------------------+
     |                           |
@@ -202,4 +201,6 @@ if __name__ == "__main__":
     +---------------------------+
     '''
 
-    # evaluation(DTR, LTR, DTE, LTE)
+    #evaluation(DTR, LTR, DTE, LTE)
+    #experimental_GMM(DTR, LTR, DTE, LTE)
+    compute_2best_plots(DTR,LTR,DTE,LTE)

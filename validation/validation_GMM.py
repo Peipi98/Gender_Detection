@@ -268,3 +268,6 @@ def validation_GMM_ncomp(DTR, LTR, pi, n, zscore=False, gauss=False):
     plot_ROC(GMM_llrst_g, GMM_labels_g, 'GMM_tied_raw')
     plot_ROC(GMM_llrsnt_g, GMM_labels_g, 'GMM_tied_diag_raw')
 
+    raw_llr = [GMM_llrs_raw, GMM_llrsn_raw, GMM_llrst_raw, GMM_llrsnt_raw, GMM_labels_raw]
+    gauss_llr = [GMM_llrs_g, GMM_llrsn_g, GMM_llrst_g, GMM_llrsnt_g, GMM_labels_g]
+    return GMM_llrst_raw, GMM_labels_raw

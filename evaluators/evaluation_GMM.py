@@ -11,7 +11,7 @@ from classifiers import *
 from prettytable import PrettyTable
 from Classifiers.GMM import GMM_Full
 import scipy.stats as stats
-
+from validation.validation_GMM import kfold_GMM
 
 def validation_GMM(title, pi, GMM_llrs, LTE):
     GMM_llrs = np.hstack(GMM_llrs)
@@ -42,6 +42,28 @@ def ll_GMM(D, L, Dte, Lte, llr, cov, comp):
     llr.extend(GMM_Full(D, Dte, L, optimal_alpha, 2 ** optimal_comp, optimal_cov).tolist())
     return llr
 
+
+def plot_minDCF_GMM_eval(score_raw, score_gauss, title, components):
+    labels = np.exp2(components).astype(int)
+    raw_val, raw_eval = score_raw
+    gauss_val, gauss_eval = score_gauss
+
+    # for i in range(components):
+    #     labels.append(2 ** (i+1))
+
+    x = np.arange(len(labels))  # the label locations
+    width = 0.1  # the width of the bars
+    plt.bar(x - 0.15, raw_val, width, label='Raw [val]', edgecolor='black', color='tab:orange', alpha=0.5)
+    plt.bar(x - 0.05, raw_eval, width, label='Raw [eval]',edgecolor='black', color='tab:orange')
+    plt.bar(x + 0.05, gauss_val, width, label='Gauss [val]',edgecolor='black', color='r', alpha=0.5)
+    plt.bar(x + 0.15, gauss_eval, width, label='Gauss [eval]',edgecolor='black', color='r')
+
+    plt.xticks(x, labels)
+    plt.ylabel("DCF")
+    plt.title(title)
+    plt.legend()
+    plt.savefig('./images/GMM/' + title)
+    plt.show()
 
 def print_minDCF_tables(score_raw, score_gauss, components):
     types = ['full-cov', 'diag-cov', 'tied full-cov', 'tied diag-cov']
@@ -200,8 +222,50 @@ def evaluation_GMM_ncomp(typeof,DTR, LTR, DTE, LTE, pi, n, zscore=False):
     for i in range(len(raw_min)):
         t.add_row([typeof + " " + types[i], raw_min[i]])
     print(t)
+
+    return GMM_llrst
     # bayes_plot_bestGMM("prova", 0.5, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels)
-    # plot_ROC(GMM_llrs, GMM_labels, 'GMM_full2')
+    plot_ROC(GMM_llrs, GMM_labels, 'GMM_full2')
     # plot_ROC(GMM_llrsn, GMM_labels, 'GMM_diag2')
     # plot_ROC(GMM_llrst, GMM_labels, 'GMM_tied2')
     # plot_ROC(GMM_llrsnt, GMM_labels, 'GMM_tied_diag2')
+
+def experimental_GMM(DTR, LTR, DTE, LTE):
+    score_raw_val = []
+    score_gauss_val = []
+
+    score_raw_eval = []
+    score_gauss_eval = []
+    DTE_gauss = gaussianize_features(DTR, DTE)
+    DTR_gauss = gaussianize_features(DTR, DTR)
+    # We'll train from 1 to 2^7 components
+
+    # We'll train from 1 to 2^7 components
+    componentsToTry = [1,2,3,4,5,6,7]
+    for comp in componentsToTry:
+        print('RAW DATA')
+        raw_min, *_ = kfold_GMM(DTR, LTR, 0.5, comp, Gauss_flag=False)
+        raw_eval, *_ = evaluation_GMM(DTR, LTR, DTE, LTE, 0.5, comp)
+        score_raw_val.append(raw_min)
+        score_raw_eval.append(raw_eval)
+
+        print('GAUSSIANIZED')
+        gauss_min, *_ = kfold_GMM(DTR, LTR, 0.5, comp, Gauss_flag=True)
+        gauss_eval, *_ = evaluation_GMM(DTR_gauss, LTR, DTE_gauss, LTE, 0.5, comp)
+        score_gauss_val.append(gauss_min)
+        score_gauss_eval.append(gauss_eval)
+
+    n_comp = len(componentsToTry)
+    score_raw_val = np.reshape(np.hstack(score_raw_eval), (n_comp, 4)).T
+    score_gauss_val = np.reshape(np.hstack(score_gauss_eval), (n_comp, 4)).T
+
+    score_raw_eval = np.reshape(np.hstack(score_raw_eval), (n_comp, 4)).T
+    score_gauss_eval = np.reshape(np.hstack(score_gauss_eval), (n_comp, 4)).T
+
+    types = ['full-cov', 'diag-cov', 'tied full-cov', 'tied diag-cov']
+    for i in range(len(types)):
+        plot_minDCF_GMM_eval(
+            [score_raw_val[i].tolist(), score_gauss_val[i].tolist()],
+            [score_raw_eval[i].tolist(), score_gauss_eval[i].tolist()],
+            types[i],
+            componentsToTry)

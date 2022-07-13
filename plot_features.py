@@ -66,18 +66,17 @@ def plot_PCA_LDA(DTR, LTR, m, appendToTitle=''):
     P = PCA(DTR, LTR, m, filename=appendToTitle + 'PCA_m=' + str(m) + ' + LDA', LDA_flag=True)
     DTR = numpy.dot(P.T, -DTR)
 
-    W = LDA(DTR, LTR, 1)
+    W = LDA(DTR, LTR, 1, m)
     DTR = numpy.dot(W.T, DTR)
     plot_histogram(DTR, LTR, ['male', 'female'], 'PCA_m=' + str(m) + ' + LDA')
 
-
-def plot_features(DTR, LTR, appendToTitle):
+def plot_features(DTR, LTR, m=2, appendToTitle=''):
     plot_features_histograms(DTR, LTR, "feature_")
     plot_correlations(DTR, "heatmap_" + appendToTitle)
     matplotlib.rcParams.update(matplotlib.rcParamsDefault)
 
-    plot_PCA(DTR, LTR, 2, appendToTitle)
-    plot_PCA(DTR, LTR, 3, appendToTitle)
+    plot_PCA(DTR, LTR, m, appendToTitle)
+    plot_PCA(DTR, LTR, m, appendToTitle)
 
-    plot_PCA_LDA(DTR, LTR, 2, appendToTitle)
-    plot_PCA_LDA(DTR, LTR, 3, appendToTitle)
+    plot_PCA_LDA(DTR, LTR, m, appendToTitle)
+    plot_PCA_LDA(DTR, LTR, m, appendToTitle)
