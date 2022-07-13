@@ -9,7 +9,6 @@ from prettytable import PrettyTable
 
 
 def kfold_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=1.0, gamma=1.01, PCA_Flag=False):
-    scores_append = []
     SVM_labels = []
     Z = numpy.zeros(LTR.shape)
     Z[LTR == 1] = 1
@@ -108,19 +107,3 @@ def evaluation_SVM_RFB(DTR, LTR, DTE, LTE, K_arr, gamma_arr, appendToTitle, PCA_
         for gamma in gamma_arr:
             kfold_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False)
             # single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
-    # x = numpy.logspace(-3, 2, 15)
-    # y = numpy.array([])
-    # y_05 = numpy.array([])
-    # y_09 = numpy.array([])
-    # y_01 = numpy.array([])
-    # for xi in x:
-    #     scores, labels = kfold_SVM_calibration(DTR, LTR, 1.0, xi)
-    #     y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
-    #     y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
-    #     y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
-    #
-    # y = numpy.hstack((y, y_05))
-    # y = numpy.vstack((y, y_09))
-    # y = numpy.vstack((y, y_01))
-
-    # plot_DCF(x, y, 'lambda', appendToTitle + 'SVM_minDCF_comparison')
