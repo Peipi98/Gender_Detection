@@ -83,8 +83,8 @@ def kfold_QUAD_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True, gauss_Flag=False, z
             D, Dte = znorm(D, Dte)
 
         if gauss_Flag is True:
-            D = gaussianize_features(D, D)
             Dte = gaussianize_features(D, Dte)
+            D = gaussianize_features(D, D)
 
         expanded_DTR = numpy.apply_along_axis(vecxxT, 0, D)
         expanded_DTE = numpy.apply_along_axis(vecxxT, 0, Dte)
@@ -139,8 +139,8 @@ def kfold_QUAD_LR_calibration(DTR, LTR, l, PCA_Flag=True, gauss_Flag=False, zsco
             D, Dte = znorm(D, Dte)
 
         if gauss_Flag is True:
-            D = gaussianize_features(D, D)
             Dte = gaussianize_features(D, Dte)
+            D = gaussianize_features(D, D)
 
         expanded_DTR = numpy.apply_along_axis(vecxxT, 0, D)
         expanded_DTE = numpy.apply_along_axis(vecxxT, 0, Dte)

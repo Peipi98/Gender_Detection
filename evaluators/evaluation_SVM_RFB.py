@@ -36,7 +36,7 @@ def kfold_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=1.0, gamma=1.01, P
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.5"
-    t.add_row(['SVM_POLYNOMIAL, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    t.add_row(['SVM_RFB, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
     print(t)
 
     ###############################

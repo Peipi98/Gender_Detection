@@ -35,7 +35,7 @@ from evaluators.evaluation_weighted_LR import evaluation_weighted_LR
 
 #from plot_features import plot_features
 from validators import *
-import scipy.stats as stats
+
 
 def validation(DTR, LTR):
     # RAW data

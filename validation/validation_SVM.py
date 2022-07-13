@@ -41,8 +41,8 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True, gauss_Flag=False, zs
             D, Dte = znorm(D, Dte)
 
         if gauss_Flag is True:
-            D = gaussianize_features(D, D)
             Dte = gaussianize_features(D, Dte)
+            D = gaussianize_features(D, D)
 
         print(i)
         wStar, primal, dual, gap = train_SVM_linear(D, L, C=C, K=K)
@@ -124,8 +124,8 @@ def kfold_SVM_calibration(DTR, LTR, K, C, PCA_Flag=True, gauss_Flag=False, zscor
             D, Dte = znorm(D, Dte)
 
         if gauss_Flag is True:
-            D = gaussianize_features(D, D)
             Dte = gaussianize_features(D, Dte)
+            D = gaussianize_features(D, D)
 
         print(i)
         wStar, primal, dual, gap = train_SVM_linear(D, L, C=C, K=K)

@@ -81,8 +81,9 @@ def kfold_WEIGHTED_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True, gauss_Flag=Fals
             D, Dte = znorm(D, Dte)
 
         if gauss_Flag is True:
-            D = gaussianize_features(D, D)
             Dte = gaussianize_features(D, Dte)
+            D = gaussianize_features(D, D)
+
 
         scores = weighted_logistic_reg_score(D, L, Dte, l)
         scores_append.append(scores)
@@ -148,8 +149,8 @@ def kfold_WEIGHTED_LR_calibration(DTR, LTR, l, PCA_Flag=False, gauss_Flag=False,
             D, Dte = znorm(D, Dte)
 
         if gauss_Flag is True:
-            D = gaussianize_features(D, D)
             Dte = gaussianize_features(D, Dte)
+            D = gaussianize_features(D, D)
 
         scores = weighted_logistic_reg_score(D, L, Dte, l)
         scores_append.append(scores)

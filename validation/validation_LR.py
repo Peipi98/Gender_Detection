@@ -81,8 +81,8 @@ def kfold_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore
             D, Dte = znorm(D, Dte)
 
         if gauss_Flag is True:
-            D = gaussianize_features(D, D)
             Dte = gaussianize_features(D, Dte)
+            D = gaussianize_features(D, D)
 
         scores = logistic_reg_score(D, L, Dte, l)
         scores_append.append(scores)
@@ -149,8 +149,9 @@ def kfold_LR_calibration(DTR, LTR, l, PCA_Flag=True, gauss_Flag=False, zscore_Fl
             D, Dte = znorm(D, Dte)
 
         if gauss_Flag is True:
-            D = gaussianize_features(D, D)
             Dte = gaussianize_features(D, Dte)
+            D = gaussianize_features(D, D)
+
 
         scores = logistic_reg_score(D, L, Dte, l)
         scores_append.append(scores)
