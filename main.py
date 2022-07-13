@@ -33,8 +33,9 @@ from evaluators.evaluation_SVM_polynomial import evaluation_SVM_polynomial
 from evaluators.evaluation_quad_LR import evaluation_quad_LR
 from evaluators.evaluation_weighted_LR import evaluation_weighted_LR
 
-#from plot_features import plot_features
+# from plot_features import plot_features
 from validators import *
+import scipy.stats as stats
 
 
 def validation(DTR, LTR):
@@ -70,9 +71,9 @@ def validation(DTR, LTR):
     print("############    Gaussian Mixture Model - RAW & gaussianization    ##############")
 
     validation_GMM_tot(DTR, LTR, 0.5)
-    #validation_GMM_tot(DTR, LTR, 0.9)
-    #validation_GMM_tot(DTR, LTR, 0.1)
-    #validation_GMM_ncomp(DTR, LTR, 0.5, 2)
+    # validation_GMM_tot(DTR, LTR, 0.9)
+    # validation_GMM_tot(DTR, LTR, 0.1)
+    # validation_GMM_ncomp(DTR, LTR, 0.5, 2)
 
     # Gaussianization
 
@@ -90,25 +91,26 @@ def validation(DTR, LTR):
     # C_arr = [0.01, 0.1, 1.0, 10.0]
     # validation_SVM(DTR, LTR, K_arr, C_arr, 'GAUSSIANIZED_')
 
+
 #    plot_features(DTR, LTR, 'ZNORM')
 
-    # print("############    MVG - Z Normalization    ##############")
-    # validation_MVG(DTR, LTR, DTE, LTE, 'ZNORM_', zscore=True)
-    #
-    # print("############    Logistic Regression - Z Normalization    ##############")
-    # L = [1e-6, 1e-4, 1e-2]
-    # validation_LR(DTR, LTR, L, 'ZNORM_')
-    # L = [1e-4, 1e-2, 1e-1, 1.0]
-    # validation_weighted_LR(DTR, LTR, L, 'RAW_', PCA_Flag=False)
-    #
-    # print("############    Support Vector Machine - Z Normalization    ##############")
-    # K_arr = [0.1, 1.0, 10.0]
-    # C_arr = [0.01, 0.1, 1.0, 10.0]
-    # validation_SVM(DTR, LTR, K_arr, C_arr, 'ZNORM')
-    
+# print("############    MVG - Z Normalization    ##############")
+# validation_MVG(DTR, LTR, DTE, LTE, 'ZNORM_', zscore=True)
+#
+# print("############    Logistic Regression - Z Normalization    ##############")
+# L = [1e-6, 1e-4, 1e-2]
+# validation_LR(DTR, LTR, L, 'ZNORM_')
+# L = [1e-4, 1e-2, 1e-1, 1.0]
+# validation_weighted_LR(DTR, LTR, L, 'RAW_', PCA_Flag=False)
+#
+# print("############    Support Vector Machine - Z Normalization    ##############")
+# K_arr = [0.1, 1.0, 10.0]
+# C_arr = [0.01, 0.1, 1.0, 10.0]
+# validation_SVM(DTR, LTR, K_arr, C_arr, 'ZNORM')
+
 def evaluation(DTR, LTR, DTE, LTE):
-    #print("############    MVG - RAW   ##############")
-    #evaluation_MVG(DTR, LTR, DTE, LTE, 'RAW_')
+    # print("############    MVG - RAW   ##############")
+    # evaluation_MVG(DTR, LTR, DTE, LTE, 'RAW_')
     #
     # print("############    Logistic Regression - RAW    ##############")
     # L = [1e-6]  # 1e-6
@@ -133,10 +135,10 @@ def evaluation(DTR, LTR, DTE, LTE):
     # gamma_Arr = [0.001]
     # validation_SVM_RFB(DTR, LTR, K_arr, gamma_Arr, 'RAW_', PCA_Flag=False)
 
-    #print("############    Gaussian Mixture Model - RAW    ##############")
-    #evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.5, 2)
-    #evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.1, 2)
-    #evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.9, 2)
+    # print("############    Gaussian Mixture Model - RAW    ##############")
+    # evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.5, 2)
+    # evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.1, 2)
+    # evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.9, 2)
 
     # Gaussianization
 
@@ -161,13 +163,12 @@ def evaluation(DTR, LTR, DTE, LTE):
     evaluation_GMM_ncomp("gauss.", DTR_gauss, LTR, DTE_gauss, LTE, 0.1, 2)
     evaluation_GMM_ncomp("gauss.", DTR_gauss, LTR, DTE_gauss, LTE, 0.9, 2)
 
-
-    #DTR_z = stats.zscore(DTR, axis=1)
-    #DTR_z, DTE_z = znorm(DTR, DTE)
+    # DTR_z = stats.zscore(DTR, axis=1)
+    # DTR_z, DTE_z = znorm(DTR, DTE)
     #    plot_features(DTR, LTR, 'ZNORM')
 
-    #print("############    MVG - Z Normalization    ##############")
-    #evaluation_MVG(DTR_z, LTR, DTE_z, LTE, 'Z-NORM')
+    # print("############    MVG - Z Normalization    ##############")
+    # evaluation_MVG(DTR_z, LTR, DTE_z, LTE, 'Z-NORM')
 
     # print("############    Logistic Regression - Z Normalization    ##############")
     # L = [1e-6, 1e-4, 1e-2]
@@ -186,7 +187,6 @@ def evaluation(DTR, LTR, DTE, LTE):
 
 
 if __name__ == "__main__":
-
     DTR, LTR = load("Train.txt")
     DTR, LTR = randomize(DTR, LTR)
     DTE, LTE = load("Test.txt")
@@ -202,4 +202,4 @@ if __name__ == "__main__":
     +---------------------------+
     '''
 
-    #evaluation(DTR, LTR, DTE, LTE)
+    # evaluation(DTR, LTR, DTE, LTE)
