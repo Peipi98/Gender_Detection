@@ -179,4 +179,4 @@ def validation_weighted_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True, gauss_Flag
     y = numpy.vstack((y, y_09))
     y = numpy.vstack((y, y_01))
 
-    # plot_DCF(x, y, 'lambda', appendToTitle + 'WEIGHTED_LR_minDCF_comparison')
+    plot_DCF(x, y, 'lambda', appendToTitle + 'WEIGHTED_LR_minDCF_comparison')
