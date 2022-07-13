@@ -99,13 +99,15 @@ def validation_MVG(DTR, LTR, appendToTitle, PCA_Flag=True, Gauss_flag = False, z
 
         Dte = Dtr[i]
         Lte = Ltr[i]
-        
+
         if (zscore):
             D, Dte = znorm(D, Dte)
 
-        if(Gauss_flag):
+        if (Gauss_flag):
+            D_training = D
             D = gaussianize_features(D, D)
-            Dte = gaussianize_features(D, Dte)
+            Dte = gaussianize_features(D_training, Dte)
+
         MVG_labels = np.append(MVG_labels, Lte, axis=0)
         MVG_labels = np.hstack(MVG_labels)
         # Once we have computed our folds, we can try different models
@@ -218,9 +220,3 @@ def validation_MVG(DTR, LTR, appendToTitle, PCA_Flag=True, Gauss_flag = False, z
                    PCA2_mvg_nt,
                    MVG_labels, appendToTitle + "minDCF_π=0.9_PCA m=9__")
 
-if __name__ == '__main__':
-    DTR, LTR = load('../Train.txt')
-    DTR, LTR = randomize(DTR, LTR)
-
-    validation_MVG(DTR, LTR, 'RAW_')
-    validation_MVG(DTR, LTR, 'RAW_', Gauss_flag=True)

@@ -192,12 +192,13 @@ def bayes_plot_bestGMM(title, pi, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GM
 def evaluation_GMM_ncomp(typeof,DTR, LTR, DTE, LTE, pi, n, zscore=False):
     raw_min, raw_act, raw_x, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels = evaluation_GMM(
         DTR, LTR, DTE, LTE, pi, n, zscore)
+    print(raw_act, raw_x)
 
     types = ['full-cov', 'diag-cov', 'tied full-cov', 'tied diag-cov']
-    t = PrettyTable(["", 'minDCF', 'actDCF', 'theoretical'])
+    t = PrettyTable(["", 'minDCF'])
     t.title = "GMM π=" + str(pi)
     for i in range(len(raw_min)):
-        t.add_row([typeof + " " + types[i], raw_min[i], raw_act[i], raw_x[i]])
+        t.add_row([typeof + " " + types[i], raw_min[i]])
     print(t)
     # bayes_plot_bestGMM("prova", 0.5, GMM_llrs, GMM_llrsn, GMM_llrst, GMM_llrsnt, GMM_labels)
     # plot_ROC(GMM_llrs, GMM_labels, 'GMM_full2')
