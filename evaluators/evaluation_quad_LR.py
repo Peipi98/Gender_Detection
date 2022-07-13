@@ -47,6 +47,8 @@ def validate_LR(scores, LR_labels, appendToTitle, l):
 
 def evaluate_LR(DTR, LTR, DTE, LTE, l, appendToTitle, PCA_Flag=True):
     scores_append = []
+    PCA_LR_scores_append = []
+    PCA2_LR_scores_append = []
     LR_labels = []
 
     def vecxxT(x):
@@ -66,8 +68,28 @@ def evaluate_LR(DTR, LTR, DTE, LTE, l, appendToTitle, PCA_Flag=True):
     LR_labels = np.append(LR_labels, LTE, axis=0)
     LR_labels = np.hstack(LR_labels)
 
-    validate_LR(scores_append, LR_labels, appendToTitle, l)
+    if PCA_Flag is True:
+        # PCA m=10
+        P = PCA(DTR, LTR, m=10)
+        DTR_PCA = numpy.dot(P.T, DTR)
+        DTE_PCA = numpy.dot(P.T, DTE)
 
+        PCA_LR_scores = quad_logistic_reg_score(DTR_PCA, LTR, DTE_PCA, l)
+        PCA_LR_scores_append.append(PCA_LR_scores)
+
+        # PCA m=9
+        P = PCA(DTR, LTR, m=9)
+        DTR_PCA = numpy.dot(P.T, DTR)
+        DTE_PCA = numpy.dot(P.T, DTE)
+
+        PCA2_LR_scores = quad_logistic_reg_score(DTR_PCA, LTR, DTE_PCA, l)
+        PCA2_LR_scores_append.append(PCA2_LR_scores)
+
+    validate_LR(scores_append, LR_labels, appendToTitle, l)
+    if PCA_Flag is True:
+        validate_LR(PCA_LR_scores_append, LR_labels, appendToTitle + 'PCA_m10_', l)
+
+        validate_LR(PCA2_LR_scores_append, LR_labels, appendToTitle + 'PCA_m9_', l)
 
 def kfold_LR_calibration(DTR, LTR, l):
     k = 5
@@ -110,20 +132,3 @@ def kfold_LR_calibration(DTR, LTR, l):
 def evaluation_quad_LR(DTR, LTR, DTE, LTE, L, appendToTitle, PCA_Flag=True):
     for l in L:  # l is a constant, not an array
         evaluate_LR(DTR, LTR, DTE, LTE, l, appendToTitle, PCA_Flag)
-
-    # x = numpy.logspace(-5, 1, 30)
-    # y = numpy.array([])
-    # y_05 = numpy.array([])
-    # y_09 = numpy.array([])
-    # y_01 = numpy.array([])
-    # for xi in x:
-    #     scores, labels = kfold_WEIGHTED_LR_calibration(DTR, LTR, xi)
-    #     y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
-    #     y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
-    #     y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
-    #
-    # y = numpy.hstack((y, y_05))
-    # y = numpy.vstack((y, y_09))
-    # y = numpy.vstack((y, y_01))
-    #
-    # plot_DCF(x, y, 'lambda', appendToTitle + 'LR_minDCF_comparison')

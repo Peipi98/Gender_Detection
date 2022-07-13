@@ -51,6 +51,8 @@ def kfold_QUAD_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True, gauss_Flag=False, z
     Ltr = numpy.split(LTR, k)
 
     scores_append = []
+    PCA_LR_scores_append = []
+    PCA2_LR_scores_append = []
     LR_labels = []
 
     for i in range(k):
@@ -98,7 +100,29 @@ def kfold_QUAD_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True, gauss_Flag=False, z
         LR_labels = np.append(LR_labels, Lte, axis=0)
         LR_labels = np.hstack(LR_labels)
 
+        if PCA_Flag is True:
+            # PCA m=10
+            P = PCA(D, L, m=10)
+            DTR_PCA = numpy.dot(P.T, D)
+            DTE_PCA = numpy.dot(P.T, Dte)
+
+            PCA_LR_scores = quad_logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
+            PCA_LR_scores_append.append(PCA_LR_scores)
+
+            # PCA m=9
+            P = PCA(D, L, m=9)
+            DTR_PCA = numpy.dot(P.T, D)
+            DTE_PCA = numpy.dot(P.T, Dte)
+
+            PCA2_LR_scores = quad_logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
+            PCA2_LR_scores_append.append(PCA2_LR_scores)
+
     validate_LR(scores_append, LR_labels, appendToTitle, l)
+
+    if PCA_Flag is True:
+        validate_LR(PCA_LR_scores_append, LR_labels, appendToTitle + 'PCA_m10_', l)
+
+        validate_LR(PCA2_LR_scores_append, LR_labels, appendToTitle + 'PCA_m9_', l)
 
 
 def kfold_QUAD_LR_calibration(DTR, LTR, l, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
