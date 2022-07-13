@@ -70,10 +70,10 @@ def validation(DTR, LTR):
 
     print("############    Gaussian Mixture Model - RAW & gaussianization    ##############")
 
-    validation_GMM_tot(DTR, LTR, 0.5)
-    # validation_GMM_tot(DTR, LTR, 0.9)
-    # validation_GMM_tot(DTR, LTR, 0.1)
+    # validation_GMM_tot(DTR, LTR, 0.5)
     # validation_GMM_ncomp(DTR, LTR, 0.5, 2)
+    # validation_GMM_ncomp(DTR, LTR, 0.1, 2)
+    # validation_GMM_ncomp(DTR, LTR, 0.9, 2)
 
     # Gaussianization
 
@@ -94,19 +94,19 @@ def validation(DTR, LTR):
 
 #    plot_features(DTR, LTR, 'ZNORM')
 
-# print("############    MVG - Z Normalization    ##############")
-# validation_MVG(DTR, LTR, DTE, LTE, 'ZNORM_', zscore=True)
-#
-# print("############    Logistic Regression - Z Normalization    ##############")
-# L = [1e-6, 1e-4, 1e-2]
-# validation_LR(DTR, LTR, L, 'ZNORM_')
-# L = [1e-4, 1e-2, 1e-1, 1.0]
-# validation_weighted_LR(DTR, LTR, L, 'RAW_', PCA_Flag=False)
-#
-# print("############    Support Vector Machine - Z Normalization    ##############")
-# K_arr = [0.1, 1.0, 10.0]
-# C_arr = [0.01, 0.1, 1.0, 10.0]
-# validation_SVM(DTR, LTR, K_arr, C_arr, 'ZNORM')
+    # print("############    MVG - Z Normalization    ##############")
+    # validation_MVG(DTR, LTR, DTE, LTE, 'ZNORM_', zscore=True)
+    #
+    # print("############    Logistic Regression - Z Normalization    ##############")
+    # L = [1e-6, 1e-4, 1e-2]
+    # validation_LR(DTR, LTR, L, 'ZNORM_')
+    # L = [1e-4, 1e-2, 1e-1, 1.0]
+    # validation_weighted_LR(DTR, LTR, L, 'RAW_', PCA_Flag=False)
+    #
+    # print("############    Support Vector Machine - Z Normalization    ##############")
+    # K_arr = [0.1, 1.0, 10.0]
+    # C_arr = [0.01, 0.1, 1.0, 10.0]
+    # validation_SVM(DTR, LTR, K_arr, C_arr, 'ZNORM')
 
 def evaluation(DTR, LTR, DTE, LTE):
     # print("############    MVG - RAW   ##############")

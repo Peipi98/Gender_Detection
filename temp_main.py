@@ -1,4 +1,6 @@
+from evaluators.evaluation_GMM import evaluation_GMM_ncomp
 from evaluators.evaluation_LR import evaluation_LR
+from evaluators.evaluation_MVG import evaluation_MVG
 from evaluators.evaluation_SVM import evaluation_SVM
 from evaluators.evaluation_SVM_RFB import evaluation_SVM_RFB
 from evaluators.evaluation_SVM_polynomial import evaluation_SVM_polynomial
@@ -11,6 +13,11 @@ from validation.validation_quad_LR import validation_quad_LR
 from validation.validation_weighted_LR import validation_weighted_LR
 
 def validation(DTR, LTR):
+    print("############    MVG    ##############")
+    # validation_MVG(DTR, LTR, 'RAW_')
+    # validation_MVG(DTR, LTR, 'GAUSSIANIZED_', Gauss_flag=True)
+    # validation_MVG(DTR, LTR, DTE, LTE, 'ZNORM_', zscore=True)
+
     print("############    Logistic Regression    ##############")
     L = [1e-6, 1e-4, 1e-2, 1.0]
     # validation_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
@@ -43,13 +50,27 @@ def validation(DTR, LTR):
     print("############    Support Vector Machine - Dual - RFB    ##############")
     # validation_SVM_RFB(DTR, LTR, K_arr, [0.001], 'RAW_', PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
 
+    print("############    Gaussian Mixture Model   ##############")
+
+    # validation_GMM_tot(DTR, LTR, 0.5)
+    # validation_GMM_ncomp(DTR, LTR, 0.5, 2)
+    # validation_GMM_ncomp(DTR, LTR, 0.1, 2)
+    # validation_GMM_ncomp(DTR, LTR, 0.9, 2)
+
 def evaluation(DTR, LTR, DTE, LTE):
-    print("############    Logistic Regression    ##############")
-    evaluation_LR(DTR, LTR, DTE, LTE, [1e-6], 'EVAL_LR_', PCA_Flag=False)
     DTR_GAUSS = gaussianize_features(DTR, DTR)
     DTE_GAUSS = gaussianize_features(DTR, DTE)
-    evaluation_LR(DTR_GAUSS, LTR, DTE_GAUSS, LTE, [1e-6], 'EVAL_LR_GAUSS_', PCA_Flag=False)
     DTR_ZNORM, DTE_ZNORM = znorm(DTR, DTE)
+
+    print("############    MVG   ##############")
+    evaluation_MVG(DTR, LTR, DTE, LTE, 'RAW_')
+    evaluation_MVG(DTR_GAUSS, LTR, DTE_GAUSS, LTE, 'GAUSSIANIZED_')
+    evaluation_MVG(DTR_ZNORM, LTR, DTE_ZNORM, LTE, 'Z-NORM')
+
+    print("############    Logistic Regression    ##############")
+    evaluation_LR(DTR, LTR, DTE, LTE, [1e-6], 'EVAL_LR_', PCA_Flag=False)
+
+    evaluation_LR(DTR_GAUSS, LTR, DTE_GAUSS, LTE, [1e-6], 'EVAL_LR_GAUSS_', PCA_Flag=False)
     evaluation_LR(DTR_ZNORM, LTR, DTE_ZNORM, LTE, [1e-6], 'EVAL_LR_ZNORM_', PCA_Flag=False)
     print("############    Weighted Logistic Regression    ##############")
     evaluation_weighted_LR(DTR, LTR, DTE, LTE, [1e-4], 'EVAL_WEIGHTED_LR_', PCA_Flag=False)
@@ -65,6 +86,14 @@ def evaluation(DTR, LTR, DTE, LTE):
 
     print("############    Support Vector Machine - Dual - RFB    ##############")
     evaluation_SVM_RFB(DTR, LTR, DTE, LTE, [1.0], [0.001], 'EVAL_SVM_RFB', PCA_Flag=False)
+
+    print("############    Gaussian Mixture Model - RAW    ##############")
+    evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.5, 2)
+    evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.1, 2)
+    evaluation_GMM_ncomp("RAW", DTR, LTR, DTE, LTE, 0.9, 2)
+    evaluation_GMM_ncomp("gauss.", DTR_GAUSS, LTR, DTE_GAUSS, LTE, 0.5, 2)
+    evaluation_GMM_ncomp("gauss.", DTR_GAUSS, LTR, DTE_GAUSS, LTE, 0.1, 2)
+    evaluation_GMM_ncomp("gauss.", DTR_GAUSS, LTR, DTE_GAUSS, LTE, 0.9, 2)
 
 if __name__ == "__main__":
     DTR, LTR = load("Train.txt")
