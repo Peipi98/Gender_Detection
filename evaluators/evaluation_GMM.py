@@ -265,7 +265,7 @@ def experimental_GMM(DTR, LTR, DTE, LTE):
     types = ['full-cov', 'diag-cov', 'tied full-cov', 'tied diag-cov']
     for i in range(len(types)):
         plot_minDCF_GMM_eval(
-            [score_raw_val[i].tolist(), score_gauss_val[i].tolist()],
-            [score_raw_eval[i].tolist(), score_gauss_eval[i].tolist()],
+            [score_raw_val[i].tolist(), score_raw_eval[i].tolist()],
+            [score_gauss_val[i].tolist(), score_gauss_eval[i].tolist()],
             types[i],
             componentsToTry)
