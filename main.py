@@ -202,5 +202,6 @@ if __name__ == "__main__":
     '''
 
     #evaluation(DTR, LTR, DTE, LTE)
+
     #experimental_GMM(DTR, LTR, DTE, LTE)
     compute_2best_plots(DTR,LTR,DTE,LTE)

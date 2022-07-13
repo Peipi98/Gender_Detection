@@ -1,4 +1,4 @@
-from evaluators.evaluation_GMM import evaluation_GMM_ncomp
+from evaluators.evaluation_GMM import evaluation_GMM_ncomp, experimental_GMM
 from evaluators.evaluation_LR import evaluation_LR
 from evaluators.evaluation_MVG import evaluation_MVG
 from evaluators.evaluation_SVM import evaluation_SVM
@@ -7,6 +7,7 @@ from evaluators.evaluation_SVM_polynomial import evaluation_SVM_polynomial
 from evaluators.evaluation_quad_LR import evaluation_quad_LR
 from evaluators.evaluation_weighted_LR import evaluation_weighted_LR
 from mlFunc import *
+from validation.compare_best_2 import compute_2best_plots
 from validation.validation_LR import validation_LR
 from validation.validation_SVM import validation_SVM
 from validation.validation_quad_LR import validation_quad_LR
@@ -107,3 +108,9 @@ if __name__ == "__main__":
     validation(DTR, LTR)
     print("############    Evaluation    ##############")
     evaluation(DTR, LTR, DTE, LTE)
+
+    # Creates barcharts for GMM with validation and evaluation
+    # experimental_GMM(DTR, LTR, DTE, LTE)
+
+    # Creates bayes error and ROC plots for 2 best models chosen (see inside)
+    compute_2best_plots(DTR, LTR, DTE, LTE)
