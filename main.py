@@ -23,7 +23,7 @@ def validation(DTR, LTR):
     print("############    MVG    ##############")
     validation_MVG(DTR, LTR, 'RAW_')
     validation_MVG(DTR, LTR, 'GAUSSIANIZED_', Gauss_flag=True)
-    validation_MVG(DTR, LTR, DTE, LTE, 'ZNORM_', zscore=True)
+    validation_MVG(DTR, LTR, 'ZNORM_', zscore=True)
 
     print("############    Logistic Regression    ##############")
     L = [1e-6, 1e-4, 1e-2, 1.0]
@@ -108,8 +108,8 @@ if __name__ == "__main__":
     DTE, LTE = load("Test.txt")
     DTE, LTE = randomize(DTE, LTE)
     DTR_GAUSS = gaussianize_features(DTR, DTR)
-    plot_features(DTR, LTR, 'RAW_')
-    plot_features(DTR, LTR, 'GAUSSIANIZED_')
+    plot_features(DTR, LTR, appendToTitle='RAW_')
+    plot_features(DTR, LTR, appendToTitle='GAUSSIANIZED_')
     print("############    Validation    ##############")
     validation(DTR, LTR)
     print("############    Evaluation    ##############")
