@@ -237,12 +237,22 @@ def quad_logreg_obj_wrap(DTR, LTR, l):
     M = DTR.shape[0]
     Z = LTR * 2.0 - 1.0
 
+    # def logreg_obj(v):
+    #     w = mcol(v[0:M])
+    #     b = v[-1]
+    #     S = numpy.dot(w.T, DTR) + b
+    #     cxe = numpy.logaddexp(0, -S * Z)
+    #     return numpy.linalg.norm(w) ** 2 * l / 2.0 + cxe.mean()
+
+    # prior weighted quad log reg
     def logreg_obj(v):
         w = mcol(v[0:M])
         b = v[-1]
-        S = numpy.dot(w.T, DTR) + b
-        cxe = numpy.logaddexp(0, -S * Z)
-        return numpy.linalg.norm(w) ** 2 * l / 2.0 + cxe.mean()
+        reg = 0.5 * l * numpy.linalg.norm(w) ** 2
+        s = (numpy.dot(w.T, DTR) + b).ravel()
+        avg_risk_0 = (numpy.logaddexp(0, -s[LTR == 0] * Z[LTR == 0])).mean()
+        avg_risk_1 = (numpy.logaddexp(0, -s[LTR == 1] * Z[LTR == 1])).mean()
+        return reg + avg_risk_1 + avg_risk_0
 
     return logreg_obj
 

@@ -165,7 +165,7 @@ def plot_DCF(x, y, xlabel, title, base=10):
     plt.legend([ "min DCF prior=0.5", "min DCF prior=0.9", "min DCF prior=0.1"])
     plt.xlabel(xlabel)
     plt.ylabel("min DCF")
-    plt.savefig('./images/DCF_' + title+ '.png')
+    plt.savefig('./images/DCF_' + title+ '.svg')
     plt.show()
     return
 
