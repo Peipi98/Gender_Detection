@@ -28,19 +28,15 @@ def validation(DTR, LTR):
     validation_MVG(DTR, LTR, 'GAUSSIANIZED_', Gauss_flag=True)
     validation_MVG(DTR, LTR, 'ZNORM_', zscore=True)
 
-    print("############    Logistic Regression    ##############")
-    L = [1e-6, 1e-4, 1e-2, 1.0]
-    validation_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
-    validation_LR(DTR, LTR, L, 'GAUSSIANIZED_', PCA_Flag=True, gauss_Flag=True, zscore_Flag=False)
-    validation_LR(DTR, LTR, L, 'ZNORMALIZED_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=True)
-    print("############    Weighted Logistic Regression    ##############")
-    L = [1e-4, 1e-2, 1e-1, 1.0]
+    print("############    Prior Weighted Logistic Regression    ##############")
+    L = [1e-5, 1e-3, 1e-1, 1.0]
     validation_weighted_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
+    validation_weighted_LR(DTR, LTR, L, 'ZNORM_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=True)
     validation_weighted_LR(DTR, LTR, L, 'GAUSSIANIZED_', PCA_Flag=True, gauss_Flag=True, zscore_Flag=False)
-    validation_weighted_LR(DTR, LTR, L, 'ZNORMALIZED_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=True)
+
 
     print("############    Quadratic Logistic Regression    ##############")
-    validation_quad_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
+    validation_quad_LR(DTR, LTR, L, 'QUAD_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
 
     print("############    Support Vector Machine - Primal    ##############")
     K_arr = [0.1, 1.0, 10.0]
@@ -57,7 +53,7 @@ def validation(DTR, LTR):
     K_arr = [0.1, 1., 10.]
     C_arr = [1., 10.]
 
-    print("############    Support Vector Machine - Dual - RFB    ##############")
+    print("############    Support Vector Machine - Dual - RBF    ##############")
     validation_SVM_RFB(DTR, LTR, K_arr, [0.001], 'RAW_', PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
 
     print("############    Gaussian Mixture Model   ##############")
@@ -78,6 +74,7 @@ def evaluation(DTR, LTR, DTE, LTE):
     evaluation_MVG(DTR_ZNORM, LTR, DTE_ZNORM, LTE, 'Z-NORM')
 
     print("############    Logistic Regression    ##############")
+    print("Questa parte andrà tolta")
     evaluation_LR(DTR, LTR, DTE, LTE, [1e-6], 'EVAL_LR_', PCA_Flag=False)
 
     evaluation_LR(DTR_GAUSS, LTR, DTE_GAUSS, LTE, [1e-6], 'EVAL_LR_GAUSS_', PCA_Flag=False)
@@ -110,7 +107,6 @@ if __name__ == "__main__":
     DTR, LTR = randomize(DTR, LTR)
     DTE, LTE = load("Test.txt")
     DTE, LTE = randomize(DTE, LTE)
-    #DTR_zscore = scipy.stats.zscore(DTR)
     #DTR_GAUSS = gaussianize_features(DTR, DTR)
     #plot_features(DTR, LTR, appendToTitle='RAW_')
     #plot_features(DTR_GAUSS, LTR, appendToTitle='GAUSSIANIZED_')
