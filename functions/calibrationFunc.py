@@ -96,7 +96,7 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle):
     #print(calibratedDcf)
 
 
-def calibrate_SVM(DTR, LTR, appendToTitle):
-    K = 1.0
+def calibrate_SVM(DTR, LTR, appendToTitle=''):
+    K = 10.0
     C = 1.0
     kfold_SVM(DTR, LTR, K, C, appendToTitle)

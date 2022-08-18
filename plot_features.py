@@ -1,6 +1,7 @@
 import sys
 
 import matplotlib.pyplot
+import scipy.stats
 import seaborn as sns
 
 sys.path.append("./")
@@ -24,7 +25,7 @@ def compute_correlation(X, Y):
     return corr
 
 
-def plot_correlations(DTR, title):
+def plot_correlations(DTR, title, cmap="Greys"):
     corr = numpy.zeros((12, 12))
     for x in range(12):
         for y in range(12):
@@ -34,9 +35,9 @@ def plot_correlations(DTR, title):
             corr[x][y] = pearson_elem
 
     sns.set()
-    heatmap = sns.heatmap(numpy.abs(corr), linewidth=0.2, cmap="Greys", square=True, cbar=False)
+    heatmap = sns.heatmap(numpy.abs(corr), linewidth=0.2, cmap=cmap, square=True, cbar=False)
     fig = heatmap.get_figure()
-    fig.savefig("./images/" + title + ".png")
+    fig.savefig("./images/" + title + ".svg")
 
 
 def plot_features_histograms(DTR, LTR, _title):
@@ -54,7 +55,7 @@ def plot_features_histograms(DTR, LTR, _title):
         plt.hist(y, bins=60, density=True, alpha=0.4, linewidth=1.0, color='blue', edgecolor='black',
                  label=labels[1])
         plt.legend()
-        plt.savefig('./images/hist_' + title + '.png')
+        plt.savefig('./images/hist_' + title + '.svg')
         plt.show()
 
 
@@ -71,8 +72,10 @@ def plot_PCA_LDA(DTR, LTR, m, appendToTitle=''):
     plot_histogram(DTR, LTR, ['male', 'female'], 'PCA_m=' + str(m) + ' + LDA')
 
 def plot_features(DTR, LTR, m=2, appendToTitle=''):
-    plot_features_histograms(DTR, LTR, "feature_")
+    plot_features_histograms(DTR, LTR, appendToTitle + "feature_")
     plot_correlations(DTR, "heatmap_" + appendToTitle)
+    plot_correlations(DTR[:, LTR == 0], "heatmap_male_" + appendToTitle, cmap="Blues")
+    plot_correlations(DTR[:, LTR == 1], "heatmap_female_" + appendToTitle, cmap="Reds")
     matplotlib.rcParams.update(matplotlib.rcParamsDefault)
 
     plot_PCA(DTR, LTR, m, appendToTitle)

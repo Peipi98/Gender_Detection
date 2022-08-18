@@ -6,6 +6,7 @@ from evaluators.evaluation_SVM_RFB import evaluation_SVM_RFB
 from evaluators.evaluation_SVM_polynomial import evaluation_SVM_polynomial
 from evaluators.evaluation_quad_LR import evaluation_quad_LR
 from evaluators.evaluation_weighted_LR import evaluation_weighted_LR
+from functions.calibrationFunc import calibrate_SVM
 from mlFunc import *
 from evaluators.compare_best_2 import compute_2best_plots
 from plot_features import plot_features
@@ -18,6 +19,8 @@ from validation.validation_SVM_polynomial import validation_SVM_polynomial
 from validation.validation_compare import compare_2_validation
 from validation.validation_quad_LR import validation_quad_LR
 from validation.validation_weighted_LR import validation_weighted_LR
+
+import scipy.stats
 
 def validation(DTR, LTR):
     print("############    MVG    ##############")
@@ -107,15 +110,16 @@ if __name__ == "__main__":
     DTR, LTR = randomize(DTR, LTR)
     DTE, LTE = load("Test.txt")
     DTE, LTE = randomize(DTE, LTE)
-    DTR_GAUSS = gaussianize_features(DTR, DTR)
-    plot_features(DTR, LTR, appendToTitle='RAW_')
-    plot_features(DTR, LTR, appendToTitle='GAUSSIANIZED_')
-    print("############    Validation    ##############")
-    validation(DTR, LTR)
-    print("############    Evaluation    ##############")
-    evaluation(DTR, LTR, DTE, LTE)
+    #DTR_zscore = scipy.stats.zscore(DTR)
+    #DTR_GAUSS = gaussianize_features(DTR, DTR)
+    #plot_features(DTR, LTR, appendToTitle='RAW_')
+    #plot_features(DTR_GAUSS, LTR, appendToTitle='GAUSSIANIZED_')
+    # print("############    Validation    ##############")
+    # validation(DTR, LTR)
+    # print("############    Evaluation    ##############")
+    # evaluation(DTR, LTR, DTE, LTE)
 
-
+    calibrate_SVM(DTR, LTR)
     # Warning # Warning # Warning # Warning
     # Warning # Warning # Warning # Warning
     # Warning # Warning # Warning # Warning
