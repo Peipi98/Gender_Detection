@@ -1,26 +1,24 @@
-from evaluators.evaluation_GMM import evaluation_GMM_ncomp, experimental_GMM
+from evaluators.evaluation_GMM import evaluation_GMM_ncomp
 from evaluators.evaluation_LR import evaluation_LR
 from evaluators.evaluation_MVG import evaluation_MVG
 from evaluators.evaluation_SVM import evaluation_SVM
-from evaluators.evaluation_SVM_RFB import evaluation_SVM_RFB
+from evaluators.evaluation_SVM_RBF import evaluation_SVM_RFB
 from evaluators.evaluation_SVM_polynomial import evaluation_SVM_polynomial
 from evaluators.evaluation_quad_LR import evaluation_quad_LR
 from evaluators.evaluation_weighted_LR import evaluation_weighted_LR
-from functions.calibrationFunc import calibrate_SVM
+from score_calibration.SVM_RBF_scores_calibration import SVM_RBF_score_calibration
+from score_calibration.SVM_scores_calibration import SVM_score_calibration
 from mlFunc import *
-from evaluators.compare_best_2 import compute_2best_plots
-from plot_features import plot_features
 from validation.validation_GMM import validation_GMM_ncomp, validation_GMM_tot
 from validation.validation_LR import validation_LR
 from validation.validation_MVG import validation_MVG
 from validation.validation_SVM import validation_SVM
-from validation.validation_SVM_RFB import validation_SVM_RFB
+from validation.validation_SVM_RBF import validation_SVM_RFB
 from validation.validation_SVM_polynomial import validation_SVM_polynomial
 from validation.validation_compare import compare_2_validation
 from validation.validation_quad_LR import validation_quad_LR
 from validation.validation_weighted_LR import validation_weighted_LR
 
-import scipy.stats
 
 def validation(DTR, LTR):
     print("############    MVG    ##############")
@@ -44,7 +42,10 @@ def validation(DTR, LTR):
     validation_SVM(DTR, LTR, K_arr, C_arr, 'RAW_', gauss_Flag=False, zscore_Flag=False)
     validation_SVM(DTR, LTR, K_arr, C_arr, 'GAUSSIANIZED_', gauss_Flag=True, zscore_Flag=False)
     validation_SVM(DTR, LTR, K_arr, C_arr, 'ZNORMALIZED_', gauss_Flag=False, zscore_Flag=True)
-
+    K_arr = [1.0]
+    C_arr = [1.0]
+    SVM_score_calibration(DTR, LTR, K_arr, C_arr, appendToTitle="SVM_SCORE_CALIBRATION_", PCA_Flag=True,
+                          gauss_Flag=False, zscore_Flag=False)
 
     print("############    Support Vector Machine - Dual - Polynomial    ##############")
     K_arr = [1., 10.]
@@ -55,8 +56,10 @@ def validation(DTR, LTR):
 
     print("############    Support Vector Machine - Dual - RBF    ##############")
     validation_SVM_RFB(DTR, LTR, K_arr, [0.001], 'RAW_', PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
+    K_arr = [1.0]
+    SVM_RBF_score_calibration(DTR, LTR, K_arr, [0.001], 'SVM_RBF_SCORE_CALIBRATION_', PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
 
-    print("############    Gaussian Mixture Model   ##############")
+    print("############    Gaussian Mixture Models   ##############")
 
     validation_GMM_tot(DTR, LTR, 0.5)
     validation_GMM_ncomp(DTR, LTR, 0.5, 2)
@@ -115,8 +118,6 @@ if __name__ == "__main__":
     # print("############    Evaluation    ##############")
     # evaluation(DTR, LTR, DTE, LTE)
 
-    calibrate_SVM(DTR, LTR)
-    # Warning # Warning # Warning # Warning
     # Warning # Warning # Warning # Warning
     # Warning # Warning # Warning # Warning
     # Warning: the following code has not been cleaned yet. It has been used to generate comparison plots.

@@ -191,14 +191,3 @@ def generative_acc_err(DTE, DTR, LTE, LTR, title):
     table.add_row(["Tied GC", round(log_acc_t * 100, 3), round(log_err_t * 100, 3)])
     table.add_row(["Naive Tied GC", round(log_acc_nt * 100, 3), round(log_err_nt * 100, 3)])
     print(table)
-
-
-def score_SVM_linear(DTR, LTR, DTE, LTE, _K, _C):
-    for K in _K:
-        for C in _C:
-            wStar, primal, dual, gap = train_SVM_linear(DTR, LTR, C=C, K=K)
-            DTEEXT = numpy.vstack([DTE, K * numpy.ones((1, DTE.shape[1]))])
-            score = numpy.dot(wStar.T, DTEEXT)
-            errorRate = (1 - numpy.sum((score > 0) == LTE) / len(LTE)) * 100
-            print("K = %d, C = %.1f, primal loss = %e, dual loss = %e, duality gap = %e, errorRate = %.1f" % (
-            K, C, primal, dual, gap, errorRate))
