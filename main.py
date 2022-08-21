@@ -1,3 +1,4 @@
+from evaluators.compare_best_2 import compute_2best_plots
 from evaluators.evaluation_GMM import evaluation_GMM_ncomp
 from evaluators.evaluation_LR import evaluation_LR
 from evaluators.evaluation_MVG import evaluation_MVG
@@ -124,5 +125,5 @@ if __name__ == "__main__":
     # Creates barcharts for GMM with validation and evaluation
     # experimental_GMM(DTR, LTR, DTE, LTE)
     # Creates bayes error and ROC plots for 2 best models chosen (see inside)
-    # compute_2best_plots(DTR, LTR, DTE, LTE)
-    # compare_2_validation(DTR, LTR, [1e-4])
+    #compute_2best_plots(DTR, LTR, DTE, LTE)
+    #compare_2_validation(DTR, LTR, [1e-4])
