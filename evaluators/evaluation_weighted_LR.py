@@ -122,17 +122,7 @@ def lr_calibration(DTR, LTR, DTE, LTE, xi):
     scores_append = []
     LR_labels = []
 
-    def vecxxT(x):
-        x = x[:, None]
-        xxT = x.dot(x.T).reshape(x.size ** 2, order='F')
-        return xxT
-
-    expanded_DTR = numpy.apply_along_axis(vecxxT, 0, DTR)
-    expanded_DTE = numpy.apply_along_axis(vecxxT, 0, DTE)
-    phi = numpy.vstack([expanded_DTR, DTR])
-
-    phi_DTE = numpy.vstack([expanded_DTE, DTE])
-    scores = quad_logistic_reg_score(phi, LTR, phi_DTE, xi)
+    scores = weighted_logistic_reg_score(DTR, LTR, DTE, xi)
     scores_append.append(scores)
 
     LR_labels = np.append(LR_labels, LTE, axis=0)
@@ -159,4 +149,4 @@ def evaluation_weighted_LR(DTR, LTR, DTE, LTE, L, appendToTitle, PCA_Flag=True):
     y = numpy.vstack((y, y_09))
     y = numpy.vstack((y, y_01))
 
-    plot_DCF(x, y, 'lambda', appendToTitle + 'EVAL_LR_minDCF_comparison')
+    plot_DCF(x, y, 'lambda', appendToTitle + 'EVAL_WLR_minDCF_comparison')
