@@ -7,7 +7,7 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False, gauss_Flag=False, zscore_Flag=False):
+def kfold_SVM_RBF(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False, gauss_Flag=False, zscore_Flag=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -79,6 +79,7 @@ def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False, 
 
     scores_append = np.hstack(scores_append)
     scores_tot = compute_min_DCF(scores_append, SVM_labels, 0.5, 1, 1)
+    #act_DCF_05 = compute_act_DCF(scores_append, SVM_labels, 0.5, 1, 1, )
 
     plot_ROC(scores_append, SVM_labels, appendToTitle + 'SVM, K=' + str(K) + ', C=' + str(C))
 
@@ -145,13 +146,86 @@ def single_F_RFB(D, L, C, K, gamma):
     t.add_row(['SVM, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
     print(t)
 
+def kfold_svm_rbf_calibration(DTR, LTR, c, gamma):
+    k = 5
+    Dtr = numpy.split(DTR, k, axis=1)
+    Ltr = numpy.split(LTR, k)
+
+    scores_append = []
+    SVM_labels = []
+    K = 1.0
+
+    for i in range(k):
+        D = []
+        L = []
+        if i == 0:
+            D.append(np.hstack(Dtr[i + 1:]))
+            L.append(np.hstack(Ltr[i + 1:]))
+        elif i == k - 1:
+            D.append(np.hstack(Dtr[:i]))
+            L.append(np.hstack(Ltr[:i]))
+        else:
+            D.append(np.hstack(Dtr[:i]))
+            D.append(np.hstack(Dtr[i + 1:]))
+            L.append(np.hstack(Ltr[:i]))
+            L.append(np.hstack(Ltr[i + 1:]))
+
+        D = np.hstack(D)
+        L = np.hstack(L)
+
+        Dte = Dtr[i]
+        Lte = Ltr[i]
+
+        Z = L * 2 - 1
+        aStar, loss = train_SVM_RBF(D, L, C=c, K=K, gamma=gamma)
+        kern = numpy.zeros((D.shape[1], Dte.shape[1]))
+        for i in range(D.shape[1]):
+            for j in range(Dte.shape[1]):
+                kern[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(D[:, i] - Dte[:, j]) ** 2)) + K * K
+        scores = numpy.sum(numpy.dot(aStar * mrow(Z), kern), axis=0)
+        scores_append.append(scores)
+
+        SVM_labels = np.append(SVM_labels, Lte, axis=0)
+        SVM_labels = np.hstack(SVM_labels)
+
+    return np.hstack(scores_append), SVM_labels
+
+
 
 def validation_SVM_RFB(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
-    # for K in [1.]:
-    #     for gamma in [0.001]:
-    #         kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=0.1, gamma=gamma, PCA_Flag=False)
-    #         single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
-    for K in K_arr:
-        for gamma in gamma_arr:
-            kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False, gauss_Flag=gauss_Flag, zscore_Flag=zscore_Flag)
-            #single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
+    # for K in K_arr:
+    #     for gamma in gamma_arr:
+    #         kfold_SVM_RBF(DTR, LTR, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False, gauss_Flag=gauss_Flag, zscore_Flag=zscore_Flag)
+    #         #single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
+    x = numpy.logspace(-4, 2, 12)  # x contains different values of C
+    count = 1
+    y = numpy.array([])
+    gamma_minus_3 = numpy.array([])
+    gamma_minus_2 = numpy.array([])
+    gamma_minus_1 = numpy.array([])
+    gamma_minus_0 = numpy.array([])
+
+    for xi in x:
+        print("-------------------------------------")
+        print("punto " + str(count) + " di " + str(x.shape[0]))
+        count += 1
+        print("1e-3")
+        scores_gamma_minus_3, labels = kfold_svm_rbf_calibration(DTR, LTR, xi, 1e-3)
+        print("1e-2")
+        scores_gamma_minus_2, _ = kfold_svm_rbf_calibration(DTR, LTR, xi, 1e-2)
+        print("1e-1")
+        scores_gamma_minus_1, _ = kfold_svm_rbf_calibration(DTR, LTR, xi, 1e-1)
+        print("1e-0")
+        scores_gamma_minus_0, _ = kfold_svm_rbf_calibration(DTR, LTR, xi, 1e-0)
+
+        gamma_minus_3 = numpy.hstack((gamma_minus_3, bayes_error_plot_compare(0.5, scores_gamma_minus_3, labels)))
+        gamma_minus_2 = numpy.hstack((gamma_minus_2, bayes_error_plot_compare(0.5, scores_gamma_minus_2, labels)))
+        gamma_minus_1 = numpy.hstack((gamma_minus_1, bayes_error_plot_compare(0.5, scores_gamma_minus_1, labels)))
+        gamma_minus_0 = numpy.hstack((gamma_minus_0, bayes_error_plot_compare(0.5, scores_gamma_minus_0, labels)))
+
+    y = numpy.hstack((y, gamma_minus_3))
+    y = numpy.vstack((y, gamma_minus_2))
+    y = numpy.vstack((y, gamma_minus_1))
+    y = numpy.vstack((y, gamma_minus_0))
+
+    plot_DCF_for_SVM_RBF_calibration(x, y, 'C', appendToTitle + 'VAL_SVM_RBF_minDCF_comparison')

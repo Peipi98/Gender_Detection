@@ -77,14 +77,13 @@ def evaluation(DTR, LTR, DTE, LTE):
     evaluation_MVG(DTR_GAUSS, LTR, DTE_GAUSS, LTE, 'GAUSSIANIZED_')
     evaluation_MVG(DTR_ZNORM, LTR, DTE_ZNORM, LTE, 'Z-NORM')
 
+    #evaluation_LR(DTR, LTR, DTE, LTE, [1e-6], 'EVAL_LR_', PCA_Flag=False)
+    #evaluation_LR(DTR_GAUSS, LTR, DTE_GAUSS, LTE, [1e-6], 'EVAL_LR_GAUSS_', PCA_Flag=False)
+    #evaluation_LR(DTR_ZNORM, LTR, DTE_ZNORM, LTE, [1e-6], 'EVAL_LR_ZNORM_', PCA_Flag=False)
     print("############    Logistic Regression    ##############")
-    print("Questa parte andrà tolta")
-    evaluation_LR(DTR, LTR, DTE, LTE, [1e-6], 'EVAL_LR_', PCA_Flag=False)
-
-    evaluation_LR(DTR_GAUSS, LTR, DTE_GAUSS, LTE, [1e-6], 'EVAL_LR_GAUSS_', PCA_Flag=False)
-    evaluation_LR(DTR_ZNORM, LTR, DTE_ZNORM, LTE, [1e-6], 'EVAL_LR_ZNORM_', PCA_Flag=False)
-    print("############    Weighted Logistic Regression    ##############")
-    evaluation_weighted_LR(DTR, LTR, DTE, LTE, [1e-4], 'EVAL_WEIGHTED_LR_', PCA_Flag=False)
+    evaluation_weighted_LR(DTR, LTR, DTE, LTE, [1e-5], 'EVAL_RAW_WEIGHTED_LR_', PCA_Flag=False)
+    evaluation_weighted_LR(DTR_GAUSS, LTR, DTE_GAUSS, LTE, [1e-5], 'EVAL_GAUSS_WEIGHTED_LR_', PCA_Flag=False)
+    evaluation_weighted_LR(DTR_ZNORM, LTR, DTE_ZNORM, LTE, [1e-5], 'EVAL_ZNORM_WEIGHTED_LR_', PCA_Flag=False)
 
     print("############    Quadratic Logistic Regression    ##############")
     evaluation_quad_LR(DTR, LTR, DTE, LTE, [1e-4], 'EVAL_WEIGHTED_LR_', PCA_Flag=False)
@@ -111,7 +110,22 @@ if __name__ == "__main__":
     DTR, LTR = randomize(DTR, LTR)
     DTE, LTE = load("Test.txt")
     DTE, LTE = randomize(DTE, LTE)
-    #DTR_GAUSS = gaussianize_features(DTR, DTR)
+
+    # DTR_GAUSS = gaussianize_features(DTR, DTR)
+    # DTE_GAUSS = gaussianize_features(DTR, DTE)
+    # DTR_ZNORM, DTE_ZNORM = znorm(DTR, DTE)
+
+    K_arr = [0.1, 1.0, 10.0]
+    C_arr = [0.01, 0.1, 1.0, 10.0]
+    #validation_SVM(DTR, LTR, K_arr, C_arr, 'RAW_', gauss_Flag=False, zscore_Flag=False, PCA_Flag=False)
+    #validation_SVM(DTR, LTR, K_arr, C_arr, 'GAUSSIANIZED_', gauss_Flag=True, zscore_Flag=False, PCA_Flag=False)
+    #validation_SVM(DTR, LTR, K_arr, C_arr, 'ZNORMALIZED_', gauss_Flag=False, zscore_Flag=True, PCA_Flag=False)
+
+
+    validation_SVM_RFB(DTR, LTR, K_arr, [0.001], 'RAW_', PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
+
+    #evaluation_SVM_RFB(DTR, LTR, DTE, LTE, [1.0], [0.001], 'EVAL_SVM_RBB', PCA_Flag=False)
+
     #plot_features(DTR, LTR, appendToTitle='RAW_')
     #plot_features(DTR_GAUSS, LTR, appendToTitle='GAUSSIANIZED_')
     # print("############    Validation    ##############")
