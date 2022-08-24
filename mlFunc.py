@@ -218,7 +218,7 @@ def logreg_obj_wrap(DTR, LTR, l):
 
     return logreg_obj
 
-def weighted_logreg_obj_wrap(DTR, LTR, l):
+def weighted_logreg_obj_wrap(DTR, LTR, l, pi=0.5):
     M = DTR.shape[0]
     Z = LTR * 2.0 - 1.0
 
@@ -227,10 +227,10 @@ def weighted_logreg_obj_wrap(DTR, LTR, l):
         b = v[-1]
         reg = 0.5 * l * numpy.linalg.norm(w) ** 2
         s = (numpy.dot(w.T, DTR) + b).ravel()
-        avg_risk_0 = (numpy.logaddexp(0, -s[LTR == 0] * Z[LTR == 0])).mean()
-        avg_risk_1 = (numpy.logaddexp(0, -s[LTR == 1] * Z[LTR == 1])).mean()
-        return reg + avg_risk_1 + avg_risk_0
-
+        nt = DTR[:, LTR == 0].shape[1]
+        avg_risk_0 = (numpy.logaddexp(0, -s[LTR == 0] * Z[LTR == 0])).sum()
+        avg_risk_1 = (numpy.logaddexp(0, -s[LTR == 1] * Z[LTR == 1])).sum()
+        return reg + (pi / nt) * avg_risk_1 + (1-pi) / (DTR.shape[1]-nt) * avg_risk_0
     return logreg_obj
 
 def quad_logreg_obj_wrap(DTR, LTR, l):
