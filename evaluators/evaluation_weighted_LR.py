@@ -9,55 +9,35 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def validate_LR(scores, LR_labels, appendToTitle, l):
+def validate_LR(scores, LR_labels, appendToTitle, l, pi):
     scores_append = np.hstack(scores)
-    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.5, 1, 1)
+    scores_tot_05 = compute_min_DCF(scores_append, LR_labels, 0.5, 1, 1)
+    scores_tot_01 = compute_min_DCF(scores_append, LR_labels, 0.1, 1, 1)
+    scores_tot_09 = compute_min_DCF(scores_append, LR_labels, 0.9, 1, 1)
 
     # plot_ROC(scores_append, LR_labels, appendToTitle + 'LR, lambda=' + str(l))
 
     # Cfn and Ctp are set to 1
     # bayes_error_min_act_plot(scores_append, LR_labels, appendToTitle + 'LR, lambda=' + str(l), 0.4)
 
-    t = PrettyTable(["Type", "minDCF"])
-    t.title = appendToTitle + "minDCF: π=0.5"
-    t.add_row(['WEIGHTED_LR, lambda=' + str(l), round(scores_tot, 3)])
-    print(t)
-
-    ###############################
-
-    # π = 0.1
-    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.1, 1, 1)
-
-    t = PrettyTable(["Type", "minDCF"])
-    t.title = appendToTitle + "minDCF: π=0.1"
-    t.add_row(['WEIGHTED_LR, lambda=' + str(l), round(scores_tot, 3)])
-
-    print(t)
-
-    ###############################
-
-    # π = 0.9
-    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.9, 1, 1)
-
-    t = PrettyTable(["Type", "minDCF"])
-    t.title = appendToTitle + "minDCF: π=0.9"
-    t.add_row(['WEIGHTED_LR, lambda=' + str(l), round(scores_tot, 3)])
-
+    t = PrettyTable(["Type", "π=0.5", "π=0.1", "π=0.9"])
+    t.title = appendToTitle
+    t.add_row(['WEIGHTED_LR, lambda=' + str(l) + " π_t=" + str(pi), round(scores_tot_05, 3), round(scores_tot_01, 3), round(scores_tot_09, 3)])
     print(t)
 
 
-def evaluate_LR(DTR, LTR, DTE, LTE, l, appendToTitle, PCA_Flag=True):
+def evaluate_LR(DTR, LTR, DTE, LTE, l, pi, appendToTitle, PCA_Flag=True):
     scores_append = []
     PCA_LR_scores_append = []
     PCA2_LR_scores_append = []
     LR_labels = []
-    scores = weighted_logistic_reg_score(DTR, LTR, DTE, l)
+    scores = weighted_logistic_reg_score(DTR, LTR, DTE, l, pi)
     scores_append.append(scores)
 
     LR_labels = np.append(LR_labels, LTE, axis=0)
     LR_labels = np.hstack(LR_labels)
 
-    validate_LR(scores_append, LR_labels, appendToTitle, l)
+    validate_LR(scores_append, LR_labels, appendToTitle, l, pi)
 
     if PCA_Flag is True:
         # PCA m=10
@@ -132,7 +112,9 @@ def lr_calibration(DTR, LTR, DTE, LTE, xi):
 
 def evaluation_weighted_LR(DTR, LTR, DTE, LTE, L, appendToTitle, PCA_Flag=True):
     for l in L:  # l is a constant, not an array
-        evaluate_LR(DTR, LTR, DTE, LTE, l, appendToTitle, PCA_Flag)
+        evaluate_LR(DTR, LTR, DTE, LTE, l, 0.5, appendToTitle, PCA_Flag)
+        evaluate_LR(DTR, LTR, DTE, LTE, l, 0.1,  appendToTitle, PCA_Flag)
+        evaluate_LR(DTR, LTR, DTE, LTE, l, 0.9, appendToTitle, PCA_Flag)
 
     x = numpy.logspace(-5, 1, 30)
     y = numpy.array([])

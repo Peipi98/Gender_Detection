@@ -24,28 +24,6 @@ def validate_LR(scores, LR_labels, appendToTitle, l, pi=0.5):
     t.add_row(['WEIGHTED_LR, lambda=' + str(l) + " π_t=" + str(pi), round(scores_tot_05, 3), round(scores_tot_01, 3), round(scores_tot_09, 3)])
     print(t)
 
-    ###############################
-    #
-    # # π = 0.1
-    # scores_tot_01 = compute_min_DCF(scores_append, LR_labels, 0.1, 1, 1)
-    #
-    # t = PrettyTable(["Type", "minDCF"])
-    # t.title = appendToTitle + "minDCF: π=0.1"
-    # t.add_row(['WEIGHTED_LR, lambda=' + str(l) + " π_t=" + str(pi), round(scores_tot, 3)])
-    #
-    # print(t)
-    #
-    # ###############################
-    #
-    # # π = 0.9
-    # scores_tot_09 = compute_min_DCF(scores_append, LR_labels, 0.9, 1, 1)
-    #
-    # t = PrettyTable(["Type", "minDCF"])
-    # t.title = appendToTitle + "minDCF: π=0.9"
-    # t.add_row(['WEIGHTED_LR, lambda=' + str(l) + " π_t=" + str(pi), round(scores_tot, 3)])
-    #
-    # print(t)
-
 
 def kfold_WEIGHTED_LR(DTR, LTR, l, appendToTitle, pi, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     k = 5
@@ -100,7 +78,7 @@ def kfold_WEIGHTED_LR(DTR, LTR, l, appendToTitle, pi, PCA_Flag=True, gauss_Flag=
             DTR_PCA = numpy.dot(P.T, D)
             DTE_PCA = numpy.dot(P.T, Dte)
 
-            PCA_LR_scores = weighted_logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
+            PCA_LR_scores = weighted_logistic_reg_score(DTR_PCA, L, DTE_PCA, l, pi)
             PCA_LR_scores_append.append(PCA_LR_scores)
 
             # PCA m=9

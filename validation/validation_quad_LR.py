@@ -8,44 +8,23 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def validate_LR(scores, LR_labels, appendToTitle, l):
+def validate_LR(scores, LR_labels, appendToTitle, l, pi):
     scores_append = np.hstack(scores)
-    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.5, 1, 1)
-
-    # plot_ROC(scores_append, LR_labels, appendToTitle + 'QUAD_LR, lambda=' + str(l))
+    scores_tot_05 = compute_min_DCF(scores_append, LR_labels, 0.5, 1, 1)
+    scores_tot_01 = compute_min_DCF(scores_append, LR_labels, 0.1, 1, 1)
+    scores_tot_09 = compute_min_DCF(scores_append, LR_labels, 0.9, 1, 1)
+    # plot_ROC(scores_append, LR_labels, appendToTitle + 'WEIGHTED_LR, lambda=' + str(l))
 
     # Cfn and Ctp are set to 1
-    # bayes_error_min_act_plot(scores_append, LR_labels, appendToTitle + 'QUAD_LR, lambda=' + str(l), 0.4)
+    # bayes_error_min_act_plot(scores_append, LR_labels, appendToTitle + 'WEIGHTED_LR, lambda=' + str(l), 0.4)
 
-    t = PrettyTable(["Type", "minDCF"])
-    t.title = appendToTitle + "minDCF: π=0.5"
-    t.add_row(['QUAD_LR, lambda=' + str(l), round(scores_tot, 3)])
-    print(t)
-
-    ###############################
-
-    # π = 0.1
-    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.1, 1, 1)
-
-    t = PrettyTable(["Type", "minDCF"])
-    t.title = appendToTitle + "minDCF: π=0.1"
-    t.add_row(['QUAD_LR, lambda=' + str(l), round(scores_tot, 3)])
-
-    print(t)
-
-    ###############################
-
-    # π = 0.9
-    scores_tot = compute_min_DCF(scores_append, LR_labels, 0.9, 1, 1)
-
-    t = PrettyTable(["Type", "minDCF"])
-    t.title = appendToTitle + "minDCF: π=0.9"
-    t.add_row(['QUAD_LR, lambda=' + str(l), round(scores_tot, 3)])
-
+    t = PrettyTable(["Type", "π=0.5", "π=0.1", "π=0.9"])
+    t.title = appendToTitle
+    t.add_row(['QUAD_LR, lambda=' + str(l) + " π_t=" + str(pi), round(scores_tot_05, 3), round(scores_tot_01, 3), round(scores_tot_09, 3)])
     print(t)
 
 
-def kfold_QUAD_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
+def kfold_QUAD_LR(DTR, LTR, l, pi, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -94,7 +73,7 @@ def kfold_QUAD_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True, gauss_Flag=False, z
 
         phi_DTE = numpy.vstack([expanded_DTE, Dte])
 
-        scores = quad_logistic_reg_score(phi, L, phi_DTE, l)
+        scores = quad_logistic_reg_score(phi, L, phi_DTE, l, pi)
         scores_append.append(scores)
 
         LR_labels = np.append(LR_labels, Lte, axis=0)
@@ -106,7 +85,7 @@ def kfold_QUAD_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True, gauss_Flag=False, z
             DTR_PCA = numpy.dot(P.T, D)
             DTE_PCA = numpy.dot(P.T, Dte)
 
-            PCA_LR_scores = quad_logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
+            PCA_LR_scores = quad_logistic_reg_score(DTR_PCA, L, DTE_PCA, l, pi)
             PCA_LR_scores_append.append(PCA_LR_scores)
 
             # PCA m=9
@@ -117,12 +96,12 @@ def kfold_QUAD_LR(DTR, LTR, l, appendToTitle, PCA_Flag=True, gauss_Flag=False, z
             PCA2_LR_scores = quad_logistic_reg_score(DTR_PCA, L, DTE_PCA, l)
             PCA2_LR_scores_append.append(PCA2_LR_scores)
 
-    validate_LR(scores_append, LR_labels, appendToTitle, l)
+    validate_LR(scores_append, LR_labels, appendToTitle, l, pi)
 
     if PCA_Flag is True:
-        validate_LR(PCA_LR_scores_append, LR_labels, appendToTitle + 'PCA_m10_', l)
+        validate_LR(PCA_LR_scores_append, LR_labels, appendToTitle + 'PCA_m10_', l, pi)
 
-        validate_LR(PCA2_LR_scores_append, LR_labels, appendToTitle + 'PCA_m9_', l)
+        validate_LR(PCA2_LR_scores_append, LR_labels, appendToTitle + 'PCA_m9_', l, pi)
 
 
 def kfold_QUAD_LR_calibration(DTR, LTR, l, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
@@ -183,7 +162,9 @@ def kfold_QUAD_LR_calibration(DTR, LTR, l, PCA_Flag=True, gauss_Flag=False, zsco
 
 def validation_quad_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
     for l in L:
-        kfold_QUAD_LR(DTR, LTR, l, appendToTitle, PCA_Flag, gauss_Flag, zscore_Flag)
+        kfold_QUAD_LR(DTR, LTR, l, 0.5, appendToTitle, PCA_Flag, gauss_Flag, zscore_Flag)
+        kfold_QUAD_LR(DTR, LTR, l, 0.1, appendToTitle, PCA_Flag, gauss_Flag, zscore_Flag)
+        kfold_QUAD_LR(DTR, LTR, l, 0.9, appendToTitle, PCA_Flag, gauss_Flag, zscore_Flag)
 
     x = numpy.logspace(-5, 1, 20)
     y = numpy.array([])
