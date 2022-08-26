@@ -97,7 +97,7 @@ def kfold_WEIGHTED_LR(DTR, LTR, l, appendToTitle, pi, PCA_Flag=True, gauss_Flag=
         validate_LR(PCA2_LR_scores_append, LR_labels, appendToTitle + 'PCA_m9_', l, pi=pi)
 
 
-def kfold_WEIGHTED_LR_calibration(DTR, LTR, l, PCA_Flag=False, gauss_Flag=False, zscore_Flag=False, pi=0.5):
+def kfold_WEIGHTED_LR_tuning(DTR, LTR, l, PCA_Flag=False, gauss_Flag=False, zscore_Flag=False, pi=0.5):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -155,7 +155,7 @@ def validation_weighted_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True, gauss_Flag
     y_09 = numpy.array([])
     y_01 = numpy.array([])
     for xi in x:
-        scores, labels = kfold_WEIGHTED_LR_calibration(DTR, LTR, xi, PCA_Flag, gauss_Flag, zscore_Flag)
+        scores, labels = kfold_WEIGHTED_LR_tuning(DTR, LTR, xi, PCA_Flag, gauss_Flag, zscore_Flag)
         y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
         y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
         y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
