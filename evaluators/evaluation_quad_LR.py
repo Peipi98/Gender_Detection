@@ -104,7 +104,7 @@ def evaluation_quad_LR(DTR, LTR, DTE, LTE, L, appendToTitle, gauss_Flag=False, z
         evaluate_LR(DTR, LTR, DTE, LTE, l, 0.5, appendToTitle, gauss_Flag=gauss_Flag, zscore_Flag=zscore_Flag)
         evaluate_LR(DTR, LTR, DTE, LTE, l, 0.1, appendToTitle, gauss_Flag=gauss_Flag, zscore_Flag=zscore_Flag)
         evaluate_LR(DTR, LTR, DTE, LTE, l, 0.9, appendToTitle, gauss_Flag=gauss_Flag, zscore_Flag=zscore_Flag)
-    x = numpy.logspace(-5, 1, 30)
+    x = numpy.logspace(-5, 1, 24)
     y = numpy.array([])
     eval_05 = numpy.array([])
     eval_09 = numpy.array([])

@@ -192,11 +192,11 @@ def kfold_svm_rbf_calibration(DTR, LTR, c, gamma):
 
 
 
-def validation_SVM_RFB(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
-    # for K in K_arr:
-    #     for gamma in gamma_arr:
-    #         kfold_SVM_RBF(DTR, LTR, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False, gauss_Flag=gauss_Flag, zscore_Flag=zscore_Flag)
-    #         #single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
+def validation_SVM_RBF(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
+    for K in K_arr:
+        for gamma in gamma_arr:
+            kfold_SVM_RBF(DTR, LTR, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False, gauss_Flag=gauss_Flag, zscore_Flag=zscore_Flag)
+
     x = numpy.logspace(-4, 2, 12)  # x contains different values of C
     count = 1
     y = numpy.array([])
@@ -206,16 +206,10 @@ def validation_SVM_RFB(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=True,
     gamma_minus_0 = numpy.array([])
 
     for xi in x:
-        print("-------------------------------------")
-        print("punto " + str(count) + " di " + str(x.shape[0]))
         count += 1
-        print("1e-3")
         scores_gamma_minus_3, labels = kfold_svm_rbf_calibration(DTR, LTR, xi, 1e-3)
-        print("1e-2")
         scores_gamma_minus_2, _ = kfold_svm_rbf_calibration(DTR, LTR, xi, 1e-2)
-        print("1e-1")
         scores_gamma_minus_1, _ = kfold_svm_rbf_calibration(DTR, LTR, xi, 1e-1)
-        print("1e-0")
         scores_gamma_minus_0, _ = kfold_svm_rbf_calibration(DTR, LTR, xi, 1e-0)
 
         gamma_minus_3 = numpy.hstack((gamma_minus_3, bayes_error_plot_compare(0.5, scores_gamma_minus_3, labels)))

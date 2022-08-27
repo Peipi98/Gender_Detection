@@ -47,8 +47,7 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True, gauss_Flag=False, zs
             D = gaussianize_features(D, D)
 
         print(i)
-        wStar, primal, dual, gap = train_SVM_linear(D, L, C=C, K=K)
-
+        wStar, primal = train_SVM_linear(D, L, C=C, K=K)
         DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
 
         scores = numpy.dot(wStar.T, DTEEXT).ravel()
@@ -63,7 +62,7 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True, gauss_Flag=False, zs
             DTR_PCA = numpy.dot(P.T, D)
             DTE_PCA = numpy.dot(P.T, Dte)
 
-            wStar, primal, dual, gap = train_SVM_linear(DTR_PCA, L, C=C, K=K)
+            wStar, primal = train_SVM_linear(DTR_PCA, L, C=C, K=K)
             DTEEXT = numpy.vstack([DTE_PCA, K * numpy.ones((1, Dte.shape[1]))])
             PCA_SVM_scores = numpy.dot(wStar.T, DTEEXT).ravel()
             PCA_SVM_scores_append.append(PCA_SVM_scores)
@@ -73,7 +72,7 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True, gauss_Flag=False, zs
             DTR_PCA = numpy.dot(P.T, D)
             DTE_PCA = numpy.dot(P.T, Dte)
 
-            wStar, primal, dual, gap = train_SVM_linear(DTR_PCA, L, C=C, K=K)
+            wStar, primal = train_SVM_linear(DTR_PCA, L, C=C, K=K)
             DTEEXT = numpy.vstack([DTE_PCA, K * numpy.ones((1, Dte.shape[1]))])
             PCA2_SVM_scores = numpy.dot(wStar.T, DTEEXT).ravel()
             PCA2_SVM_scores_append.append(PCA2_SVM_scores)
@@ -151,7 +150,7 @@ def kfold_SVM_calibration(DTR, LTR, K, C, PCA_Flag=True, gauss_Flag=False, zscor
             D = gaussianize_features(D, D)
 
         print(i)
-        wStar, primal, dual, gap = train_SVM_linear(D, L, C=C, K=K)
+        wStar, primal = train_SVM_linear(D, L, C=C, K=K)
         DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
 
         scores = numpy.dot(wStar.T, DTEEXT).ravel()
@@ -166,19 +165,20 @@ def validation_SVM(DTR, LTR, K_arr, C_arr, appendToTitle, PCA_Flag=True, gauss_F
     for K in K_arr:
         for C in C_arr:
             kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag, gauss_Flag, zscore_Flag)
-    # x = numpy.logspace(-3, 2, 15)
-    # y = numpy.array([])
-    # y_05 = numpy.array([])
-    # y_09 = numpy.array([])
-    # y_01 = numpy.array([])
-    # for xi in x:
-    #     scores, labels = kfold_SVM_calibration(DTR, LTR, 1.0, xi, PCA_Flag, gauss_Flag, zscore_Flag)
-    #     y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
-    #     y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
-    #     y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
-    #
-    # y = numpy.hstack((y, y_05))
-    # y = numpy.vstack((y, y_09))
-    # y = numpy.vstack((y, y_01))
-    #
-    # plot_DCF(x, y, 'C', appendToTitle + 'SVM_minDCF_comparison')
+
+    x = numpy.logspace(-3, 2, 12)
+    y = numpy.array([])
+    y_05 = numpy.array([])
+    y_09 = numpy.array([])
+    y_01 = numpy.array([])
+    for xi in x:
+        scores, labels = kfold_SVM_calibration(DTR, LTR, 1.0, xi, PCA_Flag, gauss_Flag, zscore_Flag)
+        y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
+        y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
+        y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
+
+    y = numpy.hstack((y, y_05))
+    y = numpy.vstack((y, y_09))
+    y = numpy.vstack((y, y_01))
+
+    plot_DCF(x, y, 'C', appendToTitle + 'SVM_minDCF_comparison')

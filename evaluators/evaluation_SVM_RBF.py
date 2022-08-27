@@ -8,12 +8,12 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=1.0, gamma=1.01, PCA_Flag=False):
+def evaluate_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=1.0, gamma=0.01, PCA_Flag=False):
     SVM_labels = []
     Z = numpy.zeros(LTR.shape)
     Z[LTR == 1] = 1
     Z[LTR == 0] = -1
-    aStar, loss = train_SVM_RBF(DTR, LTR, C=1.0, K=K, gamma=gamma)
+    aStar, loss = train_SVM_RBF(DTR, LTR, C=C, K=K, gamma=gamma)
 
     kern = numpy.zeros((DTR.shape[1], DTE.shape[1]))
     for i in range(DTR.shape[1]):
@@ -35,7 +35,7 @@ def kfold_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=1.0, gamma=1.01, P
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.5"
-    t.add_row(['SVM_RFB, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    t.add_row(['SVM_RBF, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
     print(t)
 
     ###############################
@@ -45,7 +45,7 @@ def kfold_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=1.0, gamma=1.01, P
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.1"
-    t.add_row(['SVM_POLYNOMIAL, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    t.add_row(['SVM_RBF, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
 
     print(t)
 
@@ -56,54 +56,65 @@ def kfold_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=1.0, gamma=1.01, P
 
     t = PrettyTable(["Type", "minDCF"])
     t.title = "minDCF: π=0.9"
-    t.add_row(['SVM_POLYNOMIAL, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
+    t.add_row(['SVM_RBF, K=' + str(K) + ', C=' + str(C), round(scores_tot, 3)])
 
     print(t)
 
-
-def kfold_SVM_calibration(DTR, LTR, K, C):
-    k = 5
-    Dtr = numpy.split(DTR, k, axis=1)
-    Ltr = numpy.split(LTR, k)
-
+def svm_rbf_calibration(DTR, LTR, DTE, LTE, c, gamma):
     scores_append = []
-    LR_labels = []
+    SVM_labels = []
 
-    for i in range(k):
-        D = []
-        L = []
-        if i == 0:
-            D.append(np.hstack(Dtr[i + 1:]))
-            L.append(np.hstack(Ltr[i + 1:]))
-        elif i == k - 1:
-            D.append(np.hstack(Dtr[:i]))
-            L.append(np.hstack(Ltr[:i]))
-        else:
-            D.append(np.hstack(Dtr[:i]))
-            D.append(np.hstack(Dtr[i + 1:]))
-            L.append(np.hstack(Ltr[:i]))
-            L.append(np.hstack(Ltr[i + 1:]))
+    K = 1.0
+    Z = numpy.zeros(LTR.shape)
+    Z[LTR == 1] = 1
+    Z[LTR == 0] = -1
+    aStar, loss = train_SVM_RBF(DTR, LTR, C=c, K=K, gamma=gamma)
 
-        D = np.hstack(D)
-        L = np.hstack(L)
+    kern = numpy.zeros((DTR.shape[1], DTE.shape[1]))
+    for i in range(DTR.shape[1]):
+        for j in range(DTE.shape[1]):
+            kern[i, j] = numpy.exp(-gamma * (numpy.linalg.norm(DTR[:, i] - DTE[:, j]) ** 2)) + K * K
 
-        Dte = Dtr[i]
-        Lte = Ltr[i]
-        print(i)
-        wStar, primal, dual, gap = train_SVM_linear(D, L, C=C, K=K)
-        DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
+    scores = numpy.sum(numpy.dot(aStar * mrow(Z), kern), axis=0)
+    scores_append.append(scores)
 
-        scores = numpy.dot(wStar.T, DTEEXT).ravel()
-        scores_append.append(scores)
+    SVM_labels = np.append(SVM_labels, LTE, axis=0)
+    SVM_labels = np.hstack(SVM_labels)
 
-        LR_labels = np.append(LR_labels, Lte, axis=0)
-        LR_labels = np.hstack(LR_labels)
+    return np.hstack(scores_append), SVM_labels
 
-    return np.hstack(scores_append), LR_labels
-
-
-def evaluation_SVM_RFB(DTR, LTR, DTE, LTE, K_arr, gamma_arr, appendToTitle, PCA_Flag=True):
+def evaluation_SVM_RBF(DTR, LTR, DTE, LTE, K_arr, gamma_arr, appendToTitle, PCA_Flag=True):
     for K in K_arr:
         for gamma in gamma_arr:
-            kfold_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False)
-            # single_F_RFB(DTR, LTR, C=1.0, K=1.0, gamma=gamma)
+            evaluate_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False)
+
+    x = numpy.logspace(-4, 2, 15)   #x contains different values of C
+    y = numpy.array([])
+    gamma_minus_3 = numpy.array([])
+    gamma_minus_2 = numpy.array([])
+    gamma_minus_1 = numpy.array([])
+    gamma_minus_0 = numpy.array([])
+
+    for xi in x:
+        print(xi)
+        scores_gamma_minus_3, labels = svm_rbf_calibration(DTR, LTR, DTE, LTE, xi, 1e-3)
+        print("25%")
+        scores_gamma_minus_2, _ = svm_rbf_calibration(DTR, LTR, DTE, LTE, xi, 1e-2)
+        print("50%")
+        scores_gamma_minus_1, _ = svm_rbf_calibration(DTR, LTR, DTE, LTE, xi, 1e-1)
+        print("75%")
+        scores_gamma_minus_0, _ = svm_rbf_calibration(DTR, LTR, DTE, LTE, xi, 1e-0)
+        print("100%")
+
+        gamma_minus_3 = numpy.hstack((gamma_minus_3, bayes_error_plot_compare(0.5, scores_gamma_minus_3, labels)))
+        gamma_minus_2 = numpy.hstack((gamma_minus_2, bayes_error_plot_compare(0.5, scores_gamma_minus_2, labels)))
+        gamma_minus_1 = numpy.hstack((gamma_minus_1, bayes_error_plot_compare(0.5, scores_gamma_minus_1, labels)))
+        gamma_minus_0 = numpy.hstack((gamma_minus_0, bayes_error_plot_compare(0.5, scores_gamma_minus_0, labels)))
+
+    y = numpy.hstack((y, gamma_minus_3))
+    y = numpy.vstack((y, gamma_minus_2))
+    y = numpy.vstack((y, gamma_minus_1))
+    y = numpy.vstack((y, gamma_minus_0))
+
+    plot_DCF_for_SVM_RBF_calibration(x, y, 'C', appendToTitle + 'EVAL_SVM_RBF_minDCF_comparison')
+

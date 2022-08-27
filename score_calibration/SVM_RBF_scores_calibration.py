@@ -18,7 +18,7 @@ def calibrate_scores(scores, labels):
 
     return numpy.array(S), labels_30, estimated_w, estimated_b
 
-def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False, gauss_Flag=False, zscore_Flag=False):
+def kfold_SVM_RBF(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False, gauss_Flag=False, zscore_Flag=False):
     k = 5
     Dtr = numpy.split(DTR, k, axis=1)
     Ltr = numpy.split(LTR, k)
@@ -102,5 +102,5 @@ def kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False, 
 def SVM_RBF_score_calibration(DTR, LTR, K_arr, gamma_arr, appendToTitle, PCA_Flag=False, gauss_Flag=False, zscore_Flag=False):
     for K in K_arr:
         for gamma in gamma_arr:
-            kfold_SVM_RFB(DTR, LTR, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False, gauss_Flag=gauss_Flag,
+            kfold_SVM_RBF(DTR, LTR, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False, gauss_Flag=gauss_Flag,
                           zscore_Flag=zscore_Flag)

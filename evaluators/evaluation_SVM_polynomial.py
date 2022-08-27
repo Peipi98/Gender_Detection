@@ -8,7 +8,7 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_SVM_polynomial(DTR, LTR, DTE, LTE, K, costant, appendToTitle, C=1.0, degree=2, PCA_Flag=True):
+def evaluate_SVM_polynomial(DTR, LTR, DTE, LTE, K, costant, appendToTitle, C=1.0, degree=2, PCA_Flag=True):
     scores_append = []
     SVM_labels = []
 
@@ -102,9 +102,9 @@ def kfold_SVM_calibration(DTR, LTR, K, C):
 
 def evaluation_SVM_polynomial(DTR, LTR, DTE, LTE, K_arr, C, appendToTitle, CON_array, PCA_Flag=True):
     for costant in CON_array:
-        for degree in [4]:
+        for degree in [2]:
             for K in K_arr:
-                kfold_SVM_polynomial(DTR, LTR, DTE, LTE, K, costant, appendToTitle, C=C, degree=degree, PCA_Flag=False)
+                evaluate_SVM_polynomial(DTR, LTR, DTE, LTE, K, costant, appendToTitle, C=C, degree=degree, PCA_Flag=False)
 
     # x = numpy.logspace(-3, 2, 15)
     # y = numpy.array([])

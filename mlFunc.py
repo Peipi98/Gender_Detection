@@ -301,8 +301,6 @@ def train_SVM_linear(DTR, LTR, C, K=1):
     Z[LTR == 0] = -1
 
     H = numpy.dot(DTREXT.T, DTREXT)
-    # Dist = mcol((DTR**2).sum(0)) + mrow((DTR**2).sum(0)) - 2*numpy.dot(DTR.T, DTR)
-    # H = numpy.exp(-Dist)
     H = mcol(Z) * mrow(Z) * H
 
     def JPrimal(w):
@@ -311,20 +309,8 @@ def train_SVM_linear(DTR, LTR, C, K=1):
         return 0.5 * numpy.linalg.norm(w) ** 2 + C * loss
 
     alphaStar, JDual, LDual = calculate_lbgf(H, DTR, C)
-    # print(_x),
-    # print(_y)
-
     wStar = numpy.dot(DTREXT, mcol(alphaStar) * mcol(Z))
-
-    # print (JPrimal(wStar))
-    # print (JDual(alphaStar)[0])
-
-    def get_duality_gap(alpha, w):
-        Ha = numpy.dot(H, mcol(alpha))
-        aHa = numpy.dot(mrow(alpha), Ha)
-        return JPrimal(w) - (- 0.5 * aHa.ravel() + numpy.dot(mrow(alpha), numpy.ones(alpha.size)))
-
-    return wStar, JPrimal(wStar), JDual(alphaStar)[0], get_duality_gap(alphaStar, wStar);
+    return wStar, JPrimal(wStar)
 
 
 def train_SVM_polynomial(DTR, LTR, C, K=1, constant=0, degree=2):

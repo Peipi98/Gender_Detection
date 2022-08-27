@@ -41,8 +41,8 @@ def kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=2, P
             D, Dte = znorm(D, Dte)
 
         if gauss_Flag is True:
-            D = gaussianize_features(D, D)
             Dte = gaussianize_features(D, Dte)
+            D = gaussianize_features(D, D)
 
         print(i)
 
@@ -140,13 +140,7 @@ def single_F_POLY(D, L, C, K, costant=1.0, degree=2):
 
 
 def validation_SVM_polynomial(DTR, LTR, K_arr, C, appendToTitle, CON_array, PCA_Flag=True, gauss_Flag=False, zscore_Flag=False):
-    # for costant in [1000]:
-    #     for degree in [4]:
-    #         for K in [1., 10.]:
-    #             kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=1.0, degree=degree, PCA_Flag=False)
-    #             single_F_POLY(DTR, LTR, C=1.0, K=K, costant=1000, degree=4)
     for costant in CON_array:
-        for degree in [4]:
+        for degree in [2]:
             for K in K_arr:
                 kfold_SVM_polynomial(DTR, LTR, K, costant, appendToTitle, C=C, degree=degree, PCA_Flag=PCA_Flag, gauss_Flag=gauss_Flag, zscore_Flag=zscore_Flag)
-                #single_F_POLY(DTR, LTR, C=C, K=K, costant=1000, degree=4)

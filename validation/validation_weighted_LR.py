@@ -149,7 +149,7 @@ def validation_weighted_LR(DTR, LTR, L, appendToTitle, PCA_Flag=True, gauss_Flag
         kfold_WEIGHTED_LR(DTR, LTR, l, appendToTitle, 0.1, PCA_Flag, gauss_Flag, zscore_Flag)
         kfold_WEIGHTED_LR(DTR, LTR, l, appendToTitle, 0.9, PCA_Flag, gauss_Flag, zscore_Flag)
 
-    x = numpy.logspace(-5, 1, 30)
+    x = numpy.logspace(-5, 1, 24)
     y = numpy.array([])
     y_05 = numpy.array([])
     y_09 = numpy.array([])

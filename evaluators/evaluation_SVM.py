@@ -8,11 +8,11 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def kfold_SVM(DTR, LTR, DTE, LTE, K, C, appendToTitle, PCA_Flag=True):
+def evaluate_SVM(DTR, LTR, DTE, LTE, K, C, appendToTitle, PCA_Flag=True):
     scores_append = []
     SVM_labels = []
 
-    wStar, primal, dual, gap = train_SVM_linear(DTR, LTR, C=C, K=K)
+    wStar, _ = train_SVM_linear(DTR, LTR, C=C, K=K)
 
     DTEEXT = numpy.vstack([DTE, K * numpy.ones((1, DTE.shape[1]))])
 
@@ -87,7 +87,7 @@ def kfold_SVM_calibration(DTR, LTR, K, C):
         Dte = Dtr[i]
         Lte = Ltr[i]
         print(i)
-        wStar, primal, dual, gap = train_SVM_linear(D, L, C=C, K=K)
+        wStar, _ = train_SVM_linear(D, L, C=C, K=K)
         DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])
 
         scores = numpy.dot(wStar.T, DTEEXT).ravel()
@@ -102,20 +102,20 @@ def kfold_SVM_calibration(DTR, LTR, K, C):
 def evaluation_SVM(DTR, LTR, DTE, LTE, K_arr, C_arr, appendToTitle, PCA_Flag=True):
     for K in K_arr:
         for C in C_arr:
-            kfold_SVM(DTR, LTR, DTE, LTE, K, C, appendToTitle, PCA_Flag=False)
-    # x = numpy.logspace(-3, 2, 15)
-    # y = numpy.array([])
-    # y_05 = numpy.array([])
-    # y_09 = numpy.array([])
-    # y_01 = numpy.array([])
-    # for xi in x:
-    #     scores, labels = kfold_SVM_calibration(DTR, LTR, 1.0, xi)
-    #     y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
-    #     y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
-    #     y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
-    #
-    # y = numpy.hstack((y, y_05))
-    # y = numpy.vstack((y, y_09))
-    # y = numpy.vstack((y, y_01))
+            evaluate_SVM(DTR, LTR, DTE, LTE, K, C, appendToTitle, PCA_Flag=False)
+    x = numpy.logspace(-3, 2, 14)
+    y = numpy.array([])
+    y_05 = numpy.array([])
+    y_09 = numpy.array([])
+    y_01 = numpy.array([])
+    for xi in x:
+        scores, labels = kfold_SVM_calibration(DTR, LTR, 1.0, xi)
+        y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
+        y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
+        y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
 
-    # plot_DCF(x, y, 'lambda', appendToTitle + 'SVM_minDCF_comparison')
+    y = numpy.hstack((y, y_05))
+    y = numpy.vstack((y, y_09))
+    y = numpy.vstack((y, y_01))
+
+    plot_DCF(x, y, 'C', appendToTitle + 'Linear_SVM_minDCF_comparison')
