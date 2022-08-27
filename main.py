@@ -35,7 +35,9 @@ def validation(DTR, LTR):
 
 
     print("############    Quadratic Logistic Regression    ##############")
-    validation_quad_LR(DTR, LTR, L, 'QUAD_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
+    validation_quad_LR(DTR, LTR, L, 'RAW_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
+    validation_quad_LR(DTR, LTR, L, 'ZNORM_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=True)
+    validation_quad_LR(DTR, LTR, L, 'GAUSSIANIZED_', PCA_Flag=True, gauss_Flag=True, zscore_Flag=False)
 
     print("############    Support Vector Machine - Primal    ##############")
     K_arr = [0.1, 1.0, 10.0]
@@ -86,7 +88,9 @@ def evaluation(DTR, LTR, DTE, LTE):
     evaluation_weighted_LR(DTR_ZNORM, LTR, DTE_ZNORM, LTE, [1e-5], 'EVAL_ZNORM_WEIGHTED_LR_', PCA_Flag=False)
 
     print("############    Quadratic Logistic Regression    ##############")
-    evaluation_quad_LR(DTR, LTR, DTE, LTE, [1e-4], 'EVAL_WEIGHTED_LR_', PCA_Flag=False)
+    evaluation_quad_LR(DTR, LTR, DTE, LTE, [1e-5], 'RAW_')
+    evaluation_quad_LR(DTR, LTR, DTE, LTE, [1e-5], 'Z-NORM_', zscore_Flag=True)
+    evaluation_quad_LR(DTR, LTR, DTE, LTE, [1e-5], 'GAUSSIANIZED_', gauss_Flag=True)
 
     print("############    Support Vector Machine - Primal    ##############")
     evaluation_SVM(DTR, LTR, DTE, LTE, [1.0], [1.0], 'EVAL_SVM_LR', PCA_Flag=False)
@@ -114,20 +118,6 @@ if __name__ == "__main__":
     # DTR_GAUSS = gaussianize_features(DTR, DTR)
     # DTE_GAUSS = gaussianize_features(DTR, DTE)
     # DTR_ZNORM, DTE_ZNORM = znorm(DTR, DTE)
-
-    K_arr = [0.1, 1.0, 10.0]
-    C_arr = [0.01, 0.1, 1.0, 10.0]
-    #validation_SVM(DTR, LTR, K_arr, C_arr, 'RAW_', gauss_Flag=False, zscore_Flag=False, PCA_Flag=False)
-    #validation_SVM(DTR, LTR, K_arr, C_arr, 'GAUSSIANIZED_', gauss_Flag=True, zscore_Flag=False, PCA_Flag=False)
-    #validation_SVM(DTR, LTR, K_arr, C_arr, 'ZNORMALIZED_', gauss_Flag=False, zscore_Flag=True, PCA_Flag=False)
-
-
-    validation_SVM_RFB(DTR, LTR, K_arr, [0.001], 'RAW_', PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
-
-    #evaluation_SVM_RFB(DTR, LTR, DTE, LTE, [1.0], [0.001], 'EVAL_SVM_RBB', PCA_Flag=False)
-
-    #plot_features(DTR, LTR, appendToTitle='RAW_')
-    #plot_features(DTR_GAUSS, LTR, appendToTitle='GAUSSIANIZED_')
     # print("############    Validation    ##############")
     # validation(DTR, LTR)
     # print("############    Evaluation    ##############")
@@ -140,4 +130,4 @@ if __name__ == "__main__":
     # experimental_GMM(DTR, LTR, DTE, LTE)
     # Creates bayes error and ROC plots for 2 best models chosen (see inside)
     #compute_2best_plots(DTR, LTR, DTE, LTE)
-    #compare_2_validation(DTR, LTR, [1e-4])
+    compare_2_validation(DTR, LTR, [1e-5])
