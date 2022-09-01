@@ -34,11 +34,10 @@ def validation(DTR, LTR):
     validation_weighted_LR(DTR, LTR, L, 'ZNORM_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=True)
     validation_weighted_LR(DTR, LTR, L, 'GAUSSIANIZED_', PCA_Flag=True, gauss_Flag=True, zscore_Flag=False)
 
-
     print("############    Quadratic Logistic Regression    ##############")
     validation_quad_LR(DTR, LTR, L, 'QUAD_', PCA_Flag=True, gauss_Flag=False, zscore_Flag=False)
 
-    print("############    Support Vector Machine - Primal    ##############")
+    print("############    Support Vector Machine - Linear    ##############")
     K_arr = [0.1, 1.0, 10.0]
     C_arr = [0.01, 0.1, 1.0, 10.0]
     validation_SVM(DTR, LTR, K_arr, C_arr, 'RAW_', gauss_Flag=False, zscore_Flag=False)
@@ -49,17 +48,19 @@ def validation(DTR, LTR):
     SVM_score_calibration(DTR, LTR, K_arr, C_arr, appendToTitle="SVM_SCORE_CALIBRATION_", PCA_Flag=True,
                           gauss_Flag=False, zscore_Flag=False)
 
-    print("############    Support Vector Machine - Dual - Polynomial    ##############")
+    print("############    Support Vector Machine - Quadratic    ##############")
     K_arr = [1., 10.]
-    validation_SVM_polynomial(DTR, LTR, [1.0, 10.0], 1.0, 'RAW_', [1000], PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
+    validation_SVM_polynomial(DTR, LTR, K_arr, 1.0, 'RAW_', [1000], PCA_Flag=False, gauss_Flag=False,
+                              zscore_Flag=False)
 
     K_arr = [0.1, 1., 10.]
     C_arr = [1., 10.]
 
-    print("############    Support Vector Machine - Dual - RBF    ##############")
+    print("############    Support Vector Machine - RBF    ##############")
     validation_SVM_RBF(DTR, LTR, K_arr, [0.001], 'RAW_', PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
     K_arr = [1.0]
-    SVM_RBF_score_calibration(DTR, LTR, K_arr, [0.001], 'SVM_RBF_SCORE_CALIBRATION_', PCA_Flag=False, gauss_Flag=False, zscore_Flag=False)
+    SVM_RBF_score_calibration(DTR, LTR, K_arr, [0.001], 'SVM_RBF_SCORE_CALIBRATION_', PCA_Flag=False, gauss_Flag=False,
+                              zscore_Flag=False)
 
     print("############    Gaussian Mixture Models   ##############")
 
@@ -67,6 +68,7 @@ def validation(DTR, LTR):
     validation_GMM_ncomp(DTR, LTR, 0.5, 2)
     validation_GMM_ncomp(DTR, LTR, 0.1, 2)
     validation_GMM_ncomp(DTR, LTR, 0.9, 2)
+
 
 def evaluation(DTR, LTR, DTE, LTE):
     DTR_GAUSS = gaussianize_features(DTR, DTR)
@@ -79,20 +81,20 @@ def evaluation(DTR, LTR, DTE, LTE):
     evaluation_MVG(DTR_ZNORM, LTR, DTE_ZNORM, LTE, 'Z-NORM')
 
     print("############    Logistic Regression    ##############")
-    evaluation_weighted_LR(DTR, LTR, DTE, LTE, [1e-5], 'EVAL_RAW_WEIGHTED_LR_', PCA_Flag=False)
-    evaluation_weighted_LR(DTR_GAUSS, LTR, DTE_GAUSS, LTE, [1e-5], 'EVAL_GAUSS_WEIGHTED_LR_', PCA_Flag=False)
-    evaluation_weighted_LR(DTR_ZNORM, LTR, DTE_ZNORM, LTE, [1e-5], 'EVAL_ZNORM_WEIGHTED_LR_', PCA_Flag=False)
+    evaluation_weighted_LR(DTR, LTR, DTE, LTE, [1e-5], 'EVAL_RAW_WEIGHTED_LR_')
+    evaluation_weighted_LR(DTR_GAUSS, LTR, DTE_GAUSS, LTE, [1e-5], 'EVAL_GAUSS_WEIGHTED_LR_')
+    evaluation_weighted_LR(DTR_ZNORM, LTR, DTE_ZNORM, LTE, [1e-5], 'EVAL_ZNORM_WEIGHTED_LR_')
 
     print("############    Quadratic Logistic Regression    ##############")
-    evaluation_quad_LR(DTR, LTR, DTE, LTE, [1e-5], 'EVAL_WEIGHTED_LR_', PCA_Flag=False)
+    evaluation_quad_LR(DTR, LTR, DTE, LTE, [1e-5], 'EVAL_WEIGHTED_LR_')
 
-    print("############    Support Vector Machine - Primal    ##############")
+    print("############    Support Vector Machine - Linear    ##############")
     evaluation_SVM(DTR, LTR, DTE, LTE, [1.0], [1.0], 'EVAL_SVM_LR', PCA_Flag=False)
 
-    print("############    Support Vector Machine - Dual - Polynomial    ##############")
+    print("############    Support Vector Machine - Quadratic    ##############")
     evaluation_SVM_polynomial(DTR, LTR, DTE, LTE, [1.0], 10.0, 'EVAL_SVM_POLY', [1], PCA_Flag=False)
 
-    print("############    Support Vector Machine - Dual - RFB    ##############")
+    print("############    Support Vector Machine - RBF    ##############")
     evaluation_SVM_RBF(DTR, LTR, DTE, LTE, [1.0], [0.001], 'EVAL_SVM_RFB', PCA_Flag=False)
 
     print("############    Gaussian Mixture Model - RAW    ##############")
@@ -102,6 +104,7 @@ def evaluation(DTR, LTR, DTE, LTE):
     evaluation_GMM_ncomp("gauss.", DTR_GAUSS, LTR, DTE_GAUSS, LTE, 0.5, 2)
     evaluation_GMM_ncomp("gauss.", DTR_GAUSS, LTR, DTE_GAUSS, LTE, 0.1, 2)
     evaluation_GMM_ncomp("gauss.", DTR_GAUSS, LTR, DTE_GAUSS, LTE, 0.9, 2)
+
 
 if __name__ == "__main__":
     DTR, LTR = load("Train.txt")
@@ -118,5 +121,5 @@ if __name__ == "__main__":
 
     experimental_GMM(DTR, LTR, DTE, LTE)
     # Creates bayes error and ROC plots for 2 best models chosen (see inside)
-    #compute_2best_plots(DTR, LTR, DTE, LTE)
-    #compare_2_validation(DTR, LTR, [1e-4])
+    # compute_2best_plots(DTR, LTR, DTE, LTE)
+    # compare_2_validation(DTR, LTR, [1e-4])
