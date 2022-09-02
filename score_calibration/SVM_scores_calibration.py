@@ -55,7 +55,6 @@ def kfold_SVM(DTR, LTR, K, C, appendToTitle, PCA_Flag=True, gauss_Flag=False, zs
             D = gaussianize_features(D, D)
 
         print(i)
-        #wStar, primal, dual, gap = train_SVM_linear(D, L, C=C, K=K)
         wStar, primal = train_SVM_linear(D, L, C=C, K=K)
 
         DTEEXT = numpy.vstack([Dte, K * numpy.ones((1, Dte.shape[1]))])

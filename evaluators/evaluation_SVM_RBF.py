@@ -8,7 +8,7 @@ from validators import *
 from prettytable import PrettyTable
 
 
-def evaluate_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=1.0, gamma=0.01, PCA_Flag=False):
+def evaluate_SVM_RBF(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=1.0, gamma=0.01, PCA_Flag=False):
     SVM_labels = []
     Z = numpy.zeros(LTR.shape)
     Z[LTR == 1] = 1
@@ -86,7 +86,7 @@ def svm_rbf_calibration(DTR, LTR, DTE, LTE, c, gamma):
 def evaluation_SVM_RBF(DTR, LTR, DTE, LTE, K_arr, gamma_arr, appendToTitle, PCA_Flag=True):
     for K in K_arr:
         for gamma in gamma_arr:
-            evaluate_SVM_RFB(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False)
+            evaluate_SVM_RBF(DTR, LTR, DTE, LTE, appendToTitle, C=1.0, K=K, gamma=gamma, PCA_Flag=False)
 
     x = numpy.logspace(-4, 2, 15)   #x contains different values of C
     y = numpy.array([])
@@ -98,13 +98,9 @@ def evaluation_SVM_RBF(DTR, LTR, DTE, LTE, K_arr, gamma_arr, appendToTitle, PCA_
     for xi in x:
         print(xi)
         scores_gamma_minus_3, labels = svm_rbf_calibration(DTR, LTR, DTE, LTE, xi, 1e-3)
-        print("25%")
         scores_gamma_minus_2, _ = svm_rbf_calibration(DTR, LTR, DTE, LTE, xi, 1e-2)
-        print("50%")
         scores_gamma_minus_1, _ = svm_rbf_calibration(DTR, LTR, DTE, LTE, xi, 1e-1)
-        print("75%")
         scores_gamma_minus_0, _ = svm_rbf_calibration(DTR, LTR, DTE, LTE, xi, 1e-0)
-        print("100%")
 
         gamma_minus_3 = numpy.hstack((gamma_minus_3, bayes_error_plot_compare(0.5, scores_gamma_minus_3, labels)))
         gamma_minus_2 = numpy.hstack((gamma_minus_2, bayes_error_plot_compare(0.5, scores_gamma_minus_2, labels)))

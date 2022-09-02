@@ -105,20 +105,3 @@ def evaluation_SVM_polynomial(DTR, LTR, DTE, LTE, K_arr, C, appendToTitle, CON_a
         for degree in [2]:
             for K in K_arr:
                 evaluate_SVM_polynomial(DTR, LTR, DTE, LTE, K, costant, appendToTitle, C=C, degree=degree, PCA_Flag=False)
-
-    # x = numpy.logspace(-3, 2, 15)
-    # y = numpy.array([])
-    # y_05 = numpy.array([])
-    # y_09 = numpy.array([])
-    # y_01 = numpy.array([])
-    # for xi in x:
-    #     scores, labels = kfold_SVM_calibration(DTR, LTR, 1.0, xi)
-    #     y_05 = numpy.hstack((y_05, bayes_error_plot_compare(0.5, scores, labels)))
-    #     y_09 = numpy.hstack((y_09, bayes_error_plot_compare(0.9, scores, labels)))
-    #     y_01 = numpy.hstack((y_01, bayes_error_plot_compare(0.1, scores, labels)))
-    #
-    # y = numpy.hstack((y, y_05))
-    # y = numpy.vstack((y, y_09))
-    # y = numpy.vstack((y, y_01))
-
-    # plot_DCF(x, y, 'lambda', appendToTitle + 'SVM_minDCF_comparison')

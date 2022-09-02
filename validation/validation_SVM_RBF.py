@@ -114,7 +114,7 @@ def kfold_SVM_RBF(DTR, LTR, appendToTitle, C=1.0, K=1, gamma=1, PCA_Flag=False, 
     print(t)
 
 
-def single_F_RFB(D, L, C, K, gamma):
+def single_F_RBF(D, L, C, K, gamma):
     nTrain = int(D.shape[1] * 0.8)
     numpy.random.seed(0)
     idx = numpy.random.permutation(D.shape[1])
