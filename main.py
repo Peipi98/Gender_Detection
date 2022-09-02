@@ -117,9 +117,9 @@ if __name__ == "__main__":
     print("############    Validation    ##############")
     validation(DTR, LTR)
     print("############    Evaluation    ##############")
-    evaluation(DTR, LTR, DTE, LTE)
+    #evaluation(DTR, LTR, DTE, LTE)
 
-    experimental_GMM(DTR, LTR, DTE, LTE)
+    #experimental_GMM(DTR, LTR, DTE, LTE)
     # Creates bayes error and ROC plots for 2 best models chosen (see inside)
     # compute_2best_plots(DTR, LTR, DTE, LTE)
     # compare_2_validation(DTR, LTR, [1e-4])
