@@ -11,7 +11,7 @@ We have tested some techniques studied during the lectures:
 * Classification Models:
   * Multivariate Gaussian Classifiers
   * Logistic Regression
-  * Support-vector Machines
+  * Support-vector Machine
   * Gaussian Mixure Models
 
-Feel free to check the [report](https://github.com/Peipi98/Gender_Detection/blob/main/Gender_Detection.pdf)!
+Feel free to check out the [report](https://github.com/Peipi98/Gender_Detection/blob/main/Gender_Detection.pdf)!
