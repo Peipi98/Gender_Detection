@@ -1,4 +1,4 @@
-# Gender_Detection
+# Gender Detection
 
 This is a report developed by me and [Alessio Carachino](https://github.com/CarachinoAlessio) for [Machine Learning and Pattern Recognition](https://didattica.polito.it/pls/portal30/gap.pkg_guide.viewGap?p_cod_ins=01URTOV&p_a_acc=2022&p_header=S&p_lang=&multi=N) course.
 
